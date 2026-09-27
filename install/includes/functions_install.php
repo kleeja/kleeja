@@ -56,7 +56,12 @@ function inst_languages(): array
     $languages = [];
 
     foreach (scandir(PATH . 'lang') as $folder) {
-        if ($folder[0] !== '.' && file_exists(PATH . 'lang/' . $folder . '/install.php')) {
+        //folders only, a path inside a file like lang/index.html/install.php is an error when open_basedir is on
+        if (
+            $folder[0] !== '.' &&
+            is_dir(PATH . 'lang/' . $folder) &&
+            file_exists(PATH . 'lang/' . $folder . '/install.php')
+        ) {
             $languages[] = $folder;
         }
     }
