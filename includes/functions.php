@@ -677,7 +677,8 @@ function get_config(string $name): ?string
 
     $result = $SQL->build($query);
     $v = $SQL->fetch($result);
-    $return = $v['value'];
+    $SQL->freeresult($result);
+    $return = $v['value'] ?? null;
 
     extract(runHook('get_config_func', get_defined_vars()));
 
@@ -702,7 +703,7 @@ function add_config(
 ): bool {
     global $dbprefix, $SQL, $config, $d_groups;
 
-    if (get_config($name)) {
+    if (get_config($name) !== null) {
         return true;
     }
 
@@ -772,12 +773,12 @@ function add_config_r(array $configs): bool
     foreach ($configs as $n => $m) {
         add_config(
             $n,
-            empty($m['value']) ? '' : $m['value'],
-            empty($m['order']) ? 0 : $m['order'],
-            empty($m['html']) ? '' : $m['html'],
-            empty($m['type']) ? 'other' : $m['type'],
-            empty($m['plg_id']) ? 0 : $m['plg_id'],
-            empty($m['dynamic']) ? false : $m['dynamic'],
+            $m['value'] ?? '',
+            $m['order'] ?? 0,
+            $m['html'] ?? '',
+            $m['type'] ?? 'other',
+            $m['plg_id'] ?? 0,
+            !empty($m['dynamic']),
         );
     }
 
