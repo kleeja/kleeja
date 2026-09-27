@@ -12,7 +12,7 @@
                         <label class="form-label" for="db_type">{{echo $lang['DB_TYPE']}}</label>
                         <select class="form-select" name="db_type" id="db_type">
                             <option value="mysql" selected>{{echo $lang['DB_TYPE_MYSQL']}}</option>
-                            {{if(in_array('sqlite', PDO::getAvailableDrivers())):}}
+                            {{if(in_array('sqlite', PDO::getAvailableDrivers(), true)):}}
                             <option value="sqlite">{{echo $lang['DB_TYPE_SQLITE']}}</option>
                             {{endif;}}
                         </select>

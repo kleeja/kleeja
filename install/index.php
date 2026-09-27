@@ -56,7 +56,7 @@ include_once PATH . 'includes/pdo.php';
 include_once 'includes/functions_install.php';
 
 // old links to choose a language
-if (g('step') == 'language' && ig('ln')) {
+if (g('step') === 'language' && ig('ln')) {
     header('Location: ./?step=what_is_kleeja&lang=' . g('ln', default: 'en'));
 
     exit();

@@ -41,7 +41,7 @@ if (!ig('step')) {
 // Kleeja must be safe .. once installed, only the last page of the wizard is shown,
 // otherwise anyone could write another config.php or run the installing queries again
 //
-if (g('step') != 'end' && inst_is_installed()) {
+if (g('step') !== 'end' && inst_is_installed()) {
     header('Location: ./index.php?' . getlang(1));
 
     exit();
@@ -155,7 +155,7 @@ SOFTWARE.';
             if (!$SQL->is_connected()) {
                 $problems[] =
                     $lang['INST_CONNCET_ERR'] .
-                    (isset($dbtype) && $dbtype == 'sqlite'
+                    (isset($dbtype) && $dbtype === 'sqlite'
                         ? '<br>' . sprintf($lang['INST_CONNCET_ERR_SQLITE'], $dbname)
                         : '');
             } elseif (
@@ -202,7 +202,7 @@ SOFTWARE.';
             }
 
             //fix bug #r1777 (alta3rq revision)
-            if (!empty(p('password')) && !empty(p('password2')) && p('password') != p('password2')) {
+            if (!empty(p('password')) && !empty(p('password2')) && p('password') !== p('password2')) {
                 inst_error($lang['PASS_NEQ_PASS2']);
             }
 
@@ -228,8 +228,8 @@ SOFTWARE.';
             $config_sitename = p('sitename');
             $config_siteurl = rtrim(p('siteurl'), '/') . '/';
             $config_sitemail = p('sitemail');
-            $config_time_zone = array_key_exists(p('time_zone'), time_zones()) ? p('time_zone') : 'Asia/Buraydah';
-            $config_urls_type = in_array(p('urls_type'), ['id', 'filename', 'direct']) ? p('urls_type') : 'id';
+            $config_time_zone = array_key_exists(p('time_zone'), time_zones()) ? p('time_zone') : 'Asia/Damascus';
+            $config_urls_type = in_array(p('urls_type'), ['id', 'filename', 'direct'], true) ? p('urls_type') : 'id';
             //the login page looks for this name
             $clean_name = $usrcp->cleanusername($user_name);
 
@@ -262,7 +262,7 @@ SOFTWARE.';
             ];
 
             foreach ($install_sqls as $name => $sql_content) {
-                if ($name == 'DROP_TABLES' || $name == 'ALTER_DATABASE_UTF') {
+                if ($name === 'DROP_TABLES' || $name === 'ALTER_DATABASE_UTF') {
                     continue;
                 }
 
@@ -275,7 +275,7 @@ SOFTWARE.';
                 }
             } //for
 
-            if ($err == 0) {
+            if ($err === 0) {
                 //add configs
                 foreach ($config_values as $cn) {
                     if (empty($cn[6])) {
@@ -293,7 +293,7 @@ SOFTWARE.';
 
                 //add groups configs
                 foreach ($config_values as $cn) {
-                    if ($cn[4] != 'groups' or !$cn[4]) {
+                    if ($cn[4] !== 'groups') {
                         continue;
                     }
 
@@ -312,7 +312,7 @@ SOFTWARE.';
                     $params = [];
 
                     foreach ($exts as $t => $v) {
-                        $itxt .= ($itxt == '' ? '' : ',') . '(?, ?, ?)';
+                        $itxt .= ($itxt === '' ? '' : ',') . '(?, ?, ?)';
                         array_push($params, $t, $gid, $v);
                     }
 
@@ -332,7 +332,7 @@ SOFTWARE.';
                     $params = [];
 
                     foreach ($ct as $ctk) {
-                        $itxt .= ($itxt == '' ? '' : ',') . '(?, ?, ?)';
+                        $itxt .= ($itxt === '' ? '' : ',') . '(?, ?, ?)';
                         array_push($params, $cn, $it, $ctk);
                         $it++;
                     }

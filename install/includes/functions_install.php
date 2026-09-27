@@ -56,7 +56,7 @@ function inst_languages(): array
     $languages = [];
 
     foreach (scandir(PATH . 'lang') as $folder) {
-        if ($folder[0] != '.' && file_exists(PATH . 'lang/' . $folder . '/install.php')) {
+        if ($folder[0] !== '.' && file_exists(PATH . 'lang/' . $folder . '/install.php')) {
             $languages[] = $folder;
         }
     }
@@ -221,11 +221,11 @@ function kleeja_eval(string $code): string
  */
 function do_config_export(string $srv, string $usr, string $pass, string $nm, string $prf, string $type = 'mysql'): bool
 {
-    $type = $type == 'sqlite' ? 'sqlite' : 'mysql';
+    $type = $type === 'sqlite' ? 'sqlite' : 'mysql';
     //it is added to the queries as it is
     $prf = preg_replace('/[^a-z0-9_]/i', '', $prf);
 
-    if ($type == 'sqlite' && strpos($nm, '.') === false) {
+    if ($type === 'sqlite' && strpos($nm, '.') === false) {
         $nm = $nm . '.db';
     }
 
@@ -234,7 +234,7 @@ function do_config_export(string $srv, string $usr, string $pass, string $nm, st
     $data .= '//https://github.com/kleeja/kleeja/wiki/config.php-file' . "\n\n";
 
     //var_export writes each value as a safe PHP string, whatever it has
-    if ($type != 'mysql') {
+    if ($type !== 'mysql') {
         $data .= '$dbtype   = ' . var_export($type, true) . "; //database type \n";
     }
     $data .= '$dbserver = ' . var_export($srv, true) . "; //database server \n";
@@ -293,7 +293,7 @@ function inst_get_config(string $name): string|false
 
     $result = $SQL->query("SELECT value FROM `{$dbprefix}config` WHERE `name` = :name", ['name' => $name]);
 
-    if ($SQL->num_rows($result) == 0) {
+    if (!$SQL->num_rows($result)) {
         return false;
     } else {
         $current_ver = $SQL->fetch_array($result);
@@ -311,7 +311,7 @@ function inst_db(bool $create = false): KleejaDatabase
 {
     global $dbserver, $dbuser, $dbpass, $dbname, $dbprefix, $dbtype;
 
-    if ($create && ($dbtype ?? 'mysql') == 'sqlite' && !file_exists(PATH . $dbname)) {
+    if ($create && ($dbtype ?? 'mysql') === 'sqlite' && !file_exists(PATH . $dbname)) {
         @touch(PATH . $dbname);
     }
 
@@ -334,7 +334,7 @@ function inst_is_installed(): bool
     global $dbname, $dbuser, $dbtype;
 
     //SQLite has no user
-    if (empty($dbname) || (empty($dbuser) && ($dbtype ?? 'mysql') != 'sqlite')) {
+    if (empty($dbname) || (empty($dbuser) && ($dbtype ?? 'mysql') !== 'sqlite')) {
         return false;
     }
 
@@ -362,7 +362,7 @@ function inst_site_url(): string
 {
     $https =
         (!empty($_SERVER['HTTPS']) && strtolower($_SERVER['HTTPS']) !== 'off') ||
-        ($_SERVER['SERVER_PORT'] ?? '') == 443 ||
+        (int) ($_SERVER['SERVER_PORT'] ?? 0) === 443 ||
         strtolower($_SERVER['HTTP_X_FORWARDED_PROTO'] ?? '') === 'https';
 
     $host = $_SERVER['HTTP_HOST'] ?? ($_SERVER['SERVER_NAME'] ?? 'localhost');
@@ -442,7 +442,7 @@ function get_cookies_settings(): array
         $server_name = substr($server_name, 0, strpos($server_name, ':'));
     }
 
-    $cookie_secure = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] == 'on' ? true : false;
+    $cookie_secure = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? true : false;
     $cookie_name = 'klj_' . strtolower(substr(str_replace('0', 'z', base_convert(md5(mt_rand()), 16, 35)), 0, 5));
 
     $name = !empty($_SERVER['PHP_SELF']) ? $_SERVER['PHP_SELF'] : getenv('PHP_SELF');
@@ -454,13 +454,13 @@ function get_cookies_settings(): array
     $script_path = trim(dirname(str_replace(['\\', '//'], '/', $name)));
 
     if ($script_path !== '/') {
-        if (substr($script_path, -1) == '/') {
+        if (substr($script_path, -1) === '/') {
             $script_path = substr($script_path, 0, -1);
         }
 
         $script_path = str_replace(['../', './'], '', $script_path);
 
-        if ($script_path[0] != '/') {
+        if ($script_path[0] !== '/') {
             $script_path = '/' . $script_path;
         }
     }

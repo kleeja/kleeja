@@ -87,7 +87,7 @@ $user_mail = $config_sitemail = 'admin@example.com';
 $config_urls_type = 'id';
 $config_sitename = 'Yet Another Kleeja';
 $config_siteurl = rtrim(kleeja_html_encode($cli_options['link'] ?? 'http://localhost/'), '/') . '/';
-$config_time_zone = 'Asia/Buraydah';
+$config_time_zone = 'Asia/Damascus';
 
 // Queries
 include 'includes/install_sqls.php';
@@ -102,7 +102,7 @@ $err = 0;
 $errors = '';
 
 foreach ($install_sqls as $name => $sql_content) {
-    if ($name == 'DROP_TABLES' || $name == 'ALTER_DATABASE_UTF') {
+    if ($name === 'DROP_TABLES' || $name === 'ALTER_DATABASE_UTF') {
         continue;
     }
 
@@ -113,7 +113,7 @@ foreach ($install_sqls as $name => $sql_content) {
     }
 }
 
-if ($err == 0) {
+if ($err === 0) {
     //add configs
     foreach ($config_values as $cn) {
         if (empty($cn[6])) {
@@ -131,7 +131,7 @@ if ($err == 0) {
 
     //add groups configs
     foreach ($config_values as $cn) {
-        if ($cn[4] != 'groups' or !$cn[4]) {
+        if ($cn[4] !== 'groups') {
             continue;
         }
 
@@ -150,7 +150,7 @@ if ($err == 0) {
         $params = [];
 
         foreach ($exts as $t => $v) {
-            $itxt .= ($itxt == '' ? '' : ',') . '(?, ?, ?)';
+            $itxt .= ($itxt === '' ? '' : ',') . '(?, ?, ?)';
             array_push($params, $t, $gid, $v);
         }
 
@@ -170,7 +170,7 @@ if ($err == 0) {
         $params = [];
 
         foreach ($ct as $ctk) {
-            $itxt .= ($itxt == '' ? '' : ',') . '(?, ?, ?)';
+            $itxt .= ($itxt === '' ? '' : ',') . '(?, ?, ?)';
             array_push($params, $cn, $it, $ctk);
             $it++;
         }

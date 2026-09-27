@@ -60,7 +60,7 @@
                             <label class="form-label" for="time_zone">{{echo $lang['TIME_ZONE']}}</label>
                             <select class="form-select" name="time_zone" id="time_zone" dir="ltr">
                                 {{foreach(time_zones() as $zone => $offset):}}
-                                <option value="{{echo $zone}}"{{if($zone == 'Asia/Buraydah'):}} selected{{endif;}}>{{echo $zone}} (GMT{{echo $offset < 0 ? $offset : '+' . $offset}})</option>
+                                <option value="{{echo $zone}}"{{if($zone === 'Asia/Damascus'):}} selected{{endif;}}>{{echo $zone}} (GMT{{echo $offset < 0 ? $offset : '+' . $offset}})</option>
                                 {{endforeach;}}
                             </select>
                         </div>
