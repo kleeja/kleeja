@@ -38,20 +38,13 @@ if (!ig('step')) {
 }
 
 //
-// Kleeja must be safe ..
+// Kleeja must be safe .. once installed, only the last page of the wizard is shown,
+// otherwise anyone could write another config.php or run the installing queries again
 //
-if (
-    !empty($dbuser) &&
-    !empty($dbname) &&
-    !(ig('step') && in_array(g('step'), ['c', 'check', 'data', 'end', 'wizard']))
-) {
-    $d = inst_get_config('language');
+if (g('step') != 'end' && inst_is_installed()) {
+    header('Location: ./index.php?' . getlang(1));
 
-    if (!empty($d)) {
-        header('Location: ./index.php');
-
-        exit();
-    }
+    exit();
 }
 
 /**
@@ -132,7 +125,14 @@ SOFTWARE.';
         // after submit, generate config file
         if (ip('dbsubmit')) {
             //create config file, or export it to browser on failure
-            do_config_export(p('db_server'), p('db_user'), p('db_pass'), p('db_name'), p('db_prefix'), p('db_type'));
+            do_config_export(
+                inst_post('db_server'),
+                inst_post('db_user'),
+                inst_post('db_pass', trim: false),
+                inst_post('db_name'),
+                inst_post('db_prefix'),
+                inst_post('db_type'),
+            );
         }
 
         $no_config = !file_exists(PATH . 'config.php') || ig('force') ? false : true;
@@ -149,12 +149,8 @@ SOFTWARE.';
         if (empty($dbname)) {
             $problems[] = $lang['INST_CHANG_CONFIG'];
         } else {
-            if (isset($dbtype) && $dbtype == 'sqlite') {
-                @touch(PATH . $dbname);
-            }
-
             //connect .. for check
-            $SQL = new KleejaDatabase($dbserver, $dbuser, $dbpass, $dbname, $dbprefix, $dbtype ?? 'mysql');
+            $SQL = inst_db(create: true);
 
             if (!$SQL->is_connected()) {
                 $problems[] =
@@ -210,27 +206,32 @@ SOFTWARE.';
                 inst_error($lang['PASS_NEQ_PASS2']);
             }
 
-            if (strpos(p('email'), '@') === false) {
+            if (
+                !filter_var(inst_post('email'), FILTER_VALIDATE_EMAIL) ||
+                !filter_var(inst_post('sitemail'), FILTER_VALIDATE_EMAIL)
+            ) {
                 inst_error($lang['WRONG_EMAIL']);
             }
 
-            //connect .. for check
-            $SQL = new KleejaDatabase($dbserver, $dbuser, $dbpass, $dbname, $dbprefix, $dbtype ?? 'mysql');
+            //connect .. the SQLite file is created here if the check step did not
+            $SQL = inst_db(create: true);
 
             include_once PATH . 'includes/usr.php';
             include_once PATH . 'includes/functions_alternative.php';
             $usrcp = new usrcp();
 
+            //p() HTML encodes the values once, the same way the rest of Kleeja keeps them in the database
             $user_salt = substr(base64_encode(pack('H*', sha1(mt_rand()))), 0, 7);
             $user_pass = $usrcp->kleeja_hash_password(p('password') . $user_salt);
-            $user_name = kleeja_html_encode(p('username'));
-            $user_mail = kleeja_html_encode(p('email'));
-            $config_sitename = kleeja_html_encode(p('sitename'));
-            $config_siteurl = kleeja_html_encode(p('siteurl'));
-            $config_sitemail = kleeja_html_encode(p('sitemail'));
-            $config_time_zone = kleeja_html_encode(p('time_zone'));
+            $user_name = p('username');
+            $user_mail = strtolower(p('email'));
+            $config_sitename = p('sitename');
+            $config_siteurl = rtrim(p('siteurl'), '/') . '/';
+            $config_sitemail = p('sitemail');
+            $config_time_zone = array_key_exists(p('time_zone'), time_zones()) ? p('time_zone') : 'Asia/Buraydah';
             $config_urls_type = in_array(p('urls_type'), ['id', 'filename', 'direct']) ? p('urls_type') : 'id';
-            $clean_name = $usrcp->cleanusername(kleeja_html_encode($user_name));
+            //the login page looks for this name
+            $clean_name = $usrcp->cleanusername($user_name);
 
             /// ok .. we will get sqls now ..
             include 'includes/install_sqls.php';
@@ -246,39 +247,27 @@ SOFTWARE.';
 
             $sqls_done = $sql_err = [];
 
+            //a message for each query, the rest are shown by their names
+            $done_messages = [
+                'call' => 'INST_CRT_CALL',
+                'reports' => 'INST_CRT_REPRS',
+                'stats' => 'INST_CRT_STS',
+                'users' => 'INST_CRT_USRS',
+                'users_insert' => 'INST_CRT_ADM',
+                'files' => 'INST_CRT_FLS',
+                'config' => 'INST_CRT_CNF',
+                'groups_exts' => 'INST_CRT_EXT',
+                'plugins' => 'INST_CRT_PLG',
+                'lang' => 'INST_CRT_LNG',
+            ];
+
             foreach ($install_sqls as $name => $sql_content) {
                 if ($name == 'DROP_TABLES' || $name == 'ALTER_DATABASE_UTF') {
                     continue;
                 }
 
                 if ($SQL->query($sql_content, $install_params[$name] ?? [])) {
-                    if ($name == 'call') {
-                        $sqls_done[] = $lang['INST_CRT_CALL'];
-                    } elseif ($name == 'reports') {
-                        $sqls_done[] = $lang['INST_CRT_REPRS'];
-                    } elseif ($name == 'stats') {
-                        $sqls_done[] = $lang['INST_CRT_STS'];
-                    } elseif ($name == 'users') {
-                        $sqls_done[] = $lang['INST_CRT_USRS'];
-                    } elseif ($name == 'users') {
-                        $sqls_done[] = $lang['INST_CRT_ADM'];
-                    } elseif ($name == 'files') {
-                        $sqls_done[] = $lang['INST_CRT_FLS'];
-                    } elseif ($name == 'config') {
-                        $sqls_done[] = $lang['INST_CRT_CNF'];
-                    } elseif ($name == 'exts') {
-                        $sqls_done[] = $lang['INST_CRT_EXT'];
-                    } elseif ($name == 'online') {
-                        $sqls_done[] = $lang['INST_CRT_ONL'];
-                    } elseif ($name == 'hooks') {
-                        $sqls_done[] = $lang['INST_CRT_HKS'];
-                    } elseif ($name == 'plugins') {
-                        $sqls_done[] = $lang['INST_CRT_PLG'];
-                    } elseif ($name == 'lang') {
-                        $sqls_done[] = $lang['INST_CRT_LNG'];
-                    } else {
-                        $sqls_done[] = $name . '...';
-                    }
+                    $sqls_done[] = isset($done_messages[$name]) ? $lang[$done_messages[$name]] : $name . '...';
                 } else {
                     $errors .= implode(':', $SQL->get_error()) . '' . "\n___\n";
                     $sql_err[] = $lang['INST_SQL_ERR'] . ' : ' . $name . '[basic]';
@@ -297,7 +286,7 @@ SOFTWARE.';
 
                     if (!$SQL->query($sql, array_slice($cn, 0, 7))) {
                         $errors .= implode(':', $SQL->get_error()) . '' . "\n___\n";
-                        $sql_err[] = $lang['INST_SQL_ERR'] . ' : [configs_values] ' . $cn;
+                        $sql_err[] = $lang['INST_SQL_ERR'] . ' : [configs_values] ' . $cn[0];
                         $err++;
                     }
                 }
@@ -312,7 +301,7 @@ SOFTWARE.';
 
                     if (!$SQL->query($sql, ['name' => $cn[0], 'value' => $cn[1]])) {
                         $errors .= implode(':', $SQL->get_error()) . '' . "\n___\n";
-                        $sql_err[] = $lang['INST_SQL_ERR'] . ' : [groups_configs_values] ' . $cn;
+                        $sql_err[] = $lang['INST_SQL_ERR'] . ' : [groups_configs_values] ' . $cn[0];
                         $err++;
                     }
                 }
@@ -362,7 +351,7 @@ SOFTWARE.';
 
             echo gettpl('sqls_done.html');
         } else {
-            $urlsite = 'https://' . $_SERVER['HTTP_HOST'] . str_replace('install', '', dirname($_SERVER['PHP_SELF']));
+            $urlsite = inst_site_url();
             echo gettpl('data.html');
         }
 

@@ -77,24 +77,15 @@ switch (g('step', 'str')) {
         break;
 
     case 'choose':
-        $install_or_no = $php_ver = true;
+        $php_ver = true;
 
         //check version of PHP
         if (!function_exists('version_compare') || version_compare(PHP_VERSION, MIN_PHP_VERSION, '<')) {
             $php_ver = false;
         }
 
-        if (file_exists(PATH . 'config.php')) {
-            include_once PATH . 'config.php';
-
-            if (!empty($dbuser) && !empty($dbname)) {
-                $d = inst_get_config('language');
-
-                if (!empty($d)) {
-                    $install_or_no = false;
-                }
-            }
-        }
+        //config.php is included at the top of this file
+        $install_or_no = !inst_is_installed();
 
         echo gettpl('choose.html');
 

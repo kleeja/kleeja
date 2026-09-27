@@ -18,6 +18,13 @@ define('STOP_PLUGINS', true);
 define('PATH', __DIR__ . '/../');
 define('CLI', PHP_SAPI === 'cli');
 
+//it installs without asking anything, and prints the admin password, so it is for the command line only
+if (!CLI) {
+    http_response_code(403);
+
+    exit('This file works from the command line only: php install/quick.php --password=... --link=...');
+}
+
 include_once PATH . 'includes/plugins.php';
 include_once PATH . 'includes/functions_display.php';
 include_once PATH . 'includes/functions_alternative.php';
@@ -28,24 +35,26 @@ include_once PATH . 'includes/pdo.php';
 include_once 'includes/functions_install.php';
 
 //cli options
-$cli_options = [];
-
-if (CLI) {
-    $cli_options = getopt('', ['password::', 'link::']);
-}
+$cli_options = getopt('', ['password::', 'link::']);
 
 if (file_exists(PATH . 'config.php')) {
     include_once PATH . 'config.php';
 } else {
     do_config_export('localhost', 'root', '', 'kleeja', 'klj_');
 
-    exit('`config.php` was missing! so we created one for you, kindly edit the file with database information.');
+    exit(
+        '`config.php` was missing! so we created one for you, kindly edit the file with database information.' . PHP_EOL
+    );
 }
 
-$SQL = new KleejaDatabase($dbserver, $dbuser, $dbpass, $dbname, $dbprefix, $dbtype ?? 'mysql');
+$SQL = inst_db(create: true);
 
 if (!$SQL->is_connected()) {
-    exit('Can not connect to database, please make sure the data in `config.php` is correct!');
+    exit('Can not connect to database, please make sure the data in `config.php` is correct!' . PHP_EOL);
+}
+
+if (inst_is_installed()) {
+    exit('Kleeja is installed already, there is nothing to do!' . PHP_EOL);
 }
 
 if ($SQL->driver === 'mysql') {
@@ -65,22 +74,19 @@ foreach (['cache', 'uploads', 'uploads/thumbs'] as $folder) {
 }
 
 //install
-$SQL = new KleejaDatabase($dbserver, $dbuser, $dbpass, $dbname, $dbprefix, $dbtype ?? 'mysql');
-
 include_once PATH . 'includes/usr.php';
 include_once PATH . 'includes/functions_alternative.php';
 
 $usrcp = new usrcp();
-$password = !empty($cli_options['password']) ? $cli_options['password'] : mt_rand();
+$password = !empty($cli_options['password']) ? (string) $cli_options['password'] : (string) mt_rand();
 $user_salt = substr(base64_encode(pack('H*', sha1(mt_rand()))), 0, 7);
-$user_pass = $usrcp->kleeja_hash_password($password . $user_salt);
+//the login page hashes the password HTML encoded, as p() gives it
+$user_pass = $usrcp->kleeja_hash_password(kleeja_html_encode(trim($password)) . $user_salt);
 $user_name = $clean_name = 'admin';
 $user_mail = $config_sitemail = 'admin@example.com';
 $config_urls_type = 'id';
 $config_sitename = 'Yet Another Kleeja';
-$config_siteurl = !empty($cli_options['link'])
-    ? $cli_options['link']
-    : 'http://' . $_SERVER['HTTP_HOST'] . str_replace('install', '', dirname($_SERVER['PHP_SELF']));
+$config_siteurl = rtrim(kleeja_html_encode($cli_options['link'] ?? 'http://localhost/'), '/') . '/';
 $config_time_zone = 'Asia/Buraydah';
 
 // Queries
@@ -102,7 +108,7 @@ foreach ($install_sqls as $name => $sql_content) {
 
     if (!$SQL->query($sql_content, $install_params[$name] ?? [])) {
         $errors .= implode(':', $SQL->get_error()) . '' . "\n___\n";
-        echo $lang['INST_SQL_ERR'] . ' : ' . $name . '[basic]' . (CLI ? PHP_EOL : '<br>');
+        echo $lang['INST_SQL_ERR'] . ' : ' . $name . '[basic]' . PHP_EOL;
         $err++;
     }
 }
@@ -118,7 +124,7 @@ if ($err == 0) {
 
         if (!$SQL->query($sql, array_slice($cn, 0, 7))) {
             $errors .= implode(':', $SQL->get_error()) . '' . "\n___\n";
-            echo $lang['INST_SQL_ERR'] . ' : [configs_values] ' . $cn . (CLI ? PHP_EOL : '<br>');
+            echo $lang['INST_SQL_ERR'] . ' : [configs_values] ' . $cn[0] . PHP_EOL;
             $err++;
         }
     }
@@ -133,7 +139,7 @@ if ($err == 0) {
 
         if (!$SQL->query($sql, ['name' => $cn[0], 'value' => $cn[1]])) {
             $errors .= implode(':', $SQL->get_error()) . '' . "\n___\n";
-            echo $lang['INST_SQL_ERR'] . ' : [groups_configs_values] ' . $cn . (CLI ? PHP_EOL : '<br>');
+            echo $lang['INST_SQL_ERR'] . ' : [groups_configs_values] ' . $cn[0] . PHP_EOL;
             $err++;
         }
     }
@@ -152,7 +158,7 @@ if ($err == 0) {
 
         if (!$SQL->query($sql, $params)) {
             $errors .= implode(':', $SQL->get_error()) . '' . "\n___\n";
-            echo $lang['INST_SQL_ERR'] . ' : [ext_values] ' . $gid . (CLI ? PHP_EOL : '<br>');
+            echo $lang['INST_SQL_ERR'] . ' : [ext_values] ' . $gid . PHP_EOL;
             $err++;
         }
     }
@@ -173,7 +179,7 @@ if ($err == 0) {
 
         if (!$SQL->query($sql, $params)) {
             $errors .= implode(':', $SQL->get_error()) . '' . "\n___\n";
-            echo $lang['INST_SQL_ERR'] . ' : [acl_values] ' . $cn . (CLI ? PHP_EOL : '<br>');
+            echo $lang['INST_SQL_ERR'] . ' : [acl_values] ' . $cn . PHP_EOL;
             $err++;
         }
         $it++;
@@ -181,16 +187,10 @@ if ($err == 0) {
 }
 
 if ($err > 0) {
-    echo CLI ? PHP_EOL : '<br><span style="color:red">';
-    echo 'We encountered a problem during installation, see the error log:';
-    echo CLI ? PHP_EOL : '</span><br>';
-    echo CLI ? '' : '<textarea rows="10" style="width:100%">';
+    echo PHP_EOL . 'We encountered a problem during installation, see the error log:' . PHP_EOL;
     echo $errors;
-    echo CLI ? '' : '</textarea>';
 } else {
-    echo CLI ? '' : '<span style="color:green">';
-    echo 'Kleeja has been installed successfully, enjoy ...';
-    echo CLI ? PHP_EOL : '</span><br><br>';
-    echo 'Username: admin' . (CLI ? PHP_EOL : '<br>');
-    echo 'Password: ' . $password;
+    echo 'Kleeja has been installed successfully, enjoy ...' . PHP_EOL;
+    echo 'Username: admin' . PHP_EOL;
+    echo 'Password: ' . $password . PHP_EOL;
 }

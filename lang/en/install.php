@@ -132,6 +132,14 @@ return [
     'INST_CHECK_FAILED' => 'Some checks did not pass, fix them then check again',
     'INST_ERROR_LOG' => 'Error log',
     'INST_DARK_MODE' => 'Dark mode',
+    'INST_TRY_AGAIN' => 'Try again',
+    'INST_PREFIX_WRONG' => 'Use English letters, numbers and _ only',
+    'INST_UPDATE_DESC' => 'Your database will be updated from version %1$s to version %2$s.',
+    'INST_UPDATE_BACKUP' => 'Take a backup of your database before you continue.',
+    'INST_UPDATE_LOGIN' => 'Sign in with an admin account to start the update',
+    'INST_UPDATE_NOW' => 'Update now',
+    'INST_UPDATE_WRONG_LOGIN' => 'Wrong username or password, or this account is not an admin.',
+    'INST_UPDATE_FAILED' => 'The update stopped because of a database error, fix it then try again',
 
     'KLEEJA_TEAM_MSG_NAME' => 'Kleeja Development Team',
     'KLEEJA_TEAM_MSG_TEXT' =>

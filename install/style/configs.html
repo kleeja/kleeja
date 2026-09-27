@@ -26,7 +26,8 @@
 
                     <div class="col-md-4">
                         <label class="form-label" for="db_prefix">{{echo $lang['DB_PREFIX']}}</label>
-                        <input class="form-control" name="db_prefix" id="db_prefix" type="text" value="klj_" dir="ltr">
+                        <input class="form-control" name="db_prefix" id="db_prefix" type="text" value="klj_" dir="ltr" pattern="[A-Za-z0-9_]*">
+                        <div class="invalid-feedback">{{echo $lang['INST_PREFIX_WRONG']}}</div>
                     </div>
 
                     <div class="col-12">

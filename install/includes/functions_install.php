@@ -210,7 +210,7 @@ function kleeja_eval(string $code): string
 }
 
 /**
- * Export config
+ * Export config, the values are the raw ones as typed, not HTML encoded
  * @param  string $srv
  * @param  string $usr
  * @param  string $pass
@@ -221,22 +221,27 @@ function kleeja_eval(string $code): string
  */
 function do_config_export(string $srv, string $usr, string $pass, string $nm, string $prf, string $type = 'mysql'): bool
 {
+    $type = $type == 'sqlite' ? 'sqlite' : 'mysql';
+    //it is added to the queries as it is
+    $prf = preg_replace('/[^a-z0-9_]/i', '', $prf);
+
+    if ($type == 'sqlite' && strpos($nm, '.') === false) {
+        $nm = $nm . '.db';
+    }
+
     $data = '<?php' . "\n\n" . '//fill these variables with your data' . "\n";
     $data .= '//for more information about this file, visit: ' . "\n";
     $data .= '//https://github.com/kleeja/kleeja/wiki/config.php-file' . "\n\n";
 
-    if (!empty($type) && $type != 'mysql') {
-        if ($type == 'sqlite' && strpos($nm, '.') === false) {
-            $nm = $nm . '.db';
-        }
-
-        $data .= '$dbtype   = \'' . str_replace("'", "\'", $type) . "'; //database type \n";
+    //var_export writes each value as a safe PHP string, whatever it has
+    if ($type != 'mysql') {
+        $data .= '$dbtype   = ' . var_export($type, true) . "; //database type \n";
     }
-    $data .= '$dbserver = \'' . str_replace("'", "\'", $srv) . "'; //database server \n";
-    $data .= '$dbuser   = \'' . str_replace("'", "\'", $usr) . "' ; // database user \n";
-    $data .= '$dbpass   = \'' . str_replace("'", "\'", $pass) . "'; // database password \n";
-    $data .= '$dbname   = \'' . str_replace("'", "\'", $nm) . "'; // database name \n";
-    $data .= '$dbprefix = \'' . str_replace("'", "\'", $prf) . "'; // if you use prefix for tables , fill it \n";
+    $data .= '$dbserver = ' . var_export($srv, true) . "; //database server \n";
+    $data .= '$dbuser   = ' . var_export($usr, true) . "; // database user \n";
+    $data .= '$dbpass   = ' . var_export($pass, true) . "; // database password \n";
+    $data .= '$dbname   = ' . var_export($nm, true) . "; // database name \n";
+    $data .= '$dbprefix = ' . var_export($prf, true) . "; // if you use prefix for tables , fill it \n";
 
     if (is_writable(PATH)) {
         if (@file_put_contents(PATH . 'config.php', $data, LOCK_EX) !== false) {
@@ -272,23 +277,17 @@ function get_microtime(): float
  */
 function inst_get_config(string $name): string|false
 {
-    global $SQL, $dbprefix;
+    global $SQL, $dbprefix, $dbname;
 
     if (empty($SQL)) {
-        global $dbserver, $dbuser, $dbpass, $dbname, $dbtype;
-
         if (!isset($dbname)) {
             return false;
         }
 
-        if (isset($dbtype) && $dbtype == 'sqlite') {
-            @touch(PATH . $dbname);
-        }
-
-        $SQL = new KleejaDatabase($dbserver, $dbuser, $dbpass, $dbname, $dbprefix, $dbtype ?? 'mysql');
+        $SQL = inst_db();
     }
 
-    if (empty($SQL)) {
+    if (!$SQL->is_connected()) {
         return false;
     }
 
@@ -301,6 +300,128 @@ function inst_get_config(string $name): string|false
 
         return $current_ver['value'] ?? false;
     }
+}
+
+/**
+ * Connect to the database of config.php
+ * @param  bool           $create create the SQLite database file if it is not there, only when installing
+ * @return KleejaDatabase
+ */
+function inst_db(bool $create = false): KleejaDatabase
+{
+    global $dbserver, $dbuser, $dbpass, $dbname, $dbprefix, $dbtype;
+
+    if ($create && ($dbtype ?? 'mysql') == 'sqlite' && !file_exists(PATH . $dbname)) {
+        @touch(PATH . $dbname);
+    }
+
+    return new KleejaDatabase(
+        $dbserver ?? '',
+        $dbuser ?? '',
+        $dbpass ?? '',
+        $dbname ?? '',
+        $dbprefix ?? '',
+        $dbtype ?? 'mysql',
+    );
+}
+
+/**
+ * Is Kleeja installed already, config.php leads to a database that has Kleeja settings
+ * @return bool
+ */
+function inst_is_installed(): bool
+{
+    global $dbname, $dbuser, $dbtype;
+
+    //SQLite has no user
+    if (empty($dbname) || (empty($dbuser) && ($dbtype ?? 'mysql') != 'sqlite')) {
+        return false;
+    }
+
+    return !empty(inst_get_config('language'));
+}
+
+/**
+ * A posted value as it is typed, not HTML encoded like p(), for what is not shown in pages, like config.php
+ * @param  string $name
+ * @param  bool   $trim
+ * @return string
+ */
+function inst_post(string $name, bool $trim = true): string
+{
+    $value = isset($_POST[$name]) && is_string($_POST[$name]) ? $_POST[$name] : '';
+
+    return $trim ? trim($value) : $value;
+}
+
+/**
+ * Link of Kleeja, guessed from the link of the installer
+ * @return string
+ */
+function inst_site_url(): string
+{
+    $https =
+        (!empty($_SERVER['HTTPS']) && strtolower($_SERVER['HTTPS']) !== 'off') ||
+        ($_SERVER['SERVER_PORT'] ?? '') == 443 ||
+        strtolower($_SERVER['HTTP_X_FORWARDED_PROTO'] ?? '') === 'https';
+
+    $host = $_SERVER['HTTP_HOST'] ?? ($_SERVER['SERVER_NAME'] ?? 'localhost');
+    $path = preg_replace('#/install$#', '', rtrim(str_replace('\\', '/', dirname($_SERVER['PHP_SELF'])), '/'));
+
+    return ($https ? 'https' : 'http') . '://' . $host . $path . '/';
+}
+
+/**
+ * Check the username and password of an admin, the one who can enter the control panel
+ * @param  string $name     as p() returns it, like the login page
+ * @param  string $password as p() returns it, like the login page
+ * @return bool
+ */
+function inst_admin_login(string $name, string $password): bool
+{
+    global $SQL, $dbprefix;
+
+    if ($name === '' || $password === '') {
+        return false;
+    }
+
+    $usrcp = new usrcp();
+
+    $result = $SQL->query("SELECT * FROM `{$dbprefix}users` WHERE `clean_name` = :clean_name LIMIT 1", [
+        'clean_name' => $usrcp->cleanusername(trim($name)),
+    ]);
+
+    $user = $SQL->fetch_array($result);
+
+    if (
+        empty($user['password']) ||
+        !$usrcp->kleeja_hash_password(trim($password) . $user['password_salt'], $user['password'])
+    ) {
+        return false;
+    }
+
+    if (!empty($user['founder'])) {
+        return true;
+    }
+
+    $result = $SQL->query(
+        "SELECT `acl_can` FROM `{$dbprefix}groups_acl` WHERE `acl_name` = 'enter_acp' AND `group_id` = :group_id",
+        ['group_id' => (int) $user['group_id']],
+    );
+
+    return !empty($SQL->fetch_array($result)['acl_can']);
+}
+
+/**
+ * Is a failed query of an update about something that is there already, which means it was done before
+ * @param  array $error [code, message] of $SQL->get_error()
+ * @return bool
+ */
+function inst_update_done_before(array $error): bool
+{
+    //MySQL: 1060 duplicate column, 1061 duplicate key, 1062 duplicate entry
+    return in_array((int) ($error[0] ?? 0), [1060, 1061, 1062], true) ||
+        preg_match('/duplicate|already exists|UNIQUE constraint failed/i', (string) ($error[1] ?? '')) === 1;
 }
 
 /**
