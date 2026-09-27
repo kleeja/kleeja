@@ -39,7 +39,7 @@ if (version_compare(PHP_VERSION, MIN_PHP_VERSION, '<')) {
 if (!class_exists('PDO') || !array_intersect(['mysql', 'sqlite'], PDO::getAvailableDrivers())) {
     kleeja_show_error(
         E_USER_ERROR,
-        'In order to use Kleeja, "pdo_mysql" or "pdo_sqlite" extension has to be installed on your server.',
+        'In order to update Kleeja, "pdo_mysql" or "pdo_sqlite" extension has to be installed on your server.',
         __FILE__,
         __LINE__,
     );
