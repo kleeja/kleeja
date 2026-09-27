@@ -64,9 +64,7 @@ function generate_safety_htaccess(string $folder): void
 {
     $return = false;
 
-    is_array($plugin_run_result = Plugins::getInstance()->run('generate_safety_htaccess_func', get_defined_vars()))
-        ? extract($plugin_run_result)
-        : null; //run hook
+    extract(runHook('generate_safety_htaccess_func', get_defined_vars()));
 
     if ($return) {
         return;
@@ -92,9 +90,7 @@ function make_folder(string $folder): bool
 {
     $return = false;
 
-    is_array($plugin_run_result = Plugins::getInstance()->run('make_folder_func', get_defined_vars()))
-        ? extract($plugin_run_result)
-        : null; //run hook
+    extract(runHook('make_folder_func', get_defined_vars()));
 
     if ($return) {
         return true;
@@ -119,8 +115,8 @@ function make_folder(string $folder): bool
         //create empty index so nobody can see the contents
         $fo = @fopen($path . $sub_folder . '/index.html', 'w');
         $fo2 = @fopen($path . $sub_folder . '/thumbs/index.html', 'w');
-        @fwrite($fo, '<a href="https://kleeja.com"><p>KLEEJA ..</p></a>');
-        @fwrite($fo2, '<a href="https://kleeja.com"><p>KLEEJA ..</p></a>');
+        @fwrite($fo, '<a href="https://kleeja.net"><p>KLEEJA ..</p></a>');
+        @fwrite($fo2, '<a href="https://kleeja.net"><p>KLEEJA ..</p></a>');
 
         $path .= $sub_folder . '/';
     }
@@ -173,9 +169,7 @@ function change_filename_decoding(string $filename, int $i_loop, string $ext, st
         $return = preg_replace('/-+/', '-', $return);
     }
 
-    is_array($plugin_run_result = Plugins::getInstance()->run('change_filename_decoding_func', get_defined_vars()))
-        ? extract($plugin_run_result)
-        : null; //run hook
+    extract(runHook('change_filename_decoding_func', get_defined_vars()));
 
     return $return;
 }
@@ -197,9 +191,7 @@ function change_filename_templates(string $filename): string
         $filename = preg_replace('/{date:([a-zA-Z-_]+)}/i', date($m[1]), $filename);
     }
 
-    is_array($plugin_run_result = Plugins::getInstance()->run('change_filename_templates_func', get_defined_vars()))
-        ? extract($plugin_run_result)
-        : null; //run hook
+    extract(runHook('change_filename_templates_func', get_defined_vars()));
 
     return $filename;
 }
@@ -215,9 +207,7 @@ function check_mime_type(string $given_file_mime, string $file_ext, string $file
 {
     $return = '';
 
-    is_array($plugin_run_result = Plugins::getInstance()->run('kleeja_check_mime_func', get_defined_vars()))
-        ? extract($plugin_run_result)
-        : null; //run hook
+    extract(runHook('kleeja_check_mime_func', get_defined_vars()));
 
     if ($return !== '') {
         return $return;
@@ -231,7 +221,6 @@ function check_mime_type(string $given_file_mime, string $file_ext, string $file
         } else {
             $f_info = finfo_open(FILEINFO_MIME_TYPE);
             $mime = finfo_file($f_info, $file_path);
-            finfo_close($f_info);
         }
     } elseif (!empty($given_file_mime)) {
         $mime = $given_file_mime;
@@ -285,9 +274,7 @@ function user_is_flooding(int $user_id = -1): bool
 
     $return = 'empty';
 
-    is_array($plugin_run_result = Plugins::getInstance()->run('user_is_flooding_func', get_defined_vars()))
-        ? extract($plugin_run_result)
-        : null; //run
+    extract(runHook('user_is_flooding_func', get_defined_vars())); //run
 
     if ($return != 'empty') {
         return $return;
@@ -305,7 +292,8 @@ function user_is_flooding(int $user_id = -1): bool
     $query = [
         'SELECT' => 'f.time',
         'FROM' => "{$dbprefix}files f",
-        'WHERE' => 'f.time >= ' . $time . ' AND f.user_ip = \'' . $SQL->escape(get_ip()) . '\'',
+        'WHERE' => 'f.time >= :time AND f.user_ip = :ip',
+        'BIND' => ['time' => $time, 'ip' => kleeja_html_encode(get_ip())],
     ];
 
     if ($SQL->num_rows($SQL->build($query))) {

@@ -22,9 +22,7 @@ $config['enable_captcha'] = !defined('STOP_CAPTCHA');
 
 //for security
 if (!$username) {
-    is_array($plugin_run_result = Plugins::getInstance()->run('user_not_admin_admin_page', get_defined_vars()))
-        ? extract($plugin_run_result)
-        : null; //run hook
+    extract(runHook('user_not_admin_admin_page', get_defined_vars()));
     redirect(PATH . 'ucp.php?go=login&return=' . urlencode(ADMIN_PATH . '?cp=' . $go_to));
 }
 
@@ -60,12 +58,10 @@ if (
                 $ERRORS[] = $lang['INVALID_FORM_KEY'];
             }
 
-            is_array($plugin_run_result = Plugins::getInstance()->run('admin_login_submit', get_defined_vars()))
-                ? extract($plugin_run_result)
-                : null; //run hook
+            extract(runHook('admin_login_submit', get_defined_vars()));
 
             if (empty($ERRORS)) {
-                if ($f = $usrcp->data(p('lname'), p($pass_field), false, 3600 * 6, true)) {
+                if ($f = $usrcp->data(p('lname'), p($pass_field), expire: 3600 * 6, loginadm: true)) {
                     $_SESSION['USER_SESS'] = KJ_SESSION;
                     $_SESSION['ADMINLOGIN'] = md5(sha1($config['h_key']) . $usrcp->name() . $config['siteurl']);
                     //to make sure, sometime setting time from functions doesn't work
@@ -110,9 +106,7 @@ if (
         $err = true;
     }
 
-    is_array($plugin_run_result = Plugins::getInstance()->run('before_display_template_admin_page', get_defined_vars()))
-        ? extract($plugin_run_result)
-        : null; //run hook
+    extract(runHook('before_display_template_admin_page', get_defined_vars()));
 
     header('HTTP/1.0 401 Unauthorized');
 
@@ -144,7 +138,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && defined('STOP_CSRF')) {
 
 //current admin theme color
 if (ig('change_theme')) {
-    $admin_theme_color = g('change_theme', 'str', 'dark');
+    $admin_theme_color = g('change_theme', default: 'dark');
 
     if (in_array($admin_theme_color, ['dark', 'light'])) {
         cookie()->set('klj_adm_theme_color', $admin_theme_color, time() + 31536000);
@@ -218,9 +212,7 @@ if (!$adm_extensions || !is_array($adm_extensions)) {
     big_error('No Extensions', 'Error while loading admin extensions !');
 }
 
-is_array($plugin_run_result = Plugins::getInstance()->run('begin_admin_page', get_defined_vars()))
-    ? extract($plugin_run_result)
-    : null; //run hook
+extract(runHook('begin_admin_page', get_defined_vars()));
 
 /**
  * Exception of 406 ! dirty hosting
@@ -272,9 +264,7 @@ if (ig('check_msgs') || !ig('_ajax_')):
     }
 
     //add your own bubbles here
-    is_array($plugin_run_result = Plugins::getInstance()->run('kbubbles_admin_page', get_defined_vars()))
-        ? extract($plugin_run_result)
-        : null; //run hook
+    extract(runHook('kbubbles_admin_page', get_defined_vars()));
 endif;
 
 foreach ($adm_extensions as $m) {
@@ -283,9 +273,7 @@ foreach ($adm_extensions as $m) {
         continue;
     }
 
-    is_array($plugin_run_result = Plugins::getInstance()->run('foreach_ext_admin_page', get_defined_vars()))
-        ? extract($plugin_run_result)
-        : null; //run hook
+    extract(runHook('foreach_ext_admin_page', get_defined_vars()));
 
     $s = $m;
     $m = isset($m[1]) && $m[1] == '_' ? substr($m, 2) : $m;
@@ -326,9 +314,7 @@ foreach ($adm_extensions as $m) {
     //add another item to array for title='' in href or other thing
     $adm_extensions_menu[$i]['title'] = $adm_extensions_menu[$i]['lang'];
 
-    is_array($plugin_run_result = Plugins::getInstance()->run('endforeach_ext_admin_page', get_defined_vars()))
-        ? extract($plugin_run_result)
-        : null; //run hook
+    extract(runHook('endforeach_ext_admin_page', get_defined_vars()));
 }
 
 //to attach kleeja version in the menu start item
@@ -341,23 +327,17 @@ $styleePath = '';
 if (file_exists(ADM_FILES_PATH . '/' . $go_to . '.php')) {
     $include = true;
 
-    is_array($plugin_run_result = Plugins::getInstance()->run("require_admin_page_begin_{$go_to}", get_defined_vars()))
-        ? extract($plugin_run_result)
-        : null; //run hook
+    extract(runHook("require_admin_page_begin_{$go_to}", get_defined_vars()));
 
     if ($include) {
         include_once ADM_FILES_PATH . '/' . $go_to . '.php';
     }
 
-    is_array($plugin_run_result = Plugins::getInstance()->run("require_admin_page_end_{$go_to}", get_defined_vars()))
-        ? extract($plugin_run_result)
-        : null; //run hook
+    extract(runHook("require_admin_page_end_{$go_to}", get_defined_vars()));
 } else {
     $include_alternative = null;
 
-    is_array($plugin_run_result = Plugins::getInstance()->run("not_exists_{$go_to}", get_defined_vars()))
-        ? extract($plugin_run_result)
-        : null; //run hook
+    extract(runHook("not_exists_{$go_to}", get_defined_vars()));
 
     if (!empty($include_alternative) && file_exists($include_alternative)) {
         include_once $include_alternative;
@@ -401,9 +381,7 @@ if (isset($go_menu)) {
 //add extra html to header or footer
 $extra_admin_header_code = $extra_admin_footer_code = '';
 
-is_array($plugin_run_result = Plugins::getInstance()->run('end_admin_page', get_defined_vars()))
-    ? extract($plugin_run_result)
-    : null; //run hook
+extract(runHook('end_admin_page', get_defined_vars()));
 
 //header
 if (!ig('_ajax_')) {

@@ -19,11 +19,7 @@ class KleejaCookie
     {
         global $config;
 
-        is_array(
-            $plugin_run_result = Plugins::getInstance()->run('kleeja_set_cookie_func_usr_class', get_defined_vars()),
-        )
-            ? extract($plugin_run_result)
-            : null; //run hook
+        extract(runHook('kleeja_set_cookie_func_usr_class', get_defined_vars()));
 
         //
         //when user add cookie_* in config this will replace the current ones
@@ -77,16 +73,14 @@ class KleejaCookie
         );
     }
 
-    public function get(string $name)
+    public function get(string $name): string|false
     {
         global $config;
-        is_array(
-            $plugin_run_result = Plugins::getInstance()->run('kleeja_get_cookie_func_usr_class', get_defined_vars()),
-        )
-            ? extract($plugin_run_result)
-            : null; //run hook
+        extract(runHook('kleeja_get_cookie_func_usr_class', get_defined_vars()));
 
-        return $_COOKIE[$config['cookie_name'] . '_' . $name] ?? false;
+        $value = $_COOKIE[$config['cookie_name'] . '_' . $name] ?? false;
+
+        return is_string($value) ? $value : false;
     }
 
     public function exists(string $name): bool

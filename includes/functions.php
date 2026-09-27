@@ -20,6 +20,7 @@ function kleeja_detecting_bots(): void
     global $SQL, $dbprefix, $config;
 
     // get information ..
+    //it stays escaped for SQL, it is given to the anotherbots_onlline_func hook, and plugins may use it in their queries
     $agent = $SQL->escape($_SERVER['HTTP_USER_AGENT'] ?? '');
     $time = time();
 
@@ -27,27 +28,23 @@ function kleeja_detecting_bots(): void
     if (strpos($agent, 'Google') !== false) {
         $update_query = [
             'UPDATE' => "{$dbprefix}stats",
-            'SET' => "last_google=$time, google_num=google_num+1",
+            'SET' => 'last_google = :time, google_num = google_num + 1',
+            'BIND' => ['time' => $time],
         ];
-        is_array($plugin_run_result = Plugins::getInstance()->run('qr_update_google_lst_num', get_defined_vars()))
-            ? extract($plugin_run_result)
-            : null; //run hook
+        extract(runHook('qr_update_google_lst_num', get_defined_vars()));
         $SQL->build($update_query);
     } elseif (strpos($agent, 'Bing') !== false) {
         $update_query = [
             'UPDATE' => "{$dbprefix}stats",
-            'SET' => "last_bing=$time, bing_num=bing_num+1",
+            'SET' => 'last_bing = :time, bing_num = bing_num + 1',
+            'BIND' => ['time' => $time],
         ];
-        is_array($plugin_run_result = Plugins::getInstance()->run('qr_update_bing_lst_num', get_defined_vars()))
-            ? extract($plugin_run_result)
-            : null; //run hook
+        extract(runHook('qr_update_bing_lst_num', get_defined_vars()));
         $SQL->build($update_query);
     }
 
     //put another bots as a hook if you want !
-    is_array($plugin_run_result = Plugins::getInstance()->run('anotherbots_onlline_func', get_defined_vars()))
-        ? extract($plugin_run_result)
-        : null; //run hook
+    extract(runHook('anotherbots_onlline_func', get_defined_vars()));
 
     //clean online table
     if (time() - $config['last_online_time_update'] >= 3600) {
@@ -56,9 +53,7 @@ function kleeja_detecting_bots(): void
         update_config('last_online_time_update', time());
     }
 
-    is_array($plugin_run_result = Plugins::getInstance()->run('KleejaOnline_func', get_defined_vars()))
-        ? extract($plugin_run_result)
-        : null; //run hook
+    extract(runHook('KleejaOnline_func', get_defined_vars()));
 }
 
 /**
@@ -95,9 +90,7 @@ function get_ban(): void
             }
 
             if ($is_banned) {
-                is_array($plugin_run_result = Plugins::getInstance()->run('banned_get_ban_func', get_defined_vars()))
-                    ? extract($plugin_run_result)
-                    : null; //run hook
+                extract(runHook('banned_get_ban_func', get_defined_vars()));
 
                 //
                 // if the request is an image
@@ -121,24 +114,23 @@ function get_ban(): void
         }
     }
 
-    is_array($plugin_run_result = Plugins::getInstance()->run('get_ban_func', get_defined_vars()))
-        ? extract($plugin_run_result)
-        : null; //run hook
+    extract(runHook('get_ban_func', get_defined_vars()));
 }
 
 /**
  * Check if the given plugin installed ?
  * @param  string $plugin_name
- * @return string|false the plugin id, or false when it is not installed
+ * @return int|string|false the plugin id as the database gave it, or false when it is not installed
  */
-function kleeja_plugin_exists(string $plugin_name)
+function kleeja_plugin_exists(string $plugin_name): int|string|false
 {
     global $SQL, $dbprefix;
 
     $query = [
         'SELECT' => 'p.plg_id',
         'FROM' => "{$dbprefix}plugins p",
-        'WHERE' => "p.plg_name = '" . $SQL->escape($plugin_name) . "'",
+        'WHERE' => 'p.plg_name = :name',
+        'BIND' => ['name' => kleeja_html_encode($plugin_name)],
     ];
 
     $result = $SQL->build($query);
@@ -148,7 +140,7 @@ function kleeja_plugin_exists(string $plugin_name)
         $d = $SQL->fetch($result);
         $SQL->freeresult();
 
-        return $d['plg_id'];
+        return $d['plg_id'] ?? false;
     }
 
     return false;
@@ -278,11 +270,11 @@ function send_mail(
 
 /**
  * Delete cache
- * @param  string $name
- * @param  bool   $all  if true, all cache in cache folder will be deleted
+ * @param  string|array $name
+ * @param  bool         $all  if true, all cache in cache folder will be deleted
  * @return bool
  */
-function delete_cache($name, bool $all = false): bool
+function delete_cache(string|array $name, bool $all = false): bool
 {
     //Those files are exceptions and not for deletion
     $exceptions = ['.htaccess', 'index.html', 'php.ini', 'web.config'];
@@ -292,9 +284,7 @@ function delete_cache($name, bool $all = false): bool
         array_push($exceptions, 'kleeja_log.log');
     }
 
-    is_array($plugin_run_result = Plugins::getInstance()->run('delete_cache_func', get_defined_vars()))
-        ? extract($plugin_run_result)
-        : null; //run hook
+    extract(runHook('delete_cache_func', get_defined_vars()));
 
     //handle array of cached files
     if (is_array($name)) {
@@ -313,7 +303,7 @@ function delete_cache($name, bool $all = false): bool
         if ($dh = @opendir($path_to_cache)) {
             while (($file = @readdir($dh)) !== false) {
                 if ($file != '.' && $file != '..' && !in_array($file, $exceptions)) {
-                    kleeja_unlink($path_to_cache . '/' . $file, true);
+                    kleeja_unlink($path_to_cache . '/' . $file, cache_file: true);
                 }
             }
             @closedir($dh);
@@ -327,7 +317,7 @@ function delete_cache($name, bool $all = false): bool
         $name = str_replace('.php', '', $name) . '.php';
 
         if (file_exists($path_to_cache . '/' . $name)) {
-            $del = kleeja_unlink($path_to_cache . '/' . $name, true);
+            $del = kleeja_unlink($path_to_cache . '/' . $name, cache_file: true);
         }
     }
 
@@ -345,9 +335,7 @@ function kleeja_unlink(string $filePath, bool $cache_file = false): bool
 {
     $return = false;
 
-    is_array($plugin_run_result = Plugins::getInstance()->run('kleeja_unlink_func', get_defined_vars()))
-        ? extract($plugin_run_result)
-        : null; //run hook
+    extract(runHook('kleeja_unlink_func', get_defined_vars()));
 
     if ($return) {
         return true;
@@ -607,9 +595,7 @@ function get_mime_for_header(string $ext): string
         $return = 'application/force-download';
     }
 
-    is_array($plugin_run_result = Plugins::getInstance()->run('get_mime_for_header_func', get_defined_vars()))
-        ? extract($plugin_run_result)
-        : null; //run hook
+    extract(runHook('get_mime_for_header_func', get_defined_vars()));
 
     return $return;
 }
@@ -628,9 +614,7 @@ function get_lang(string $name, string $folder = ''): bool
         $lang = [];
     }
 
-    is_array($plugin_run_result = Plugins::getInstance()->run('get_lang_func', get_defined_vars()))
-        ? extract($plugin_run_result)
-        : null; //run hook
+    extract(runHook('get_lang_func', get_defined_vars()));
 
     $name = str_replace('..', '', $name);
 
@@ -673,28 +657,29 @@ function get_config(string $name): ?string
     global $dbprefix, $SQL, $d_groups, $userinfo;
 
     $table = "{$dbprefix}config c";
+    $bind = ['name' => kleeja_html_encode($name)];
 
     //what if this config is a group-configs related ?
     $group_id_sql = '';
 
     if (array_key_exists($name, $d_groups[$userinfo['group_id']]['configs'])) {
         $table = "{$dbprefix}groups_data c";
-        $group_id_sql = ' AND c.group_id=' . $userinfo['group_id'];
+        $group_id_sql = ' AND c.group_id = :group_id';
+        $bind['group_id'] = $userinfo['group_id'];
     }
 
     $query = [
         'SELECT' => 'c.value',
         'FROM' => $table,
-        'WHERE' => "c.name = '" . $SQL->escape($name) . "'" . $group_id_sql,
+        'WHERE' => 'c.name = :name' . $group_id_sql,
+        'BIND' => $bind,
     ];
 
     $result = $SQL->build($query);
     $v = $SQL->fetch($result);
     $return = $v['value'];
 
-    is_array($plugin_run_result = Plugins::getInstance()->run('get_config_func', get_defined_vars()))
-        ? extract($plugin_run_result)
-        : null; //run hook
+    extract(runHook('get_config_func', get_defined_vars()));
 
     return $return;
 }
@@ -733,17 +718,15 @@ function add_config(
             $insert_query = [
                 'INSERT' => '`name`, `value`, `group_id`',
                 'INTO' => "{$dbprefix}groups_data",
-                'VALUES' => "'" . $SQL->escape($name) . "','" . $SQL->escape($value) . "', " . $g_id,
+                'VALUES' => ':name, :value, :group_id',
+                'BIND' => [
+                    'name' => kleeja_html_encode($name),
+                    'value' => kleeja_html_encode($value),
+                    'group_id' => $g_id,
+                ],
             ];
 
-            is_array(
-                $plugin_run_result = Plugins::getInstance()->run(
-                    'insert_sql_add_config_func_groups_data',
-                    get_defined_vars(),
-                ),
-            )
-                ? extract($plugin_run_result)
-                : null; //run hook
+            extract(runHook('insert_sql_add_config_func_groups_data', get_defined_vars()));
 
             $SQL->build($insert_query);
         }
@@ -752,27 +735,19 @@ function add_config(
     $insert_query = [
         'INSERT' => '`name` ,`value` ,`option` ,`display_order`, `type`, `plg_id`, `dynamic`',
         'INTO' => "{$dbprefix}config",
-        'VALUES' =>
-            "'" .
-            $SQL->escape($name) .
-            "','" .
-            $SQL->escape($value) .
-            "', '" .
-            $SQL->real_escape($html) .
-            "','" .
-            intval($order) .
-            "','" .
-            $SQL->escape($type) .
-            "','" .
-            intval($plg_id) .
-            "','" .
-            ($dynamic ? '1' : '0') .
-            "'",
+        'VALUES' => ':name, :value, :option, :display_order, :type, :plg_id, :dynamic',
+        'BIND' => [
+            'name' => kleeja_html_encode($name),
+            'value' => kleeja_html_encode($value),
+            'option' => $html,
+            'display_order' => $order,
+            'type' => kleeja_html_encode($type),
+            'plg_id' => $plg_id,
+            'dynamic' => (int) $dynamic,
+        ],
     ];
 
-    is_array($plugin_run_result = Plugins::getInstance()->run('insert_sql_add_config_func', get_defined_vars()))
-        ? extract($plugin_run_result)
-        : null; //run hook
+    extract(runHook('insert_sql_add_config_func', get_defined_vars()));
 
     $SQL->build($insert_query);
 
@@ -809,35 +784,41 @@ function add_config_r(array $configs): bool
     return true;
 }
 
+/**
+ * update a config value
+ *
+ * @param  string $name
+ * @param  string $value
+ * @param  bool   $escape HTML encode the value, false to keep it as it is, like a serialized value,
+ *                        the values are always bound to the query, so there is no SQL escaping
+ * @param  int    $group  group id for group configs, -1 for the group of the current user, 0 for the general config
+ * @return bool
+ */
 function update_config(string $name, string $value, bool $escape = true, int $group = 0): bool
 {
     global $SQL, $dbprefix, $d_groups, $userinfo, $config;
 
-    $value = $escape ? $SQL->escape($value) : $value;
+    $value = $escape ? kleeja_html_encode($value) : $value;
     $table = "{$dbprefix}config";
+    $bind = ['value' => $value, 'name' => kleeja_html_encode($name)];
 
     //what if this config is a group-configs related ?
     $group_id_sql = '';
 
     if (array_key_exists($name, $d_groups[$userinfo['group_id']]['configs']) && $group != false) {
         $table = "{$dbprefix}groups_data";
-
-        if ($group == -1) {
-            $group_id_sql = ' AND group_id=' . $userinfo['group_id'];
-        } elseif ($group) {
-            $group_id_sql = ' AND group_id=' . intval($group);
-        }
+        $group_id_sql = ' AND group_id = :group_id';
+        $bind['group_id'] = $group == -1 ? $userinfo['group_id'] : $group;
     }
 
     $update_query = [
         'UPDATE' => $table,
-        'SET' => "value='" . ($escape ? $SQL->escape($value) : $value) . "'",
-        'WHERE' => 'name = "' . $SQL->escape($name) . '"' . $group_id_sql,
+        'SET' => 'value = :value',
+        'WHERE' => 'name = :name' . $group_id_sql,
+        'BIND' => $bind,
     ];
 
-    is_array($plugin_run_result = Plugins::getInstance()->run('update_sql_update_config_func', get_defined_vars()))
-        ? extract($plugin_run_result)
-        : null; //run hook
+    extract(runHook('update_sql_update_config_func', get_defined_vars()));
 
     $SQL->build($update_query);
 
@@ -859,7 +840,7 @@ function update_config(string $name, string $value, bool $escape = true, int $gr
 }
 
 // Delete config
-function delete_config($name): bool
+function delete_config(string|array $name): bool
 {
     if (is_array($name)) {
         foreach ($name as $n) {
@@ -876,22 +857,20 @@ function delete_config($name): bool
     //
     $delete_query = [
         'DELETE' => "{$dbprefix}config",
-        'WHERE' => "name  = '" . $SQL->escape($name) . "'",
+        'WHERE' => 'name = :name',
+        'BIND' => ['name' => kleeja_html_encode($name)],
     ];
-    is_array($plugin_run_result = Plugins::getInstance()->run('del_sql_delete_config_func', get_defined_vars()))
-        ? extract($plugin_run_result)
-        : null; //run hook
+    extract(runHook('del_sql_delete_config_func', get_defined_vars()));
 
     $SQL->build($delete_query);
 
     if (array_key_exists($name, $d_groups[$userinfo['group_id']]['configs'])) {
         $delete_query = [
             'DELETE' => "{$dbprefix}groups_data",
-            'WHERE' => "name  = '" . $SQL->escape($name) . "'",
+            'WHERE' => 'name = :name',
+            'BIND' => ['name' => kleeja_html_encode($name)],
         ];
-        is_array($plugin_run_result = Plugins::getInstance()->run('del_sql_delete_config_func2', get_defined_vars()))
-            ? extract($plugin_run_result)
-            : null; //run hook
+        extract(runHook('del_sql_delete_config_func2', get_defined_vars()));
 
         $SQL->build($delete_query);
     }
@@ -912,12 +891,15 @@ function update_olang(string $name, string $value, string $lang = 'en'): bool
 
     $update_query = [
         'UPDATE' => "{$dbprefix}lang",
-        'SET' => "trans='" . $SQL->escape($value) . "'",
-        'WHERE' => 'word = "' . $SQL->escape($name) . '", lang_id = "' . $SQL->escape($lang) . '"',
+        'SET' => 'trans = :trans',
+        'WHERE' => 'word = :word AND lang_id = :lang_id',
+        'BIND' => [
+            'trans' => kleeja_html_encode($value),
+            'word' => kleeja_html_encode($name),
+            'lang_id' => kleeja_html_encode($lang),
+        ],
     ];
-    is_array($plugin_run_result = Plugins::getInstance()->run('update_sql_update_olang_func', get_defined_vars()))
-        ? extract($plugin_run_result)
-        : null; //run hook
+    extract(runHook('update_sql_update_olang_func', get_defined_vars()));
 
     $SQL->build($update_query);
 
@@ -942,20 +924,15 @@ function add_olang(array $words = [], string $lang = 'en', int $plg_id = 0): voi
         $insert_query = [
             'INSERT' => 'word ,trans ,lang_id, plg_id',
             'INTO' => "{$dbprefix}lang",
-            'VALUES' =>
-                "'" .
-                $SQL->escape($w) .
-                "','" .
-                $SQL->real_escape($t) .
-                "', '" .
-                $SQL->escape($lang) .
-                "','" .
-                intval($plg_id) .
-                "'",
+            'VALUES' => ':word, :trans, :lang_id, :plg_id',
+            'BIND' => [
+                'word' => kleeja_html_encode($w),
+                'trans' => $t,
+                'lang_id' => kleeja_html_encode($lang),
+                'plg_id' => $plg_id,
+            ],
         ];
-        is_array($plugin_run_result = Plugins::getInstance()->run('insert_sql_add_olang_func', get_defined_vars()))
-            ? extract($plugin_run_result)
-            : null; //run hook
+        extract(runHook('insert_sql_add_olang_func', get_defined_vars()));
         $SQL->build($insert_query);
     }
 
@@ -966,12 +943,12 @@ function add_olang(array $words = [], string $lang = 'en', int $plg_id = 0): voi
 //delete words from lang
 //
 /**
- * @param  string|array $words  language terms to use a in $olang[word] or olang.word
- * @param  string       $lang   langauge of given word
- * @param  string       $plg_id plugin id associated with these words, optional
+ * @param  string|array|null $words  language terms to use a in $olang[word] or olang.word, empty for all the terms
+ * @param  string|array|null $lang   langauge of given word, empty for all the languages
+ * @param  int               $plg_id plugin id associated with these words, optional
  * @return bool
  */
-function delete_olang($words = '', $lang = 'en', int $plg_id = 0): bool
+function delete_olang(string|array|null $words = '', string|array|null $lang = 'en', int $plg_id = 0): bool
 {
     global $dbprefix, $SQL;
 
@@ -983,26 +960,31 @@ function delete_olang($words = '', $lang = 'en', int $plg_id = 0): bool
         return true;
     }
 
-    $delete_query = [
-        'DELETE' => "{$dbprefix}lang",
-        'WHERE' => empty($words) ? '' : "word = '" . $SQL->escape($words) . "'",
-    ];
+    $where = [];
+
+    if (!empty($words)) {
+        $where[] = 'word = :word';
+    }
 
     if (!empty($lang)) {
-        $lang_sql = is_array($lang)
-            ? "(lang_id = '" . implode("' AND lang_id = '", array_map([$SQL, 'escape'], $lang)) . "')"
-            : "lang_id = '" . $SQL->escape($lang) . "'";
-
-        $delete_query['WHERE'] .= (empty($delete_query['WHERE']) ? '' : ' AND ') . $lang_sql;
+        $where[] = 'lang_id IN (:lang_id)';
     }
 
     if (!empty($plg_id)) {
-        $delete_query['WHERE'] .= (empty($delete_query['WHERE']) ? '' : ' AND ') . 'plg_id = ' . intval($plg_id);
+        $where[] = 'plg_id = :plg_id';
     }
 
-    is_array($plugin_run_result = Plugins::getInstance()->run('del_sql_delete_olang_func', get_defined_vars()))
-        ? extract($plugin_run_result)
-        : null; //run hook
+    $delete_query = [
+        'DELETE' => "{$dbprefix}lang",
+        'WHERE' => implode(' AND ', $where),
+        'BIND' => [
+            'word' => kleeja_html_encode((string) $words),
+            'lang_id' => array_map('kleeja_html_encode', (array) $lang),
+            'plg_id' => $plg_id,
+        ],
+    ];
+
+    extract(runHook('del_sql_delete_olang_func', get_defined_vars()));
 
     if (empty($delete_query['WHERE'])) {
         return false;
@@ -1010,7 +992,7 @@ function delete_olang($words = '', $lang = 'en', int $plg_id = 0): bool
 
     $SQL->build($delete_query);
 
-    return $SQL->affected();
+    return (bool) $SQL->affected();
 }
 
 /**
@@ -1024,9 +1006,7 @@ function klj_clean_old_files(int $from = 0): void
     global $config, $SQL, $stat_last_f_del, $dbprefix;
 
     $return = false;
-    is_array($plugin_run_result = Plugins::getInstance()->run('klj_clean_old_files_func', get_defined_vars()))
-        ? extract($plugin_run_result)
-        : null; //run hook
+    extract(runHook('klj_clean_old_files_func', get_defined_vars()));
 
     if ((int) $config['del_f_day'] <= 0 || $return) {
         return;
@@ -1044,16 +1024,14 @@ function klj_clean_old_files(int $from = 0): void
         $query = [
             'SELECT' => 'f.id, f.last_down, f.name, f.type, f.folder, f.time, f.size, f.id_form',
             'FROM' => "{$dbprefix}files f",
-            'WHERE' => "f.last_down < $totaldays AND f.time < $not_today AND f.id > $from AND f.id_form <> '' AND f.id_form <> 'direct'",
+            'WHERE' =>
+                "f.last_down < :last_down AND f.time < :time AND f.id > :from AND f.id_form <> '' AND f.id_form <> 'direct'",
+            'BIND' => ['last_down' => $totaldays, 'time' => $not_today, 'from' => $from],
             'ORDER BY' => 'f.id ASC',
             'LIMIT' => '20',
         ];
 
-        is_array(
-            $plugin_run_result = Plugins::getInstance()->run('qr_select_klj_clean_old_files_func', get_defined_vars()),
-        )
-            ? extract($plugin_run_result)
-            : null; //run hook
+        extract(runHook('qr_select_klj_clean_old_files_func', get_defined_vars()));
 
         $result = $SQL->build($query);
 
@@ -1063,14 +1041,11 @@ function klj_clean_old_files(int $from = 0): void
             //update $stat_last_f_del !!
             $update_query = [
                 'UPDATE' => "{$dbprefix}stats",
-                'SET' => "last_f_del ='" . time() . "'",
+                'SET' => 'last_f_del = :time',
+                'BIND' => ['time' => time()],
             ];
 
-            is_array(
-                $plugin_run_result = Plugins::getInstance()->run('qr_update_lstf_del_date_kcof', get_defined_vars()),
-            )
-                ? extract($plugin_run_result)
-                : null; //run hook
+            extract(runHook('qr_update_lstf_del_date_kcof', get_defined_vars()));
 
             $SQL->build($update_query);
             //delete stats cache
@@ -1086,14 +1061,7 @@ function klj_clean_old_files(int $from = 0): void
         $ex_ids = [];
         //$ex_types = explode(',', $config['livexts']);
 
-        is_array(
-            $plugin_run_result = Plugins::getInstance()->run(
-                'beforewhile_klj_clean_old_files_func',
-                get_defined_vars(),
-            ),
-        )
-            ? extract($plugin_run_result)
-            : null; //run hook
+        extract(runHook('beforewhile_klj_clean_old_files_func', get_defined_vars()));
 
         //phpfalcon plugin
         $exlive_types = explode(',', $config['imagefolderexts']);
@@ -1123,11 +1091,7 @@ function klj_clean_old_files(int $from = 0): void
             //}
 
             //your exepctions
-            is_array(
-                $plugin_run_result = Plugins::getInstance()->run('while_klj_clean_old_files_func', get_defined_vars()),
-            )
-                ? extract($plugin_run_result)
-                : null; //run hook
+            extract(runHook('while_klj_clean_old_files_func', get_defined_vars()));
 
             if ($continue) {
                 //delete from folder ..
@@ -1156,32 +1120,29 @@ function klj_clean_old_files(int $from = 0): void
         if (sizeof($ex_ids)) {
             $update_query = [
                 'UPDATE' => "{$dbprefix}files",
-                'SET' => "last_down = '" . (time() + 2 * 86400) . "'",
-                'WHERE' => 'id IN (' . implode(',', $ex_ids) . ')',
+                'SET' => 'last_down = :last_down',
+                'WHERE' => 'id IN (:ids)',
+                'BIND' => ['last_down' => time() + 2 * 86400, 'ids' => $ex_ids],
             ];
-            is_array(
-                $plugin_run_result = Plugins::getInstance()->run('qr_update_lstdown_old_files', get_defined_vars()),
-            )
-                ? extract($plugin_run_result)
-                : null; //run hook
+            extract(runHook('qr_update_lstdown_old_files', get_defined_vars()));
             $SQL->build($update_query);
         }
 
         if (sizeof($ids)) {
             $query_del = [
                 'DELETE' => "{$dbprefix}files",
-                'WHERE' => 'id IN (' . implode(',', $ids) . ')',
+                'WHERE' => 'id IN (:ids)',
+                'BIND' => ['ids' => $ids],
             ];
 
             //update number of stats
             $update_query = [
                 'UPDATE' => "{$dbprefix}stats",
-                'SET' => "sizes=sizes-$sizes,files=files-$files_num, imgs=imgs-$imgs_num",
+                'SET' => 'sizes = sizes - :sizes, files = files - :files, imgs = imgs - :imgs',
+                'BIND' => ['sizes' => $sizes, 'files' => $files_num, 'imgs' => $imgs_num],
             ];
 
-            is_array($plugin_run_result = Plugins::getInstance()->run('qr_del_delf_old_files', get_defined_vars()))
-                ? extract($plugin_run_result)
-                : null; //run hook
+            extract(runHook('qr_del_delf_old_files', get_defined_vars()));
 
             $SQL->build($query_del);
             $SQL->build($update_query);
@@ -1210,12 +1171,11 @@ function klj_clean_old(string $table, string $for = 'all'): void
     ];
 
     if ($for != 'all') {
-        $query['WHERE'] = "f.time < $days";
+        $query['WHERE'] = 'f.time < :time';
+        $query['BIND'] = ['time' => $days];
     }
 
-    is_array($plugin_run_result = Plugins::getInstance()->run('qr_select_klj_clean_old_func', get_defined_vars()))
-        ? extract($plugin_run_result)
-        : null; //run hook
+    extract(runHook('qr_select_klj_clean_old_func', get_defined_vars()));
 
     $result = $SQL->build($query);
     $num_to_delete = $SQL->num_rows($result);
@@ -1237,12 +1197,11 @@ function klj_clean_old(string $table, string $for = 'all'): void
 
     $query_del = [
         'DELETE' => '`' . $dbprefix . $table . '`',
-        'WHERE' => 'id IN (' . implode(',', $ids) . ')',
+        'WHERE' => 'id IN (:ids)',
+        'BIND' => ['ids' => $ids],
     ];
 
-    is_array($plugin_run_result = Plugins::getInstance()->run('qr_del_delf_old_table', get_defined_vars()))
-        ? extract($plugin_run_result)
-        : null; //run hook
+    extract(runHook('qr_del_delf_old_table', get_defined_vars()));
 
     $SQL->build($query_del);
 }
@@ -1277,9 +1236,7 @@ function get_ip(): string
     }
 
     $return = preg_replace('/[^0-9a-z.:]/i', '', $ip);
-    is_array($plugin_run_result = Plugins::getInstance()->run('kleeja_get_ip_func', get_defined_vars()))
-        ? extract($plugin_run_result)
-        : null; //run hook
+    extract(runHook('kleeja_get_ip_func', get_defined_vars()));
 
     return $return;
 }
@@ -1305,9 +1262,7 @@ function kleeja_check_captcha(): bool
         }
     }
 
-    is_array($plugin_run_result = Plugins::getInstance()->run('kleeja_check_captcha_func', get_defined_vars()))
-        ? extract($plugin_run_result)
-        : null; //run hook
+    extract(runHook('kleeja_check_captcha_func', get_defined_vars()));
 
     return $return;
 }
@@ -1418,18 +1373,20 @@ function ip(string $name): bool
     return isset($_POST[$name]);
 }
 
-function g(string $name, string $type = 'str', string $default = '')
+//an array given instead of a single value (name[]=...) is treated as not sent, so $default is returned
+function g(string $name, string $type = 'str', string $default = ''): string|int
 {
-    if (isset($_GET[$name])) {
+    if (isset($_GET[$name]) && is_string($_GET[$name])) {
         return $type == 'str' ? htmlspecialchars($_GET[$name], ENT_QUOTES) : intval($_GET[$name]);
     }
 
     return $type == 'str' ? htmlspecialchars($default, ENT_QUOTES) : intval($default);
 }
 
-function p(string $name, string $type = 'str', string $default = '')
+//an array given instead of a single value (name[]=...) is treated as not sent, so $default is returned
+function p(string $name, string $type = 'str', string $default = ''): string|int
 {
-    if (isset($_POST[$name])) {
+    if (isset($_POST[$name]) && is_string($_POST[$name])) {
         return $type == 'str'
             ? str_replace(["\r\n", "\r", "\0"], ["\n", "\n", ''], htmlspecialchars(trim($_POST[$name]), ENT_QUOTES))
             : intval($_POST[$name]);
@@ -1439,12 +1396,24 @@ function p(string $name, string $type = 'str', string $default = '')
 }
 
 /**
+ * encode a text for HTML, as Kleeja keeps the texts in the database,
+ * it is what $SQL->escape() did before the SQL part, so the values stay the same as the saved ones
+ *
+ * @param  string|null $text
+ * @return string
+ */
+function kleeja_html_encode(?string $text): string
+{
+    return htmlspecialchars($text ?? '', ENT_QUOTES);
+}
+
+/**
  * add rewrite rules to the serve.php file
  * @param  array|string $rules
  * @param  string       $unique_id useful for the deletion later
  * @return bool
  */
-function add_to_serve_rules($rules, string $unique_id = ''): bool
+function add_to_serve_rules(string|array $rules, string $unique_id = ''): bool
 {
     if (!file_exists(PATH . 'plugins_rules.php')) {
         if (!is_writable(PATH)) {

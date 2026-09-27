@@ -20,9 +20,7 @@ extract(runHook('begin_download_page', get_defined_vars()));
 //page of wait downloading files
 //
 if (ig('id') || ig('filename')) {
-    is_array($plugin_run_result = Plugins::getInstance()->run('begin_download_id_filename', get_defined_vars()))
-        ? extract($plugin_run_result)
-        : null; //run hook
+    extract(runHook('begin_download_id_filename', get_defined_vars()));
 
     $query = [
         'SELECT' => 'f.id, f.real_filename, f.name, f.folder, f.size, f.time, f.uploads, f.type',
@@ -42,21 +40,16 @@ if (ig('id') || ig('filename')) {
     }
 
     if (ig('filename')) {
-        $filename_l = (string) $SQL->escape(g('filename'));
-
-        if (ig('x')) {
-            $query['WHERE'] = "f.name='" . $filename_l . '.' . $SQL->escape(g('x')) . "'";
-        } else {
-            $query['WHERE'] = "f.name='" . $filename_l . "'";
-        }
+        $filename_l = kleeja_html_encode(g('filename'));
+        $query['WHERE'] = 'f.name = :name';
+        $query['BIND'] = ['name' => $filename_l . (ig('x') ? '.' . kleeja_html_encode(g('x')) : '')];
     } else {
         $id_l = g('id', 'int');
-        $query['WHERE'] = 'f.id=' . $id_l;
+        $query['WHERE'] = 'f.id = :id';
+        $query['BIND'] = ['id' => $id_l];
     }
 
-    is_array($plugin_run_result = Plugins::getInstance()->run('qr_download_id_filename', get_defined_vars()))
-        ? extract($plugin_run_result)
-        : null; //run hook
+    extract(runHook('qr_download_id_filename', get_defined_vars()));
     $result = $SQL->build($query);
 
     if ($SQL->num_rows($result) != 0) {
@@ -107,7 +100,7 @@ if (ig('id') || ig('filename')) {
                         : $config['siteurl'] . 'do.php?downex=' . $file_info['id'];
                 }
 
-                redirect($url_filex, false);
+                redirect($url_filex, header: false);
             }
         }
 
@@ -125,17 +118,13 @@ if (ig('id') || ig('filename')) {
         $title = $name . ' - ' . $lang['DOWNLAOD'];
     } else {
         //file not exists
-        is_array($plugin_run_result = Plugins::getInstance()->run('not_exists_qr_downlaod_file', get_defined_vars()))
-            ? extract($plugin_run_result)
-            : null; //run hook
+        extract(runHook('not_exists_qr_downlaod_file', get_defined_vars()));
         kleeja_err($lang['FILE_NO_FOUNDED']);
     }
 
     $show_style = true;
 
-    is_array($plugin_run_result = Plugins::getInstance()->run('b4_showsty_downlaod_id_filename', get_defined_vars()))
-        ? extract($plugin_run_result)
-        : null; //run hook
+    extract(runHook('b4_showsty_downlaod_id_filename', get_defined_vars()));
 
     //add http reffer to session to prevent errors with some browsers !
     $_SESSION['HTTP_REFERER'] = $file_info['id'];
@@ -175,9 +164,7 @@ elseif (
     ig('downex') ||
     ig('downexf')
 ) {
-    is_array($plugin_run_result = Plugins::getInstance()->run('begin_down_go_page', get_defined_vars()))
-        ? extract($plugin_run_result)
-        : null; //run hook
+    extract(runHook('begin_down_go_page', get_defined_vars()));
 
     //kleeja_log('downloading file start -  (' . var_dump($_GET) . ') -> ' . $_SERVER['HTTP_REFERER']);
 
@@ -263,9 +250,9 @@ elseif (
 
         //x, represent the extension, came from html links
         if (ig('x') && $var) {
-            $filename = $SQL->escape(g($var)) . '.' . $SQL->escape(g('x'));
+            $filename = kleeja_html_encode(g($var)) . '.' . kleeja_html_encode(g('x'));
         } else {
-            $filename = $SQL->escape(g($var));
+            $filename = kleeja_html_encode(g($var));
         }
     } else {
         $id = ig('down')
@@ -291,17 +278,13 @@ elseif (
         'SELECT' => 'f.id, f.name, f.real_filename, f.folder, f.type, f.size, f.time',
         'FROM' => "{$dbprefix}files f",
         'WHERE' => $is_id_filename
-            ? "f.name='" .
-                $filename .
-                "'" .
-                (ig('downexf') ? " AND f.type IN ('" . implode("', '", $livexts) . "')" : '')
-            : 'f.id=' . $id . (ig('downex') ? " AND f.type IN ('" . implode("', '", $livexts) . "')" : ''),
+            ? 'f.name = :name' . (ig('downexf') ? ' AND f.type IN (:livexts)' : '')
+            : 'f.id = :id' . (ig('downex') ? ' AND f.type IN (:livexts)' : ''),
         'LIMIT' => '1',
+        'BIND' => ['name' => $filename ?? '', 'id' => $id ?? 0, 'livexts' => $livexts],
     ];
 
-    is_array($plugin_run_result = Plugins::getInstance()->run('qr_down_go_page_filename', get_defined_vars()))
-        ? extract($plugin_run_result)
-        : null; //run hook
+    extract(runHook('qr_down_go_page_filename', get_defined_vars()));
     $result = $SQL->build($query);
 
     $is_live = false;
@@ -343,15 +326,12 @@ elseif (
                 //updates number of uploads ..
                 $update_query = [
                     'UPDATE' => "{$dbprefix}files",
-                    'SET' => 'uploads=uploads+1, last_down=' . time(),
-                    'WHERE' => $is_id_filename ? "name='" . $filename . "'" : 'id=' . $id,
+                    'SET' => 'uploads = uploads + 1, last_down = :time',
+                    'WHERE' => $is_id_filename ? 'name = :name' : 'id = :id',
+                    'BIND' => ['time' => time(), 'name' => $filename ?? '', 'id' => $id ?? 0],
                 ];
 
-                is_array(
-                    $plugin_run_result = Plugins::getInstance()->run('qr_update_no_uploads_down', get_defined_vars()),
-                )
-                    ? extract($plugin_run_result)
-                    : null; //run hook
+                extract(runHook('qr_update_no_uploads_down', get_defined_vars()));
                 $SQL->build($update_query);
 
                 //
@@ -370,9 +350,7 @@ elseif (
     } else {
         //not exists img or thumb
         if (ig('img') || ig('thmb') || ig('thmbf') || ig('imgf')) {
-            is_array($plugin_run_result = Plugins::getInstance()->run('not_exists_qr_down_img', get_defined_vars()))
-                ? extract($plugin_run_result)
-                : null; //run hook
+            extract(runHook('not_exists_qr_down_img', get_defined_vars()));
 
             $f = 'images';
             $n = 'not_exists.jpg';
@@ -381,9 +359,7 @@ elseif (
             $is_image = true;
         } else {
             //not exists file
-            is_array($plugin_run_result = Plugins::getInstance()->run('not_exists_qr_down_file', get_defined_vars()))
-                ? extract($plugin_run_result)
-                : null; //run hook
+            extract(runHook('not_exists_qr_down_file', get_defined_vars()));
             kleeja_err($lang['FILE_NO_FOUNDED']);
         }
     }
@@ -393,9 +369,7 @@ elseif (
     $chunksize = 8192;
     $resuming_on = true;
 
-    is_array($plugin_run_result = Plugins::getInstance()->run('down_go_page', get_defined_vars()))
-        ? extract($plugin_run_result)
-        : null; //run hook
+    extract(runHook('down_go_page', get_defined_vars()));
 
     // this is a solution to ignore downloading through the file, redirect to the actual file
     // where you can add 'define("MAKE_DOPHP_301_HEADER", true);' in config.php to stop the load
@@ -410,9 +384,7 @@ elseif (
 
     //start download ,,
     if (!is_readable($path_file)) {
-        is_array($plugin_run_result = Plugins::getInstance()->run('down_file_not_exists', get_defined_vars()))
-            ? extract($plugin_run_result)
-            : null; //run hook
+        extract(runHook('down_file_not_exists', get_defined_vars()));
 
         if ($is_image) {
             $path_file = 'images/not_exists.jpg';
@@ -480,9 +452,7 @@ elseif (
     //Unsetting all previously set headers.
     header_remove();
 
-    is_array($plugin_run_result = Plugins::getInstance()->run('do_page_before_headers_set', get_defined_vars()))
-        ? extract($plugin_run_result)
-        : null; //run hook
+    extract(runHook('do_page_before_headers_set', get_defined_vars()));
 
     //send file headers
     header('Pragma: public');
@@ -498,9 +468,7 @@ elseif (
     //header('Content-Encoding: none');
     header('Content-Disposition: ' . ($is_image || $is_live ? 'inline' : 'attachment') . '; ' . $h_name);
 
-    is_array($plugin_run_result = Plugins::getInstance()->run('do_page_headers_set', get_defined_vars()))
-        ? extract($plugin_run_result)
-        : null; //run hook
+    extract(runHook('do_page_headers_set', get_defined_vars()));
 
     //if(!$is_image && !$is_live && $is_ie8)
     //{
@@ -557,17 +525,13 @@ elseif (
 else {
     $error = true;
 
-    is_array($plugin_run_result = Plugins::getInstance()->run('err_navig_download_page', get_defined_vars()))
-        ? extract($plugin_run_result)
-        : null; //run hook
+    extract(runHook('err_navig_download_page', get_defined_vars()));
 
     if ($error) {
         kleeja_err($lang['ERROR_NAVIGATATION']);
     }
 }
 
-is_array($plugin_run_result = Plugins::getInstance()->run('end_download_page', get_defined_vars()))
-    ? extract($plugin_run_result)
-    : null; //run hook
+extract(runHook('end_download_page', get_defined_vars()));
 
 //<-- EOF

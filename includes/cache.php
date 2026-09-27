@@ -15,9 +15,6 @@ if (!defined('IN_COMMON')) {
 //we are in cache now ..
 define('IN_CACHE', true);
 
-//make sure it's utf8 data
-$SQL->set_utf8();
-
 //
 //In the future here will be a real cache class
 //this codes, it's just a sample and usefull for
@@ -25,7 +22,7 @@ $SQL->set_utf8();
 //
 class KleejaCache
 {
-    public function get(string $name)
+    public function get(string $name): mixed
     {
         if (defined('DEV_STAGE')) {
             return false;
@@ -49,7 +46,7 @@ class KleejaCache
         return file_exists(PATH . 'cache/' . $name . '.php');
     }
 
-    public function save(string $name, $data, int $time = 86400): void
+    public function save(string $name, mixed $data, int $time = 86400): void
     {
         $name = preg_replace('![^a-z0-9_]!i', '_', $name);
         $data_for_save = '<?' . 'php' . "\n";
@@ -68,7 +65,7 @@ class KleejaCache
         }
     }
 
-    public function clean($name): void
+    public function clean(string|array $name): void
     {
         if (is_array($name)) {
             foreach ($name as $n) {
@@ -96,9 +93,7 @@ if (!($config = $cache->get('data_config'))) {
         'WHERE' => 'c.dynamic = 0',
     ];
 
-    is_array($plugin_run_result = Plugins::getInstance()->run('qr_select_config_cache', get_defined_vars()))
-        ? extract($plugin_run_result)
-        : null; //run hook
+    extract(runHook('qr_select_config_cache', get_defined_vars()));
 
     $result = $SQL->build($query);
 
@@ -120,12 +115,11 @@ if (!($olang = $cache->get('data_lang' . $config['language']))) {
     $query = [
         'SELECT' => 'l.word, l.trans',
         'FROM' => "{$dbprefix}lang l",
-        'WHERE' => "l.lang_id='" . $SQL->escape($config['language']) . "'",
+        'WHERE' => 'l.lang_id = :lang_id',
+        'BIND' => ['lang_id' => kleeja_html_encode($config['language'])],
     ];
 
-    is_array($plugin_run_result = Plugins::getInstance()->run('qr_select_lang_cache', get_defined_vars()))
-        ? extract($plugin_run_result)
-        : null; //run hook
+    extract(runHook('qr_select_lang_cache', get_defined_vars()));
 
     $result = $SQL->build($query);
 
@@ -149,9 +143,7 @@ if (!($stats = $cache->get('data_stats'))) {
         'FROM' => "{$dbprefix}stats s",
     ];
 
-    is_array($plugin_run_result = Plugins::getInstance()->run('qr_select_stats_cache', get_defined_vars()))
-        ? extract($plugin_run_result)
-        : null; //run hook
+    extract(runHook('qr_select_stats_cache', get_defined_vars()));
 
     $result = $SQL->build($query);
 
@@ -170,9 +162,7 @@ if (!($stats = $cache->get('data_stats'))) {
             'stat_last_user' => $row['lastuser'],
         ];
 
-        is_array($plugin_run_result = Plugins::getInstance()->run('while_fetch_stats_in_cache', get_defined_vars()))
-            ? extract($plugin_run_result)
-            : null; //run hook
+        extract(runHook('while_fetch_stats_in_cache', get_defined_vars()));
     }
 
     $SQL->freeresult($result);
@@ -184,7 +174,8 @@ if (!($stats = $cache->get('data_stats'))) {
     $query = [
         'SELECT' => 'f.filter_uid',
         'FROM' => "{$dbprefix}filters f",
-        'WHERE' => "f.filter_type='stats_for_acp' AND f.filter_uid = '" . date('d-n-Y') . "'",
+        'WHERE' => "f.filter_type='stats_for_acp' AND f.filter_uid = :day",
+        'BIND' => ['day' => date('d-n-Y')],
     ];
 
     $result = $SQL->build($query);
@@ -193,23 +184,23 @@ if (!($stats = $cache->get('data_stats'))) {
     if ($SQL->num_rows($result)) {
         $f_query = [
             'UPDATE' => "{$dbprefix}filters",
-            'SET' =>
-                "filter_value='" .
-                implode(':', [$stats['stat_files'], $stats['stat_imgs'], $stats['stat_sizes']]) .
-                "'",
-            'WHERE' => "filter_type='stats_for_acp' AND filter_uid = '" . date('d-n-Y') . "'",
+            'SET' => 'filter_value = :value',
+            'WHERE' => "filter_type='stats_for_acp' AND filter_uid = :day",
+            'BIND' => [
+                'value' => implode(':', [$stats['stat_files'], $stats['stat_imgs'], $stats['stat_sizes']]),
+                'day' => date('d-n-Y'),
+            ],
         ];
     } else {
         $f_query = [
             'INSERT' => 'filter_uid, filter_type ,filter_value ,filter_time',
             'INTO' => "{$dbprefix}filters",
-            'VALUES' =>
-                "'" .
-                date('d-n-Y') .
-                "', 'stats_for_acp', '" .
-                implode(':', [$stats['stat_files'], $stats['stat_imgs'], $stats['stat_sizes']]) .
-                "', " .
-                time(),
+            'VALUES' => ":day, 'stats_for_acp', :value, :time",
+            'BIND' => [
+                'day' => date('d-n-Y'),
+                'value' => implode(':', [$stats['stat_files'], $stats['stat_imgs'], $stats['stat_sizes']]),
+                'time' => time(),
+            ],
         ];
     }
 
@@ -229,9 +220,7 @@ if (!($banss = $cache->get('data_ban'))) {
         'FROM' => "{$dbprefix}stats s",
     ];
 
-    is_array($plugin_run_result = Plugins::getInstance()->run('qr_select_ban_cache', get_defined_vars()))
-        ? extract($plugin_run_result)
-        : null; //run hook
+    extract(runHook('qr_select_ban_cache', get_defined_vars()));
     $result = $SQL->build($query);
 
     $row = $SQL->fetch_array($result);
@@ -263,9 +252,7 @@ if (!($ruless = $cache->get('data_rules'))) {
         'FROM' => "{$dbprefix}stats s",
     ];
 
-    is_array($plugin_run_result = Plugins::getInstance()->run('qr_select_rules_cache', get_defined_vars()))
-        ? extract($plugin_run_result)
-        : null; //run hook
+    extract(runHook('qr_select_rules_cache', get_defined_vars()));
     $result = $SQL->build($query);
 
     $row = $SQL->fetch_array($result);
@@ -284,9 +271,7 @@ if (!($extras = $cache->get('data_extra'))) {
         'FROM' => "{$dbprefix}stats s",
     ];
 
-    is_array($plugin_run_result = Plugins::getInstance()->run('qr_select_extra_cache', get_defined_vars()))
-        ? extract($plugin_run_result)
-        : null; //run hook
+    extract(runHook('qr_select_extra_cache', get_defined_vars()));
     $result = $SQL->build($query);
 
     $row = $SQL->fetch_array($result);
@@ -314,9 +299,7 @@ if (!($d_groups = $cache->get('data_groups'))) {
         'ORDER_BY' => 'g.group_id ASC',
     ];
 
-    is_array($plugin_run_result = Plugins::getInstance()->run('qr_select_groups_cache', get_defined_vars()))
-        ? extract($plugin_run_result)
-        : null; //run hook
+    extract(runHook('qr_select_groups_cache', get_defined_vars()));
     $result = $SQL->build($query);
 
     //Initiating
@@ -335,9 +318,7 @@ if (!($d_groups = $cache->get('data_groups'))) {
         'ORDER_BY' => 'g.group_id ASC',
     ];
 
-    is_array($plugin_run_result = Plugins::getInstance()->run('qr_select_groups_data_cache', get_defined_vars()))
-        ? extract($plugin_run_result)
-        : null; //run hook
+    extract(runHook('qr_select_groups_data_cache', get_defined_vars()));
     $result = $SQL->build($query);
 
     while ($row = $SQL->fetch_array($result)) {
@@ -352,9 +333,7 @@ if (!($d_groups = $cache->get('data_groups'))) {
         'ORDER_BY' => 'g.group_id ASC',
     ];
 
-    is_array($plugin_run_result = Plugins::getInstance()->run('qr_select_groups_acls_cache', get_defined_vars()))
-        ? extract($plugin_run_result)
-        : null; //run hook
+    extract(runHook('qr_select_groups_acls_cache', get_defined_vars()));
     $result2 = $SQL->build($query2);
 
     while ($row = $SQL->fetch_array($result2)) {
@@ -369,9 +348,7 @@ if (!($d_groups = $cache->get('data_groups'))) {
         'ORDER_BY' => 'g.group_id ASC',
     ];
 
-    is_array($plugin_run_result = Plugins::getInstance()->run('qr_select_groups_exts_cache', get_defined_vars()))
-        ? extract($plugin_run_result)
-        : null; //run hook
+    extract(runHook('qr_select_groups_exts_cache', get_defined_vars()));
     $result3 = $SQL->build($query3);
 
     while ($row = $SQL->fetch_array($result3)) {
@@ -385,9 +362,7 @@ if (!($d_groups = $cache->get('data_groups'))) {
 }
 
 // ummm, does this useful here
-is_array($plugin_run_result = Plugins::getInstance()->run('in_cache_page', get_defined_vars()))
-    ? extract($plugin_run_result)
-    : null; //run hook
+extract(runHook('in_cache_page', get_defined_vars()));
 
 function cache(): KleejaCache
 {

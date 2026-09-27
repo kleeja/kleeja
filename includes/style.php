@@ -38,9 +38,7 @@ class kleeja_style
 
         //use 'b' to force binary mode
         if ($filename = @fopen(PATH . 'cache/tpl_' . $this->re_name_tpl($template_name, $style_path) . '.php', 'wb')) {
-            is_array($plugin_run_result = Plugins::getInstance()->run('style_load_template_func', get_defined_vars()))
-                ? extract($plugin_run_result)
-                : null; //run hook
+            extract(runHook('style_load_template_func', get_defined_vars()));
 
             @flock($filename, LOCK_EX);
             @fwrite($filename, $html);
@@ -57,7 +55,7 @@ class kleeja_style
      * @param  string       $style_path
      * @return string|false the template path, or false when it does not exist
      */
-    public function template_exists(string $template_name, string $style_path = '')
+    public function template_exists(string $template_name, string $style_path = ''): string|false
     {
         global $config, $STYLE_PATH_ADMIN_ABS, $THIS_STYLE_PATH_ABS, $DEFAULT_PATH_ADMIN_ABS;
 
@@ -113,13 +111,11 @@ class kleeja_style
      */
     protected function _parse(string $html, string $template_name = ''): string
     {
-        is_array($plugin_run_result = Plugins::getInstance()->run('style_parse_func', get_defined_vars()))
-            ? extract($plugin_run_result)
-            : null; //run hook
+        extract(runHook('style_parse_func', get_defined_vars()));
 
         $html = preg_replace_callback(
             '/<IGNORE>(.*?)<\/IGNORE>/is',
-            function ($m) {
+            function (array $m): string {
                 return '<STRREV>' . strrev($m[1]) . '</STRREV>';
             },
             $html,
@@ -135,7 +131,7 @@ class kleeja_style
         );
         $html = preg_replace_callback(
             '/\(([{A-Z0-9_\.}\s!=<>]+)\?(.*):(.*)\)/iU',
-            function ($m) {
+            function (array $m): string {
                 return '<IF NAME="' . $m[1] . '">' . $m[2] . '<ELSE>' . $m[3] . '</IF>';
             },
             $html,
@@ -143,7 +139,7 @@ class kleeja_style
         $html = preg_replace_callback('/<(IF|ELSEIF|UNLESS) (.+)>/iU', ['kleeja_style', '_if_callback'], $html);
         $html = preg_replace_callback(
             '/<LOOP\s+NAME\s*=\s*(\"|)+([a-z0-9_\.]{1,})+(\"|)\s*>/i',
-            function ($m) {
+            function (array $m): string {
                 return '<?php foreach($this->vars["' .
                     (strpos($m[2], '.') !== false ? str_replace('.', '"]["', $m[2]) : $m[2]) .
                     '"] as $key=>$value){ ?>';
@@ -153,7 +149,7 @@ class kleeja_style
         $html = preg_replace_callback(kleeja_style::reg('var'), ['kleeja_style', '_vars_callback'], $html);
         $html = preg_replace_callback(
             '/<STRREV>(.*?)<\/STRREV>/is',
-            function ($m) {
+            function (array $m): string {
                 return strrev($m[1]);
             },
             $html,
@@ -274,7 +270,7 @@ class kleeja_style
      * @param  array|string $matches
      * @return string
      */
-    protected function _var_callback($matches): string
+    protected function _var_callback(array|string $matches): string
     {
         if (!is_array($matches)) {
             preg_match(kleeja_style::reg('var'), $matches, $matches);
@@ -342,7 +338,7 @@ class kleeja_style
      * @param string $var
      * @param mixed  $to
      */
-    public function assign(string $var, $to): void
+    public function assign(string $var, mixed $to): void
     {
         $GLOBALS[$var] = $to;
     }

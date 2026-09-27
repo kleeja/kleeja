@@ -24,9 +24,7 @@ function helper_watermark(string $name, string $ext): void
 {
     $return = false;
 
-    is_array($plugin_run_result = Plugins::getInstance()->run('helper_watermark_func', get_defined_vars()))
-        ? extract($plugin_run_result)
-        : null; //run hook
+    extract(runHook('helper_watermark_func', get_defined_vars()));
 
     if ($return) {
         return;
@@ -68,11 +66,6 @@ function helper_watermark(string $name, string $ext): void
         return;
         //        $src_img = @imagecreatefromgif($name);
     } elseif (strpos($ext, 'bmp') !== false) {
-        if (!defined('BMP_CLASS_INCLUDED')) {
-            include dirname(__FILE__) . '/BMP.php';
-            define('BMP_CLASS_INCLUDED', true);
-        }
-
         $src_img = imagecreatefrombmp($name);
     } else {
         return;

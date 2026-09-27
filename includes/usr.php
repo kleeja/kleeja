@@ -28,9 +28,7 @@ class usrcp
 
         $return_now = $login_status = false;
 
-        is_array($plugin_run_result = Plugins::getInstance()->run('data_func_usr_class', get_defined_vars()))
-            ? extract($plugin_run_result)
-            : null; //run hook
+        extract(runHook('data_func_usr_class', get_defined_vars()));
 
         if ($return_now) {
             return $login_status;
@@ -41,13 +39,11 @@ class usrcp
     }
 
     //get username by id
-    public function usernamebyid(int $user_id)
+    public function usernamebyid(int $user_id): string|false
     {
         $return_now = $auth_status = false;
 
-        is_array($plugin_run_result = Plugins::getInstance()->run('auth_func_usr_class', get_defined_vars()))
-            ? extract($plugin_run_result)
-            : null; //run hook
+        extract(runHook('auth_func_usr_class', get_defined_vars()));
 
         if ($return_now) {
             return $auth_status;
@@ -56,7 +52,7 @@ class usrcp
         //normal system
         $u = $this->get_data('name', $user_id);
 
-        return $u['name'];
+        return $u['name'] ?? false;
     }
 
     //now our table, normal user system
@@ -76,14 +72,14 @@ class usrcp
         ];
 
         if ($hashed) {
-            $query['WHERE'] = 'id=' . intval($name) . " and password='" . $SQL->escape($pass) . "'";
+            $query['WHERE'] = 'id = :id AND password = :password';
+            $query['BIND'] = ['id' => intval($name), 'password' => kleeja_html_encode($pass)];
         } else {
-            $query['WHERE'] = "clean_name='" . $SQL->real_escape($this->cleanusername($name)) . "'";
+            $query['WHERE'] = 'clean_name = :clean_name';
+            $query['BIND'] = ['clean_name' => $this->cleanusername($name)];
         }
 
-        is_array($plugin_run_result = Plugins::getInstance()->run('qr_select_usrdata_n_usr_class', get_defined_vars()))
-            ? extract($plugin_run_result)
-            : null; //run hook
+        extract(runHook('qr_select_usrdata_n_usr_class', get_defined_vars()));
         $result = $SQL->build($query);
 
         if ($SQL->num_rows($result)) {
@@ -106,20 +102,14 @@ class usrcp
                         ////new password hash
                         $new_password = $this->kleeja_hash_password(trim($pass) . $new_salt);
 
-                        is_array(
-                            $plugin_run_result = Plugins::getInstance()->run(
-                                'qr_update_usrdata_md5_n_usr_class',
-                                get_defined_vars(),
-                            ),
-                        )
-                            ? extract($plugin_run_result)
-                            : null; //run hook
+                        extract(runHook('qr_update_usrdata_md5_n_usr_class', get_defined_vars()));
 
                         ////update now !!
                         $update_query = [
                             'UPDATE' => "{$dbprefix}users",
-                            'SET' => "password='" . $new_password . "' ,password_salt='" . $new_salt . "'",
-                            'WHERE' => 'id=' . intval($row['id']),
+                            'SET' => 'password = :password, password_salt = :salt',
+                            'WHERE' => 'id = :id',
+                            'BIND' => ['password' => $new_password, 'salt' => $new_salt, 'id' => intval($row['id'])],
                         ];
 
                         $SQL->build($update_query);
@@ -189,21 +179,15 @@ class usrcp
                 if (empty($row['last_visit']) || time() - $row['last_visit'] > 60) {
                     $update_last_visit = [
                         'UPDATE' => "{$dbprefix}users",
-                        'SET' => 'last_visit=' . time(),
-                        'WHERE' => 'id=' . intval($row['id']),
+                        'SET' => 'last_visit = :time',
+                        'WHERE' => 'id = :id',
+                        'BIND' => ['time' => time(), 'id' => intval($row['id'])],
                     ];
 
                     $SQL->build($update_last_visit);
                 }
 
-                is_array(
-                    $plugin_run_result = Plugins::getInstance()->run(
-                        'qr_while_usrdata_n_usr_class',
-                        get_defined_vars(),
-                    ),
-                )
-                    ? extract($plugin_run_result)
-                    : null; //run hook
+                extract(runHook('qr_while_usrdata_n_usr_class', get_defined_vars()));
             }
             $SQL->freeresult($result);
 
@@ -219,7 +203,7 @@ class usrcp
         get user data
         new function:1rc5+
     */
-    public function get_data(string $type = '*', int $user_id = 0)
+    public function get_data(string $type = '*', int $user_id = 0): array|false
     {
         global $dbprefix, $SQL;
 
@@ -234,53 +218,44 @@ class usrcp
         $query_name = [
             'SELECT' => $type,
             'FROM' => "{$dbprefix}users",
-            'WHERE' => 'id=' . intval($user_id),
+            'WHERE' => 'id = :id',
+            'BIND' => ['id' => intval($user_id)],
         ];
 
-        is_array($plugin_run_result = Plugins::getInstance()->run('qr_select_userdata_in_usrclass', get_defined_vars()))
-            ? extract($plugin_run_result)
-            : null; //run hook
+        extract(runHook('qr_select_userdata_in_usrclass', get_defined_vars()));
         $data_user = $SQL->fetch_array($SQL->build($query_name));
 
         return $data_user;
     }
 
-    // user ids
-    public function id()
+    // user ids, kept as the database gave it (a string with MySQL, an int with SQLite), plugins compare it with ===
+    public function id(): int|string|false
     {
-        is_array($plugin_run_result = Plugins::getInstance()->run('id_func_usr_class', get_defined_vars()))
-            ? extract($plugin_run_result)
-            : null; //run hook
+        extract(runHook('id_func_usr_class', get_defined_vars()));
 
         return defined('USER_ID') ? USER_ID : false;
     }
 
-    // group ids
-    public function group_id()
+    // group ids, kept as the database gave it, same as id()
+    public function group_id(): int|string|false
     {
-        is_array($plugin_run_result = Plugins::getInstance()->run('group_id_func_usr_class', get_defined_vars()))
-            ? extract($plugin_run_result)
-            : null; //run hook
+        extract(runHook('group_id_func_usr_class', get_defined_vars()));
 
         return defined('GROUP_ID') ? GROUP_ID : false;
     }
 
     // user name
-    public function name()
+    public function name(): string|false
     {
-        is_array($plugin_run_result = Plugins::getInstance()->run('name_func_usr_class', get_defined_vars()))
-            ? extract($plugin_run_result)
-            : null; //run hook
+        extract(runHook('name_func_usr_class', get_defined_vars()));
 
         return defined('USER_NAME') ? USER_NAME : false;
     }
 
     // user mail
-    public function mail()
+    public function mail(): string|false
     {
-        is_array($plugin_run_result = Plugins::getInstance()->run('mail_func_usr_class', get_defined_vars()))
-            ? extract($plugin_run_result)
-            : null; //run hook
+        extract(runHook('mail_func_usr_class', get_defined_vars()));
 
         return defined('USER_MAIL') ? USER_MAIL : false;
     }
@@ -288,9 +263,7 @@ class usrcp
     // logout func
     public function logout(): bool
     {
-        is_array($plugin_run_result = Plugins::getInstance()->run('logout_func_usr_class', get_defined_vars()))
-            ? extract($plugin_run_result)
-            : null; //run hook
+        extract(runHook('logout_func_usr_class', get_defined_vars()));
 
         //acp
         if (user_can('enter_acp') && !empty($_SESSION['ADMINLOGIN'])) {
@@ -306,9 +279,7 @@ class usrcp
     // logut just from acp
     public function logout_cp(): bool
     {
-        is_array($plugin_run_result = Plugins::getInstance()->run('logout_cp_func_usr_class', get_defined_vars()))
-            ? extract($plugin_run_result)
-            : null; //run hook
+        extract(runHook('logout_cp_func_usr_class', get_defined_vars()));
 
         if (!empty($_SESSION['ADMINLOGIN'])) {
             unset($_SESSION['ADMINLOGIN'], $_SESSION['USER_SESS'] /*, $_SESSION['LAST_VISIT']*/);
@@ -320,9 +291,7 @@ class usrcp
     //clean usernames
     public function cleanusername(string $uname): string
     {
-        is_array($plugin_run_result = Plugins::getInstance()->run('cleanusername_func_usr_class', get_defined_vars()))
-            ? extract($plugin_run_result)
-            : null; //run hook
+        extract(runHook('cleanusername_func_usr_class', get_defined_vars()));
 
         static $arabic_t = [];
         static $latin_t = [
@@ -450,15 +419,12 @@ class usrcp
     }
 
     //depand on phpass class
-    public function kleeja_hash_password(string $password, string $check_pass = '')
+    //return the hash of $password, or when $check_pass is given, whether $password matches it
+    public function kleeja_hash_password(string $password, string $check_pass = ''): string|bool
     {
         include_once 'phpass.php';
 
-        is_array(
-            $plugin_run_result = Plugins::getInstance()->run('kleeja_hash_password_func_usr_class', get_defined_vars()),
-        )
-            ? extract($plugin_run_result)
-            : null; //run hook
+        extract(runHook('kleeja_hash_password_func_usr_class', get_defined_vars()));
 
         $hasher = new PasswordHash(8, true);
         $return = $hasher->HashPassword($password);
@@ -540,7 +506,7 @@ class usrcp
     //
     //get cookie
     //
-    public function kleeja_get_cookie(string $name)
+    public function kleeja_get_cookie(string $name): string|false
     {
         // for plugins that are still using old version of kleeja
         return cookie()->get($name);
@@ -552,11 +518,7 @@ class usrcp
     {
         global $config, $userinfo;
 
-        is_array(
-            $plugin_run_result = Plugins::getInstance()->run('kleeja_check_user_func_usr_class', get_defined_vars()),
-        )
-            ? extract($plugin_run_result)
-            : null; //run hook
+        extract(runHook('kleeja_check_user_func_usr_class', get_defined_vars()));
 
         //to make sure
         $userinfo = [
@@ -584,7 +546,7 @@ class usrcp
             //verify the signature (constant-time) and that the cookie is not expired
             if (hash_equals($expected_signature, (string) $hashed_expire) && $expire_at > time()) {
                 if (user_can('enter_acp', $group_id)) {
-                    $user_data = $this->data($user_id, $hashed_password, true, $expire_at);
+                    $user_data = $this->data($user_id, $hashed_password, hashed: true, expire: $expire_at);
                 } else {
                     if (!empty($u_info)) {
                         $userinfo = unserialize(base64_decode($u_info), ['allowed_classes' => false]);
