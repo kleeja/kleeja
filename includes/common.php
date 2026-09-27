@@ -49,92 +49,9 @@ if (defined('DEV_STAGE')) {
     ini_set('display_errors', 1);
 }
 
-/**
- * functions for start
- * @param int    $error_number
- * @param string $error_string
- * @param string $error_file
- * @param int    $error_line
- */
-function kleeja_show_error(
-    int $error_number,
-    string $error_string = '',
-    string $error_file = '',
-    int $error_line = 0,
-): void {
-    switch ($error_number) {
-        case E_NOTICE:
-        case E_WARNING:
-        case E_USER_WARNING:
-        case E_USER_NOTICE:
-        case E_DEPRECATED:
-        case E_USER_DEPRECATED:
-            if (function_exists('kleeja_log')) {
-                $error_name = [
-                    E_WARNING => 'Warning',
-                    E_NOTICE => 'Notice',
-                    E_USER_WARNING => 'U_Warning',
-                    E_USER_NOTICE => 'U_Notice',
-                    E_DEPRECATED => 'Deprecated',
-                    E_USER_DEPRECATED => 'U_Deprecated',
-                ][$error_number];
-                kleeja_log('[' . $error_name . '] ' . basename($error_file) . ':' . $error_line . ' ' . $error_string);
-            }
+//the error handler, it shows the Kleeja error page
+require_once PATH . 'includes/functions_error.php';
 
-            break;
-
-        default:
-            if (!headers_sent()) {
-                header('HTTP/1.1 503 Service Temporarily Unavailable');
-                header('Content-Type: text/html; charset=UTF-8');
-            }
-
-            $error_name =
-                [
-                    E_ERROR => 'E_ERROR',
-                    E_PARSE => 'E_PARSE',
-                    E_CORE_ERROR => 'E_CORE_ERROR',
-                    E_COMPILE_ERROR => 'E_COMPILE_ERROR',
-                    E_USER_ERROR => 'E_USER_ERROR',
-                    E_RECOVERABLE_ERROR => 'E_RECOVERABLE_ERROR',
-                ][$error_number] ?? 'E_UNKNOWN';
-
-            $escape = fn(string $value): string => htmlspecialchars($value, ENT_QUOTES, 'UTF-8');
-            $error_template = @file_get_contents(__DIR__ . '/error.html');
-
-            if ($error_template === false) {
-                echo '<strong>Kleeja error: [ ' .
-                    $error_number .
-                    ':' .
-                    $escape(basename($error_file)) .
-                    ':' .
-                    $error_line .
-                    ' ]</strong><br />' .
-                    nl2br($escape($error_string));
-            } else {
-                echo strtr($error_template, [
-                    '{TITLE}' => 'Kleeja Error',
-                    '{BADGE}' => 'HTTP 503 · Service Temporarily Unavailable',
-                    '{TYPE}' => 'error',
-                    '{MESSAGE}' => nl2br($escape($error_string)),
-                    '{ERROR_NAME}' => $error_name,
-                    '{ERROR_NUMBER}' => $error_number,
-                    '{ERROR_FILE}' => $escape(basename($error_file)),
-                    '{ERROR_LINE}' => $error_line,
-                ]);
-            }
-
-            global $SQL;
-
-            if (isset($SQL)) {
-                @$SQL->close();
-            }
-
-            exit();
-
-            break;
-    }
-}
 set_error_handler('kleeja_show_error');
 
 include PATH . 'includes/version.php';
@@ -143,7 +60,11 @@ include PATH . 'includes/version.php';
 if (version_compare(PHP_VERSION, MIN_PHP_VERSION, '<')) {
     kleeja_show_error(
         E_USER_ERROR,
-        'You are using an old PHP version (' . PHP_VERSION . '), to run Kleeja you should use PHP 8.0 or above.',
+        'You are using an old PHP version (' .
+            PHP_VERSION .
+            '), to run Kleeja you should use PHP ' .
+            MIN_PHP_VERSION .
+            ' or above.',
         __FILE__,
         __LINE__,
     );

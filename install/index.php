@@ -18,19 +18,30 @@ define('IN_COMMON', true);
 //path to this file from Kleeja root folder
 define('PATH', '../');
 
-//before anything check PHP version compatibility
-if (version_compare(PHP_VERSION, 8.0, '<')) {
-    exit(
-        '<h2>You are using an old PHP version (' .
+include_once PATH . 'includes/version.php';
+include_once PATH . 'includes/functions_error.php';
+
+//before anything check PHP version compatibility, the error handler is called directly like in common.php
+if (version_compare(PHP_VERSION, MIN_PHP_VERSION, '<')) {
+    kleeja_show_error(
+        E_USER_ERROR,
+        'You are using an old PHP version (' .
             PHP_VERSION .
-            '), to run Kleeja you should use PHP 8.0 or above.</h2>'
+            '), to run Kleeja you should use PHP ' .
+            MIN_PHP_VERSION .
+            ' or above.',
+        __FILE__,
+        __LINE__,
     );
 }
 
 // if PDO or its drivers are not installed
 if (!class_exists('PDO') || !array_intersect(['mysql', 'sqlite'], PDO::getAvailableDrivers())) {
-    exit(
-        '<h2>In order to use Kleeja, "<b>pdo_mysql</b>" or "<b>pdo_sqlite</b>" extension has to be installed on your server.</h2>'
+    kleeja_show_error(
+        E_USER_ERROR,
+        'In order to use Kleeja, "pdo_mysql" or "pdo_sqlite" extension has to be installed on your server.',
+        __FILE__,
+        __LINE__,
     );
 }
 

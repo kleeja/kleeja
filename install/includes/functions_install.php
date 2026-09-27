@@ -8,7 +8,7 @@
  */
 
 // get version info and min requirement values
-require PATH . 'includes/version.php';
+require_once PATH . 'includes/version.php';
 
 //set mysql to show no errors
 define('SQL_NO_ERRORS', true);
