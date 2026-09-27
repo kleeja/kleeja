@@ -13,6 +13,28 @@
             return Array.prototype.slice.call(document.querySelectorAll(selector));
         };
 
+        // show the state of a field, bootstrap style. an error shows up only after the user leaves
+        // the field or presses next, so it does not complain while typing, then it follows every key
+        var validate = function (field) {
+            var valid = field.disabled || field.checkValidity();
+            var touched = field.hasAttribute('data-kj-touched');
+            var invalid = !valid && touched;
+
+            field.classList.toggle('is-invalid', invalid);
+            field.classList.toggle(
+                'is-valid',
+                valid && !field.disabled && field.value !== '' && (touched || field.hasAttribute('data-kj-dirty'))
+            );
+
+            if (invalid) {
+                field.setAttribute('aria-invalid', 'true');
+            } else {
+                field.removeAttribute('aria-invalid');
+            }
+
+            return valid;
+        };
+
         // a field that has to match another one, like the password confirmation
         all('[data-kj-match]').forEach(function (input) {
             var other = document.querySelector(input.getAttribute('data-kj-match'));
@@ -22,6 +44,7 @@
                 var mismatch = input.value !== '' && input.value !== other.value;
                 input.setCustomValidity(mismatch ? 'mismatch' : '');
                 feedback.textContent = mismatch ? input.getAttribute('data-kj-match-message') : requiredMessage;
+                validate(input);
             };
 
             input.addEventListener('input', sync);
@@ -29,15 +52,39 @@
             input.form.addEventListener('submit', sync);
         });
 
-        // forms validation, bootstrap style
+        // live forms validation
         all('form.needs-validation').forEach(function (form) {
+            var fields = Array.prototype.slice.call(form.querySelectorAll('[required], [pattern]'));
+
+            fields.forEach(function (field) {
+                field.addEventListener('input', function () {
+                    field.setAttribute('data-kj-dirty', '');
+                    validate(field);
+                });
+
+                field.addEventListener('blur', function () {
+                    if (field.hasAttribute('data-kj-dirty')) {
+                        field.setAttribute('data-kj-touched', '');
+                        validate(field);
+                    }
+                });
+            });
+
             form.addEventListener('submit', function (event) {
+                fields.forEach(function (field) {
+                    field.setAttribute('data-kj-touched', '');
+                    validate(field);
+                });
+
                 if (!form.checkValidity()) {
                     event.preventDefault();
-                    event.stopPropagation();
-                }
 
-                form.classList.add('was-validated');
+                    var first = form.querySelector('.is-invalid');
+
+                    if (first) {
+                        first.focus();
+                    }
+                }
             });
         });
 
@@ -72,6 +119,7 @@
             input.addEventListener('input', function () {
                 if (target.value === copied) {
                     target.value = copied = input.value;
+                    target.dispatchEvent(new Event('input', { bubbles: true }));
                 }
             });
         });
@@ -94,6 +142,7 @@
             var syncDbType = function () {
                 all('[data-kj-mysql-only]').forEach(function (input) {
                     input.disabled = dbType.value === 'sqlite';
+                    validate(input);
                 });
             };
 

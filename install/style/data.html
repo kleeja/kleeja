@@ -15,7 +15,7 @@
                         </div>
                         <div class="col-md-5">
                             <label class="form-label" for="sitemail">{{echo $lang['SITEMAIL']}}</label>
-                            <input class="form-control" name="sitemail" id="sitemail" type="email" dir="ltr" required data-kj-copy-to="#email">
+                            <input class="form-control" name="sitemail" id="sitemail" type="email" dir="ltr" required pattern="[^@\s]+@[^@\s]+\.[^@\s]+" data-kj-copy-to="#email">
                             <div class="invalid-feedback">{{echo $lang['WRONG_EMAIL']}}</div>
                         </div>
                     </div>
@@ -31,7 +31,7 @@
                         </div>
                         <div class="col-md-6">
                             <label class="form-label" for="email">{{echo $lang['EMAIL']}}</label>
-                            <input class="form-control" name="email" id="email" type="email" dir="ltr" autocomplete="email" required>
+                            <input class="form-control" name="email" id="email" type="email" dir="ltr" autocomplete="email" required pattern="[^@\s]+@[^@\s]+\.[^@\s]+">
                             <div class="invalid-feedback">{{echo $lang['WRONG_EMAIL']}}</div>
                         </div>
                         <div class="col-md-6">
