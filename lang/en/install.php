@@ -103,9 +103,10 @@ return [
 
     'INST_PHP_LESSMIN' => 'You need PHP %1$s or above to install Kleeja, your current version is %2$s',
     'INST_MYSQL_LESSMIN' => 'You need MySQL %1$s or above to install Kleeja, your current version is %2$s',
-    'IS_IT_OFFICIAL' => 'Did you get your copy from Kleeja.net (Kleeja official site) ?',
+    'IS_IT_OFFICIAL' =>
+        'Did you get your copy from Kleeja.net (Kleeja official site) or from the official release files on GitHub?',
     'IS_IT_OFFICIAL_DESC' =>
-        'We receive a lot of complaints and questions about the cause of some bugs and issues which occur in kleeja and probably we can\'t figure out what the problem is . After we have checked we have found that there are some unofficial copies released from untrusted publishers .<span class="sure"> So are you sure that this copy was downloaded from Kleeja official site ?</span>',
+        'We receive a lot of complaints and questions about the cause of some bugs and issues which occur in kleeja and probably we can\'t figure out what the problem is . After we have checked we have found that there are some unofficial copies released from untrusted publishers .<span class="sure"> So are you sure that this copy was downloaded from <a href="https://kleeja.net" target="_blank" rel="noopener">Kleeja.net</a> or from the <a href="https://github.com/kleeja/kleeja/releases" target="_blank" rel="noopener">official releases on GitHub</a>?</span>',
     'INST_WHAT_IS_KLEEJA_T' => 'What is Kleeja ?',
 
     'INST_WHAT_IS_KLEEJA' =>
