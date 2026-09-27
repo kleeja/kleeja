@@ -122,14 +122,10 @@ if (version_compare(strtolower(KLEEJA_VERSION), strtolower($v['version_number'] 
             '<a href="https://kleeja.net/" target="_blank">kleeja.net</a>',
     ];
 
-    is_array($plugin_run_result = Plugins::getInstance()->run('admin_update_now', get_defined_vars()))
-        ? extract($plugin_run_result)
-        : null; //run hook
+    extract(runHook('admin_update_now', get_defined_vars()));
 }
 
-is_array($plugin_run_result = Plugins::getInstance()->run('default_admin_page', get_defined_vars()))
-    ? extract($plugin_run_result)
-    : null; //run hook
+extract(runHook('default_admin_page', get_defined_vars()));
 
 //check upload_max_filesize
 if (!empty($d_groups) && is_array($d_groups)) {
@@ -390,9 +386,7 @@ if ($cf_num > 3) {
 
     $stats_chart .= ');';
 
-    is_array($plugin_run_result = Plugins::getInstance()->run('stats_start_admin', get_defined_vars()))
-        ? extract($plugin_run_result)
-        : null; //run hook
+    extract(runHook('stats_start_admin', get_defined_vars()));
 
     $SQL->freeresult($cf_result);
 

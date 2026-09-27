@@ -861,14 +861,7 @@ switch ($current_smt):
         while ($row = $SQL->fetch_array($result)) {
             //submit, why here ? dont ask me just accept it as it.
             if (ip('editdata')) {
-                is_array(
-                    $plugin_run_result = Plugins::getInstance()->run(
-                        'after_submit_adm_users_groupdata',
-                        get_defined_vars(),
-                    ),
-                )
-                    ? extract($plugin_run_result)
-                    : null; //run hook
+                extract(runHook('after_submit_adm_users_groupdata', get_defined_vars()));
 
                 $new[$row['name']] = p($row['name'], default: $row['value']);
 

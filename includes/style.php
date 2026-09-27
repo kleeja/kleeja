@@ -38,9 +38,7 @@ class kleeja_style
 
         //use 'b' to force binary mode
         if ($filename = @fopen(PATH . 'cache/tpl_' . $this->re_name_tpl($template_name, $style_path) . '.php', 'wb')) {
-            is_array($plugin_run_result = Plugins::getInstance()->run('style_load_template_func', get_defined_vars()))
-                ? extract($plugin_run_result)
-                : null; //run hook
+            extract(runHook('style_load_template_func', get_defined_vars()));
 
             @flock($filename, LOCK_EX);
             @fwrite($filename, $html);
@@ -113,9 +111,7 @@ class kleeja_style
      */
     protected function _parse(string $html, string $template_name = ''): string
     {
-        is_array($plugin_run_result = Plugins::getInstance()->run('style_parse_func', get_defined_vars()))
-            ? extract($plugin_run_result)
-            : null; //run hook
+        extract(runHook('style_parse_func', get_defined_vars()));
 
         $html = preg_replace_callback(
             '/<IGNORE>(.*?)<\/IGNORE>/is',

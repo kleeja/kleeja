@@ -79,9 +79,7 @@ class FetchFile
 
         $result = false;
 
-        is_array($plugin_run_result = Plugins::getInstance()->run('kleeja_fetch_file_start', get_defined_vars()))
-            ? extract($plugin_run_result)
-            : null; //run hook
+        extract(runHook('kleeja_fetch_file_start', get_defined_vars()));
 
         if (!empty($fetchType)) {
             $result = $this->{$fetchType}();

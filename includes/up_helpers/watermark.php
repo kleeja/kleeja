@@ -24,9 +24,7 @@ function helper_watermark(string $name, string $ext): void
 {
     $return = false;
 
-    is_array($plugin_run_result = Plugins::getInstance()->run('helper_watermark_func', get_defined_vars()))
-        ? extract($plugin_run_result)
-        : null; //run hook
+    extract(runHook('helper_watermark_func', get_defined_vars()));
 
     if ($return) {
         return;

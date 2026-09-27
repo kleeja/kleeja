@@ -40,9 +40,7 @@ function kleeja_admin_err(
         $redirect = $navigation;
     }
 
-    is_array($plugin_run_result = Plugins::getInstance()->run('kleeja_admin_err_func', get_defined_vars()))
-        ? extract($plugin_run_result)
-        : null; //run hook
+    extract(runHook('kleeja_admin_err_func', get_defined_vars()));
 
     //Exception for ajax
     if (ig('_ajax_')) {
@@ -99,9 +97,7 @@ function kleeja_admin_info(
     bool|string $redirect = false,
     int $rs = 2,
 ): void {
-    is_array($plugin_run_result = Plugins::getInstance()->run('kleeja_admin_info_func', get_defined_vars()))
-        ? extract($plugin_run_result)
-        : null; //run hook
+    extract(runHook('kleeja_admin_info_func', get_defined_vars()));
 
     kleeja_admin_err($msg, $navigation, $title, $exit, $redirect, $rs, 'admin_info');
 }
@@ -144,9 +140,7 @@ function insert_filter(
             'status' => kleeja_html_encode($status),
         ],
     ];
-    is_array($plugin_run_result = Plugins::getInstance()->run('insert_sql_insert_filter_func', get_defined_vars()))
-        ? extract($plugin_run_result)
-        : null; //run hook
+    extract(runHook('insert_sql_insert_filter_func', get_defined_vars()));
 
     $SQL->build($insert_query);
 
@@ -190,9 +184,7 @@ function update_filter(
         ],
     ];
 
-    is_array($plugin_run_result = Plugins::getInstance()->run('update_filter_func', get_defined_vars()))
-        ? extract($plugin_run_result)
-        : null; //run hook
+    extract(runHook('update_filter_func', get_defined_vars()));
 
     $SQL->build($update_query);
 
@@ -250,9 +242,7 @@ function get_filter(
         ],
     ];
 
-    is_array($plugin_run_result = Plugins::getInstance()->run('get_filter_func', get_defined_vars()))
-        ? extract($plugin_run_result)
-        : null; //run hook
+    extract(runHook('get_filter_func', get_defined_vars()));
 
     $result = $SQL->build($query);
     $v = $SQL->fetch($result);
@@ -303,9 +293,7 @@ function filter_exists(
         ],
     ];
 
-    is_array($plugin_run_result = Plugins::getInstance()->run('filter_exists_func', get_defined_vars()))
-        ? extract($plugin_run_result)
-        : null; //run hook
+    extract(runHook('filter_exists_func', get_defined_vars()));
 
     $result = $SQL->build($query);
 
@@ -349,14 +337,7 @@ function build_search_query(mixed $search): array
             'BIND' => ['name' => '%' . kleeja_html_encode($search['username']) . '%'],
         ];
 
-        is_array(
-            $plugin_run_result = Plugins::getInstance()->run(
-                'qr_select_usersids_in_build_search_query',
-                get_defined_vars(),
-            ),
-        )
-            ? extract($plugin_run_result)
-            : null; //run hook
+        extract(runHook('qr_select_usersids_in_build_search_query', get_defined_vars()));
         $result = $SQL->build($query);
         $user_ids = [];
 
@@ -484,9 +465,7 @@ function get_actual_stats(string $name): int
     $result = $SQL->build($query);
     $v = $SQL->fetch($result);
 
-    is_array($plugin_run_result = Plugins::getInstance()->run('get_actual_stats_func', get_defined_vars()))
-        ? extract($plugin_run_result)
-        : null; //run hook
+    extract(runHook('get_actual_stats_func', get_defined_vars()));
 
     $SQL->freeresult($result);
 
@@ -515,9 +494,7 @@ function adm_is_start_box_hidden(string $name): bool
         $boxes = array_filter($boxes);
     }
 
-    is_array($plugin_run_result = Plugins::getInstance()->run('adm_start_boxes_func', get_defined_vars()))
-        ? extract($plugin_run_result)
-        : null; //run hook
+    extract(runHook('adm_start_boxes_func', get_defined_vars()));
 
     return in_array($name, $boxes);
 }

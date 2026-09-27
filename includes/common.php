@@ -287,9 +287,7 @@ if (isset($config['foldername'])) {
     );
 }
 
-is_array($plugin_run_result = Plugins::getInstance()->run('boot_common', get_defined_vars()))
-    ? extract($plugin_run_result)
-    : null; //run hook
+extract(runHook('boot_common', get_defined_vars()));
 
 /**
  * Set default time zone
@@ -433,9 +431,7 @@ if (defined('STOP_CAPTCHA')) {
     $config['enable_captcha'] = 0;
 }
 
-is_array($plugin_run_result = Plugins::getInstance()->run('end_common', get_defined_vars()))
-    ? extract($plugin_run_result)
-    : null; //run hook
+extract(runHook('end_common', get_defined_vars()));
 
 register_shutdown_function(function (): void {
     session_write_close();

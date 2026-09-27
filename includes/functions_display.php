@@ -101,9 +101,7 @@ function Saaheader(string $title = '', string $extra = ''): void
     //check for extra header
     $extras['header'] = empty($extras['header']) ? false : $extras['header'];
 
-    is_array($plugin_run_result = Plugins::getInstance()->run('Saaheader_links_func', get_defined_vars()))
-        ? extract($plugin_run_result)
-        : null; //run hook
+    extract(runHook('Saaheader_links_func', get_defined_vars()));
 
     //assign some variables
     $tpl->assign('dir', $lang['DIR']);
@@ -147,9 +145,7 @@ function Saaheader(string $title = '', string $extra = ''): void
         );
     }
 
-    is_array($plugin_run_result = Plugins::getInstance()->run('Saaheader_func', get_defined_vars()))
-        ? extract($plugin_run_result)
-        : null; //run hook
+    extract(runHook('Saaheader_func', get_defined_vars()));
 
     header('Content-type: text/html; charset=UTF-8');
     header('Cache-Control: private, no-cache="set-cookie"');
@@ -232,15 +228,11 @@ function Saafooter(): void
 
     $extras['footer'] = empty($extras['footer']) ? false : $extras['footer'];
 
-    is_array($plugin_run_result = Plugins::getInstance()->run('Saafooter_func', get_defined_vars()))
-        ? extract($plugin_run_result)
-        : null; //run hook
+    extract(runHook('Saafooter_func', get_defined_vars()));
 
     $footer = $tpl->display('footer');
 
-    is_array($plugin_run_result = Plugins::getInstance()->run('print_Saafooter_func', get_defined_vars()))
-        ? extract($plugin_run_result)
-        : null; //run hook
+    extract(runHook('print_Saafooter_func', get_defined_vars()));
 
     echo $footer;
 
@@ -268,9 +260,7 @@ function readable_size(int $size): string
         $ext = $sizes[$i];
     }
     $result = round($size, 2) . $ext;
-    is_array($plugin_run_result = Plugins::getInstance()->run('func_readable_size', get_defined_vars()))
-        ? extract($plugin_run_result)
-        : null; //run hook
+    extract(runHook('func_readable_size', get_defined_vars()));
 
     return $result;
 }
@@ -297,9 +287,7 @@ function kleeja_err(
 ): void {
     global $text, $tpl, $SQL;
 
-    is_array($plugin_run_result = Plugins::getInstance()->run('kleeja_err_func', get_defined_vars()))
-        ? extract($plugin_run_result)
-        : null; //run hook
+    extract(runHook('kleeja_err_func', get_defined_vars()));
 
     // assign {text} in err template
     $text = $message . ($redirect ? redirect($redirect, header: false, exit: $exit, sec: $rs, return: true) : '');
@@ -335,9 +323,7 @@ function kleeja_info(
     int $rs = 5,
     string $extra_code_header = '',
 ): void {
-    is_array($plugin_run_result = Plugins::getInstance()->run('kleeja_info_func', get_defined_vars()))
-        ? extract($plugin_run_result)
-        : null; //run hook
+    extract(runHook('kleeja_info_func', get_defined_vars()));
 
     kleeja_err($message, $title, $exit, $redirect, $rs, $extra_code_header, 'info');
 }
@@ -349,9 +335,7 @@ function kleeja_debug(): void
 {
     global $SQL, $starttm, $config, $STYLE_PATH_ADMIN;
 
-    is_array($plugin_run_result = Plugins::getInstance()->run('kleeja_debug_func', get_defined_vars()))
-        ? extract($plugin_run_result)
-        : null; //run hook
+    extract(runHook('kleeja_debug_func', get_defined_vars()));
 
     $escape = fn(mixed $value): string => htmlspecialchars((string) $value, ENT_QUOTES, 'UTF-8');
     $ms = fn(float $seconds): string => number_format($seconds * 1000, 2) . ' ms';
@@ -707,9 +691,7 @@ function redirect(string $url, bool $header = true, bool $exit = true, int $sec 
 {
     global $SQL;
 
-    is_array($plugin_run_result = Plugins::getInstance()->run('redirect_func', get_defined_vars()))
-        ? extract($plugin_run_result)
-        : null; //run hook
+    extract(runHook('redirect_func', get_defined_vars()));
 
     if (!headers_sent() && $header && !$return) {
         header('Location: ' . str_replace(['&amp;'], ['&'], $url));
@@ -756,9 +738,7 @@ function kleeja_add_form_key_get(string $request_id): string
 
     $return = 'formkey=' . substr(sha1($config['h_key'] . date('H-d-m') . $request_id), 0, 20);
 
-    is_array($plugin_run_result = Plugins::getInstance()->run('kleeja_add_form_key_get_func', get_defined_vars()))
-        ? extract($plugin_run_result)
-        : null; //run hook
+    extract(runHook('kleeja_add_form_key_get_func', get_defined_vars()));
 
     return $return;
 }
@@ -775,9 +755,7 @@ function kleeja_check_form_key_get(string $request_id): bool
         $return = true;
     }
 
-    is_array($plugin_run_result = Plugins::getInstance()->run('kleeja_check_form_key_get_func', get_defined_vars()))
-        ? extract($plugin_run_result)
-        : null; //run hook
+    extract(runHook('kleeja_check_form_key_get_func', get_defined_vars()));
 
     return $return;
 }
@@ -799,9 +777,7 @@ function kleeja_add_form_key(string $form_name): string
         '" />' .
         "\n";
 
-    is_array($plugin_run_result = Plugins::getInstance()->run('kleeja_add_form_key_func', get_defined_vars()))
-        ? extract($plugin_run_result)
-        : null; //run hook
+    extract(runHook('kleeja_add_form_key_func', get_defined_vars()));
 
     return $return;
 }
@@ -836,9 +812,7 @@ function kleeja_check_form_key(string $form_name, int $require_time = 300): bool
         }
     }
 
-    is_array($plugin_run_result = Plugins::getInstance()->run('kleeja_check_form_key_func', get_defined_vars()))
-        ? extract($plugin_run_result)
-        : null; //run hook
+    extract(runHook('kleeja_check_form_key_func', get_defined_vars()));
 
     return $return;
 }
@@ -896,15 +870,11 @@ function kleeja_get_link(string $pid, array $extra = []): string
     $links['thumb'] = $thumb_link[$config['id_form_img']];
     $links['del'] = $del_link;
 
-    is_array($plugin_run_result = Plugins::getInstance()->run('kleeja_get_link_func', get_defined_vars()))
-        ? extract($plugin_run_result)
-        : null; //run hook
+    extract(runHook('kleeja_get_link_func', get_defined_vars()));
 
     $return_link = $config['siteurl'] . str_replace(array_keys($extra), array_values($extra), $links[$pid]);
 
-    is_array($plugin_run_result = Plugins::getInstance()->run('kleeja_get_link_func2', get_defined_vars()))
-        ? extract($plugin_run_result)
-        : null; //run hook
+    extract(runHook('kleeja_get_link_func2', get_defined_vars()));
 
     return $return_link;
 }
@@ -971,9 +941,7 @@ function get_up_tpl_box(string $box_name, array $extra = []): string
      * We add this hook here so you can substitute you own vars
      * and even add your own boxes to this template.
      */
-    is_array($plugin_run_result = Plugins::getInstance()->run('get_up_tpl_box_func', get_defined_vars()))
-        ? extract($plugin_run_result)
-        : null; //run hook
+    extract(runHook('get_up_tpl_box_func', get_defined_vars()));
 
     return $return;
 }
@@ -1022,9 +990,7 @@ function kleeja_style_info(string $style_name): array|false
         }
     }
 
-    is_array($plugin_run_result = Plugins::getInstance()->run('kleeja_style_info_func', get_defined_vars()))
-        ? extract($plugin_run_result)
-        : null; //run hook
+    extract(runHook('kleeja_style_info_func', get_defined_vars()));
 
     return $inf_r;
 }
@@ -1152,9 +1118,7 @@ function is_browser(string $b): bool
             break;
     }
 
-    is_array($plugin_run_result = Plugins::getInstance()->run('is_browser_func', get_defined_vars()))
-        ? extract($plugin_run_result)
-        : null; //run hook
+    extract(runHook('is_browser_func', get_defined_vars()));
 
     return $return;
 }
@@ -1245,9 +1209,7 @@ function kleeja_date(int $time, bool $human_time = true, string $format = ''): s
 
     $return = $now > $time ? $return . '  ' . $lang['W_AGO'] : $lang['W_FROM'] . ' ' . $return;
 
-    is_array($plugin_run_result = Plugins::getInstance()->run('kleeja_date_func', get_defined_vars()))
-        ? extract($plugin_run_result)
-        : null; //run hook
+    extract(runHook('kleeja_date_func', get_defined_vars()));
 
     return $return;
 }
@@ -1364,9 +1326,7 @@ function shorten_text(string $text, int $until = 30): string
         $return = $text;
     }
 
-    is_array($plugin_run_result = Plugins::getInstance()->run('shorten_text_func', get_defined_vars()))
-        ? extract($plugin_run_result)
-        : null; //run hook
+    extract(runHook('shorten_text_func', get_defined_vars()));
 
     return $return;
 }

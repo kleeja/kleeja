@@ -90,9 +90,7 @@ if (ip('submit')) {
         }
     }
 
-    is_array($plugin_run_result = Plugins::getInstance()->run('submit_files_admin', get_defined_vars()))
-        ? extract($plugin_run_result)
-        : null; //run hook
+    extract(runHook('submit_files_admin', get_defined_vars()));
 
     $SQL->freeresult($result);
 
@@ -291,9 +289,7 @@ if (ip('submit')) {
 
     $no_results = false;
 
-    is_array($plugin_run_result = Plugins::getInstance()->run('query_files_admin', get_defined_vars()))
-        ? extract($plugin_run_result)
-        : null; //run hook
+    extract(runHook('query_files_admin', get_defined_vars()));
 
     if ($nums_rows > 0) {
         $query['SELECT'] = 'f.*' . ((int) $config['user_system'] == 1 ? ', u.name AS username' : '');
@@ -370,9 +366,7 @@ if (ip('submit')) {
                 'showfilesbyip' => basename(ADMIN_PATH) . '?cp=h_search&amp;s_input=1&amp;s_value=' . $row['user_ip'],
             ];
 
-            is_array($plugin_run_result = Plugins::getInstance()->run('arr_files_admin', get_defined_vars()))
-                ? extract($plugin_run_result)
-                : null; //run hook
+            extract(runHook('arr_files_admin', get_defined_vars()));
 
             $del[$row['id']] = p('del_' . $row['id']);
         }

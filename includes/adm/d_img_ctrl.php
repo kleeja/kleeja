@@ -72,9 +72,7 @@ if (ip('submit')) {
         $SQL->freeresult($result);
     }
 
-    is_array($plugin_run_result = Plugins::getInstance()->run('submit_imgctrl_admin', get_defined_vars()))
-        ? extract($plugin_run_result)
-        : null; //run hook
+    extract(runHook('submit_imgctrl_admin', get_defined_vars()));
 
     //no files to delete
     if (isset($ids) && sizeof($ids)) {
@@ -145,9 +143,7 @@ if (ip('submit')) {
         $do_not_query_total_files = true;
     }
 
-    is_array($plugin_run_result = Plugins::getInstance()->run('query_imgctrl_admin', get_defined_vars()))
-        ? extract($plugin_run_result)
-        : null; //run hook
+    extract(runHook('query_imgctrl_admin', get_defined_vars()));
 
     $nums_rows = 0;
 
@@ -222,9 +218,7 @@ if (ip('submit')) {
 
             $del[$row['id']] = p('del_' . $row['id']);
 
-            is_array($plugin_run_result = Plugins::getInstance()->run('arr_imgctrl_admin', get_defined_vars()))
-                ? extract($plugin_run_result)
-                : null; //run hook
+            extract(runHook('arr_imgctrl_admin', get_defined_vars()));
         }
 
         $SQL->freeresult($result);

@@ -161,9 +161,7 @@ while ($row = $SQL->fetch_array($result)) {
         continue;
     }
 
-    is_array($plugin_run_result = Plugins::getInstance()->run('while_fetch_adm_config', get_defined_vars()))
-        ? extract($plugin_run_result)
-        : null; //run hook
+    extract(runHook('while_fetch_adm_config', get_defined_vars()));
 
     //options from database [UNDER TEST]
     if (!empty($row['option'])) {
@@ -244,9 +242,7 @@ while ($row = $SQL->fetch_array($result)) {
             delete_cache('data_lang' . $got_lang);
         }
 
-        is_array($plugin_run_result = Plugins::getInstance()->run('after_submit_adm_config', get_defined_vars()))
-            ? extract($plugin_run_result)
-            : null; //run hook
+        extract(runHook('after_submit_adm_config', get_defined_vars()));
 
         $update_query = [
             'UPDATE' => "{$dbprefix}config",
@@ -303,9 +299,7 @@ if (ip('submit')) {
     //some configs need refresh page ..
     $need_refresh_configs = ['language'];
 
-    is_array($plugin_run_result = Plugins::getInstance()->run('after_submit_adm_config', get_defined_vars()))
-        ? extract($plugin_run_result)
-        : null; //run hook
+    extract(runHook('after_submit_adm_config', get_defined_vars()));
 
     //empty ..
     /*
