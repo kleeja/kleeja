@@ -1,41 +1,85 @@
+{{$steps = inst_steps(); $current_step = inst_current_step(); $current_index = array_search($current_step, array_keys($steps), true);}}
 <!DOCTYPE html>
-<html lang="{{echo getlang()}}" dir="{{echo $lang['DIR']}}">
+<html lang="{{echo getlang()}}" dir="{{echo $lang['DIR']}}" data-bs-theme="light">
 <head>
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-<meta name="robots" content="noindex, follow" />
-<title>{{echo $lang['INST_INSTALL_WIZARD']}}</title>
-<link rel="shortcut icon" href="../images/favicon.ico" />
-<link rel="icon" type="image/gif" href="../images/favicon.gif" />
-<style type="text/css">{{echo gettpl('style.css')}}</style>
-<!--[if IE]><style type="text/css">.divline,button.btn span{margin-top:0;}.wrapper {background-position: center -5px;}</style><![endif]-->
-<script type="text/javascript">
-var PATH_SPACER = 'style/images/spacer.gif';
-</script>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="robots" content="noindex, nofollow">
+    <title>{{echo $current_index !== false ? $steps[$current_step] . ' · ' : ''}}{{echo $lang['INST_INSTALL_WIZARD']}}</title>
+    <link rel="icon" type="image/svg+xml" href="https://kleeja.net/images/logo.svg">
+    <script>
+        (function () {
+            var media = window.matchMedia('(prefers-color-scheme: dark)');
+            var apply = function () {
+                document.documentElement.setAttribute('data-bs-theme', media.matches ? 'dark' : 'light');
+            };
+
+            apply();
+            media.addEventListener('change', apply);
+        })();
+    </script>
+    {{if($lang['DIR'] == 'rtl'):}}
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.rtl.min.css" rel="stylesheet" integrity="sha384-CfCrinSRH2IR6a4e6fy2q6ioOX7O6Mtm1L9vRvFZ1trBncWmMePhzvafv7oIcWiW" crossorigin="anonymous">
+    {{else:}}
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
+    {{endif;}}
+    <link href="style/install.css" rel="stylesheet">
 </head>
 <body>
-    <div id="Header">
-        <div class="header">
-            <ul class="headerIcon">
-                <li><a onclick="window.open(this.href,'_blank');return false;" href="https://kleeja.net"><img src="style/images/kleeja.png" title="kleeja.net" alt="" /></a></li>
-                <li><a href="./"><img title="Start over" src="style/images/install_h.png" alt="" /></a></li>
-            </ul>
-            <div class="BoxLang">
-            {{if(((ig('step') && g('step') != 'language') && (strpos('index.php', $_SERVER['PHP_SELF'])=== false && ig('step'))) OR (ig('step') && g('step') == 'license' || g('step') == 'action_file') ):}}
-                <form action="?step={{echo g('step')}}&amp;change_lang=1" method="post">
-                    <select name="lang" id="lang" class="Lang" onchange="submit()">
-                    {{if($dh = opendir(PATH . 'lang')):}}
-                        {{while (($file = readdir($dh)) !== false): if(strpos($file, '.') === false && $file != '..' && $file != '.'):}}
-                        {{$current_icon=file_exists('style/images/'.$file.'_16.png') ? 'style/images/'.$file.'_16.png' : (file_exists('../lang/'.$file.'/icon_16.png') ? '../lang/'.$file.'/icon_16.png' : 'style/images/zz_flag.png');}}
-                        <option value="{{echo $file}}" title="{{echo $current_icon}}" {{echo ig('lang') && $file==g('lang') || (!ig('lang') && $file=='en') ?'selected="selected"':''}}>{{echo $file}}</option>
-                    {{endif; endwhile;closedir($dh);endif;}}
-                    </select>
-                    <input type="hidden" name="step_is" value="{{echo g('step')}}" />
-                </form>
-            {{endif;}}
+{{echo file_get_contents('style/icons.svg')}}
+<header class="kj-header">
+    <div class="container kj-container d-flex align-items-center justify-content-between gap-3 py-3">
+        <a class="kj-brand" href="./?{{echo getlang(1)}}">
+            <picture>
+                <source srcset="https://kleeja.net/images/logo-light.svg" media="(prefers-color-scheme: dark)">
+                <img src="https://kleeja.net/images/logo.svg" alt="" width="40" height="40" aria-hidden="true">
+            </picture>
+            <span>Kleeja</span>
+            <span class="kj-badge d-none d-sm-inline" dir="ltr">v{{echo KLEEJA_VERSION}}</span>
+        </a>
+
+        {{if(ig('step') && g('step') != 'language' && $_SERVER['REQUEST_METHOD'] != 'POST'):}}
+        <form class="kj-lang" method="post" action="?step={{echo g('step')}}&amp;change_lang=1">
+            <div class="input-group input-group-sm">
+                <label class="input-group-text" for="lang" title="{{echo $lang['LANGUAGE']}}">
+                    {{echo inst_icon('translate')}}
+                    <span class="visually-hidden">{{echo $lang['LANGUAGE']}}</span>
+                </label>
+                <select class="form-select" name="lang" id="lang" onchange="this.form.submit()">
+                    {{foreach(inst_languages() as $language):}}
+                    <option value="{{echo $language}}"{{if($language == getlang()):}} selected{{endif;}}>{{echo inst_lang_name($language)}}</option>
+                    {{endforeach;}}
+                </select>
+            </div>
+            <input type="hidden" name="step_is" value="{{echo g('step')}}">
+        </form>
+        {{endif;}}
+    </div>
+</header>
+
+<main class="kj-main container kj-container py-4 py-lg-5">
+    {{if($current_index !== false):}}
+    <nav aria-label="{{echo $lang['INST_INSTALL_WIZARD']}}">
+        <ol class="kj-steps d-none d-md-flex">
+            {{foreach(array_values($steps) as $i => $label):}}
+            <li class="{{echo $i < $current_index ? 'is-done' : ($i == $current_index ? 'is-current' : '')}}"{{if($i == $current_index):}} aria-current="step"{{endif;}}>
+                <span class="kj-step-dot">{{echo $i < $current_index ? inst_icon('check-lg') : $i + 1}}</span>
+                <span class="kj-step-label">{{echo $label}}</span>
+            </li>
+            {{endforeach;}}
+        </ol>
+
+        <div class="d-md-none mb-4">
+            <div class="d-flex justify-content-between align-items-baseline gap-2 mb-2">
+                <span class="fw-semibold">{{echo $steps[$current_step]}}</span>
+                <span class="small text-body-secondary">{{echo sprintf($lang['INST_STEP_OF'], $current_index + 1, count($steps))}}</span>
+            </div>
+            <div class="progress" role="progressbar" aria-label="{{echo $steps[$current_step]}}" aria-valuenow="{{echo $current_index + 1}}" aria-valuemin="1" aria-valuemax="{{echo count($steps)}}">
+                <div class="progress-bar" style="width: {{echo round(($current_index + 1) / count($steps) * 100)}}%"></div>
             </div>
         </div>
-        <div class="divline"></div>
-    </div>
-    <div class="clr"></div>
-    <div class="wrapper">
-    <div class="clr"></div><br />
+    </nav>
+    {{endif;}}
+
+    <div class="card kj-card">
+        <div class="card-body">

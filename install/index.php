@@ -44,12 +44,17 @@ include_once PATH . 'includes/pdo.php';
 
 include_once 'includes/functions_install.php';
 
+// old links to choose a language
+if (g('step') == 'language' && ig('ln')) {
+    header('Location: ./?step=what_is_kleeja&lang=' . g('ln', default: 'en'));
+
+    exit();
+}
+
 /**
  * print header
  */
-if (!ip('lang')) {
-    echo gettpl('header.html');
-}
+echo gettpl('header.html');
 
 /**
  * Navigation ..
@@ -57,14 +62,6 @@ if (!ip('lang')) {
 switch (g('step', 'str')) {
     default:
     case 'language':
-        if (ig('ln')) {
-            echo '<meta http-equiv="refresh" content="0;url=./?step=what_is_kleeja&lang=' .
-                g('ln', default: 'en') .
-                '">';
-
-            exit();
-        }
-
         echo gettpl('lang.html');
 
         break;

@@ -17,6 +17,8 @@ define('EVAL_IS_ON', is_eval_is_on());
 // Detect choosing another lang while installing
 if (ig('change_lang') && ip('lang')) {
     header('Location: ' . $_SERVER['PHP_SELF'] . '?step=' . p('step_is') . '&lang=' . p('lang'));
+
+    exit();
 }
 
 // Including current language
@@ -45,13 +47,125 @@ function getlang(bool $link = false): string
     return $link ? 'lang=' . $ln : $ln;
 }
 
-function getjquerylink(): string
+/**
+ * Languages that have a translation of the installing wizard
+ * @return string[]
+ */
+function inst_languages(): array
 {
-    if (file_exists(PATH . 'admin/Masmak/js/jquery.min.js')) {
-        return PATH . 'admin/Masmak/js/jquery.min.js';
+    $languages = [];
+
+    foreach (scandir(PATH . 'lang') as $folder) {
+        if ($folder[0] != '.' && file_exists(PATH . 'lang/' . $folder . '/install.php')) {
+            $languages[] = $folder;
+        }
     }
 
-    return 'http://ajax.googleapis.com/ajax/libs/jquery/3.4.0/jquery.min.js';
+    return $languages;
+}
+
+/**
+ * Name of a language written in the language itself
+ * @param  string $code
+ * @return string
+ */
+function inst_lang_name(string $code): string
+{
+    $names = ['en' => 'English', 'ar' => 'العربية'];
+
+    if (isset($names[$code])) {
+        return $names[$code];
+    }
+
+    if (class_exists('Locale')) {
+        $name = Locale::getDisplayLanguage($code, $code);
+
+        if ($name !== '' && $name !== $code) {
+            return $name;
+        }
+    }
+
+    return strtoupper($code);
+}
+
+/**
+ * Steps of the installing wizard, shown as a progress bar at the top
+ * @return array<string, string>
+ */
+function inst_steps(): array
+{
+    global $lang;
+
+    return [
+        'language' => $lang['INST_STEP_LANGUAGE'],
+        'welcome' => $lang['INST_STEP_WELCOME'],
+        'license' => $lang['INST_STEP_LICENSE'],
+        'requirements' => $lang['INST_STEP_REQUIREMENTS'],
+        'database' => $lang['INST_STEP_DATABASE'],
+        'site' => $lang['INST_STEP_SITE'],
+        'finish' => $lang['INST_STEP_FINISH'],
+    ];
+}
+
+/**
+ * Current step of the installing wizard, or empty if we are not installing (updating for example)
+ * @return string
+ */
+function inst_current_step(): string
+{
+    $steps = [
+        'index.php' => [
+            'language' => 'language',
+            'what_is_kleeja' => 'welcome',
+            'official' => 'welcome',
+            'choose' => 'welcome',
+        ],
+        'install.php' => [
+            'license' => 'license',
+            'f' => 'requirements',
+            'c' => 'database',
+            'check' => 'database',
+            'data' => 'site',
+            'end' => 'finish',
+        ],
+    ];
+
+    $script = basename($_SERVER['SCRIPT_NAME'] ?? '');
+
+    if (!isset($steps[$script])) {
+        return '';
+    }
+
+    return $steps[$script][g('step')] ?? reset($steps[$script]);
+}
+
+/**
+ * An icon from style/icons.svg
+ * @param  string $name
+ * @param  string $class
+ * @return string
+ */
+function inst_icon(string $name, string $class = ''): string
+{
+    return '<svg class="kj-icon' .
+        ($class !== '' ? ' ' . $class : '') .
+        '" aria-hidden="true"><use href="#i-' .
+        $name .
+        '"></use></svg>';
+}
+
+/**
+ * Show an error message inside the wizard, then stop
+ * @param string $message
+ */
+function inst_error(string $message): void
+{
+    $GLOBALS['error_message'] = $message;
+
+    echo gettpl('error.html');
+    echo gettpl('footer.html');
+
+    exit();
 }
 
 /**

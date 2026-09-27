@@ -92,20 +92,37 @@ SOFTWARE.';
         break;
 
     case 'f':
-        $check_ok = true;
-        $advices = $ziparchive_lib = false;
+        $requirements = [];
 
-        if (!class_exists('ZipArchive')) {
-            $ziparchive_lib = true;
+        $functions = [
+            'unlink' => 'FUNCTION_DISC_UNLINK',
+            'imagecreatetruecolor' => 'FUNCTION_DISC_GD',
+            'fopen' => 'FUNCTION_DISC_FOPEN',
+            'move_uploaded_file' => 'FUNCTION_DISC_MUF',
+        ];
+
+        foreach ($functions as $function => $description) {
+            $exists = function_exists($function);
+
+            $requirements[] = [
+                'ok' => $exists,
+                'title' => sprintf($lang[$exists ? 'FUNCTION_IS_EXISTS' : 'FUNCTION_IS_NOT_EXISTS'], $function),
+                'description' => $lang[$description],
+            ];
         }
 
-        if ($ziparchive_lib) {
-            $advices = true;
-        }
+        $requirements[] = [
+            'ok' => extension_loaded('pdo'),
+            'title' => sprintf(
+                $lang[extension_loaded('pdo') ? 'EXTENSION_IS_EXISTS' : 'EXTENSION_IS_NOT_EXISTS'],
+                'PDO',
+            ),
+            'description' => $lang['EXTENSION_PDO_EXISTS'],
+        ];
 
-        if (!extension_loaded('pdo')) {
-            $check_ok = false;
-        }
+        $check_ok = !in_array(false, array_column($requirements, 'ok'), true);
+        $ziparchive_lib = !class_exists('ZipArchive');
+        $advices = $ziparchive_lib;
 
         echo gettpl('check.html');
 
@@ -126,10 +143,12 @@ SOFTWARE.';
         break;
 
     case 'check':
-        $submit_disabled = $no_connection = $mysql_ver = false;
+        $problems = [];
 
         //config.php
-        if (!empty($dbname)) {
+        if (empty($dbname)) {
+            $problems[] = $lang['INST_CHANG_CONFIG'];
+        } else {
             if (isset($dbtype) && $dbtype == 'sqlite') {
                 @touch(PATH . $dbname);
             }
@@ -138,13 +157,17 @@ SOFTWARE.';
             $SQL = new KleejaDatabase($dbserver, $dbuser, $dbpass, $dbname, $dbprefix, $dbtype ?? 'mysql');
 
             if (!$SQL->is_connected()) {
-                $no_connection = true;
-            } else {
-                if ($SQL->driver === 'mysql') {
-                    if (!empty($SQL->version()) && version_compare($SQL->version(), MIN_MYSQL_VERSION, '<')) {
-                        $mysql_ver = $SQL->version();
-                    }
-                }
+                $problems[] =
+                    $lang['INST_CONNCET_ERR'] .
+                    (isset($dbtype) && $dbtype == 'sqlite'
+                        ? '<br>' . sprintf($lang['INST_CONNCET_ERR_SQLITE'], $dbname)
+                        : '');
+            } elseif (
+                $SQL->driver === 'mysql' &&
+                !empty($SQL->version()) &&
+                version_compare($SQL->version(), MIN_MYSQL_VERSION, '<')
+            ) {
+                $problems[] = sprintf($lang['INST_MYSQL_LESSMIN'], MIN_MYSQL_VERSION, $SQL->version());
             }
         }
 
@@ -155,6 +178,12 @@ SOFTWARE.';
             @chmod(PATH . 'styles', 0755);
             @chmod(PATH . 'uploads', 0755);
             @chmod(PATH . 'uploads/thumbs', 0755);
+        }
+
+        foreach (['cache', 'uploads', 'uploads/thumbs'] as $folder) {
+            if (!is_writable(PATH . $folder)) {
+                $problems[] = '<code dir="ltr">' . $folder . '</code> : ' . $lang['INST_NO_WRTABLE'];
+            }
         }
 
         echo gettpl('check_all.html');
@@ -173,25 +202,16 @@ SOFTWARE.';
                 empty(p('password2')) ||
                 empty(p('email'))
             ) {
-                echo $lang['EMPTY_FIELDS'];
-                echo $footer_inst;
-
-                exit();
+                inst_error($lang['EMPTY_FIELDS']);
             }
 
             //fix bug #r1777 (alta3rq revision)
             if (!empty(p('password')) && !empty(p('password2')) && p('password') != p('password2')) {
-                echo $lang['PASS_NEQ_PASS2'];
-                echo $footer_inst;
-
-                exit();
+                inst_error($lang['PASS_NEQ_PASS2']);
             }
 
             if (strpos(p('email'), '@') === false) {
-                echo $lang['WRONG_EMAIL'];
-                echo $footer_inst;
-
-                exit();
+                inst_error($lang['WRONG_EMAIL']);
             }
 
             //connect .. for check

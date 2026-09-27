@@ -38,7 +38,7 @@ return [
     'INST_FINISH_SQL' => 'Kleeja was installed successfully',
     'INST_NOTES' => 'Installation Notes ..!',
     'INST_END' =>
-        'The installation wizard is finished, please remove the INSTALL directory <span style="color:red">(the site will not work while this directory exists)</span>',
+        'The installation wizard is finished, please remove the INSTALL directory <strong>(the site will not work while this directory exists)</strong>',
     'INST_NOTE_D' =>
         'For any observations or problems related to Kleeja, please report them on the <a href="https://github.com/kleeja/kleeja/issues">Issues page</a>',
     'INST_FINISH_ERRSQL' => 'Oops! there seems to be a problem, try again.',
@@ -94,7 +94,7 @@ return [
 
     'ADVICES_CHECK' => 'Advanced check (Optional)',
     'ZIPARCHIVE_LIB' =>
-        '<span style="color:red;padding:0 6px">ZipArchive Lib is not available..!</span><br /> It is required to install plugins, styles and to upgrade to newer Kleeja versions!',
+        '<strong>ZipArchive Lib is not available..!</strong><br /> It is required to install plugins, styles and to upgrade to newer Kleeja versions!',
 
     //UPDATE
     'INST_UPDATE_CUR_VER_IS_UP' => 'Your current version database is up-to-date ... hooray!',
@@ -116,6 +116,21 @@ return [
         'Kleeja has a simple and powerful user system which can be easily integrated with many boards . Kleeja provides a simple admin control panel that enables you to control everything in your site . Also you can customize Kleeja\'s style and install a lot of add-ons  ....  <a target="_blank" href="https://kleeja.net">more details in Kleeja site </a>',
     'YES' => 'Yes',
     'NO' => 'No',
+
+    //WIZARD
+    'INST_CHOOSE_LANG' => 'Choose the language of the installation wizard',
+    'INST_STEP_LANGUAGE' => 'Language',
+    'INST_STEP_WELCOME' => 'Welcome',
+    'INST_STEP_LICENSE' => 'License',
+    'INST_STEP_REQUIREMENTS' => 'Requirements',
+    'INST_STEP_DATABASE' => 'Database',
+    'INST_STEP_SITE' => 'Site setup',
+    'INST_STEP_FINISH' => 'Finish',
+    'INST_STEP_OF' => 'Step %1$d of %2$d',
+    'INST_SHOW_PASSWORD' => 'Show password',
+    'INST_DB_TABLES' => 'Creating the database tables',
+    'INST_CHECK_FAILED' => 'Some checks did not pass, fix them then check again',
+    'INST_ERROR_LOG' => 'Error log',
 
     'KLEEJA_TEAM_MSG_NAME' => 'Kleeja Development Team',
     'KLEEJA_TEAM_MSG_TEXT' =>

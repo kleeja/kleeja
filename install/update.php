@@ -69,7 +69,7 @@ switch (g('step', default: 'action_file')) {
         sort($available_db_updates);
 
         if (!sizeof($available_db_updates)) {
-            $update_msgs_arr[] = '<span style="color:green;">' . $lang['INST_UPDATE_CUR_VER_IS_UP'] . '</span>';
+            $update_msgs_arr[] = $lang['INST_UPDATE_CUR_VER_IS_UP'];
             $complete_update = false;
         }
 
