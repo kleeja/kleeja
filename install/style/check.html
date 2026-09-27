@@ -1,94 +1,47 @@
-<div class="BoxInner"><div class="BoxTopImg"></div><div class="BoxBody"><div class="inner">
-    <div class="clr"></div>
+            <div class="kj-page-head">
+                <span class="kj-icon-tile">{{echo inst_icon('list-check')}}</span>
+                <div>
+                    <h1>{{echo $lang['FUNCTIONS_CHECK']}}</h1>
+                </div>
+            </div>
 
-    <h2><img src="style/images/k_info.png" class="img" alt=" " /> {{echo $lang['FUNCTIONS_CHECK']}} :</h2>
-    <ul class="F_Check">
-        {{if(function_exists('unlink')):}}
-        <li class="YesCheck">
-            <h3><img src="style/images/ok.png" alt=" " class="img" /> {{echo sprintf($lang['FUNCTION_IS_EXISTS'], 'unlink')}}</h3>
-            <p>[ {{echo $lang['FUNCTION_DISC_UNLINK']}} ]</p>
-        </li>
-        {{else: $GLOBALS['check_ok'] = false;}}
-        <li class="NoCheck">
-            <h3><img src="style/images/error.png" alt=" " class="img" /> {{echo sprintf($lang['FUNCTION_IS_NOT_EXISTS'], 'unlink')}}</h3>
-            <p>[ {{echo $lang['FUNCTION_DISC_UNLINK']}} ]</p>
-        </li>
-        {{endif;}}
+            <ul class="list-group kj-checks">
+                {{foreach($GLOBALS['requirements'] as $requirement):}}
+                <li class="list-group-item">
+                    {{if($requirement['ok']):}}
+                    <span class="text-success">{{echo inst_icon('check-circle-fill')}}</span>
+                    {{else:}}
+                    <span class="text-danger">{{echo inst_icon('x-circle-fill')}}</span>
+                    {{endif;}}
+                    <div>
+                        <div class="fw-semibold">{{echo $requirement['title']}}</div>
+                        <div class="small text-body-secondary">{{echo $requirement['description']}}</div>
+                    </div>
+                </li>
+                {{endforeach;}}
+            </ul>
 
-        {{if(function_exists('imagecreatetruecolor')):}}
-        <li class="YesCheck">
-            <h3><img src="style/images/ok.png" alt=" " class="img" /> {{echo sprintf($lang['FUNCTION_IS_EXISTS'], 'imagecreatetruecolor')}}</h3>
-            <p>[ {{echo $lang['FUNCTION_DISC_GD']}} ]</p>
-        </li>
-        {{else: $GLOBALS['check_ok'] = false;}}
-        <li class="NoCheck">
-            <h3><img src="style/images/error.png" alt=" " class="img" /> {{echo sprintf($lang['FUNCTION_IS_NOT_EXISTS'], 'imagecreatetruecolor')}}</h3>
-            <p>[ {{echo $lang['FUNCTION_DISC_GD']}} ]</p>
-        </li>
-        {{endif;}}
+            {{if($GLOBALS['advices']):}}
+            <h2 class="h6 fw-bold mt-4 mb-3">{{echo $lang['ADVICES_CHECK']}}</h2>
+            {{if($GLOBALS['ziparchive_lib']):}}
+            <div class="alert alert-warning d-flex gap-3 mb-0" role="alert">
+                {{echo inst_icon('exclamation-triangle-fill')}}
+                <div>{{echo $lang['ZIPARCHIVE_LIB']}}</div>
+            </div>
+            {{endif;}}
+            {{endif;}}
 
-        {{if(function_exists('fopen')):}}
-        <li class="YesCheck">
-            <h3><img src="style/images/ok.png" alt=" " class="img" /> {{echo sprintf($lang['FUNCTION_IS_EXISTS'], 'fopen')}}</h3>
-            <p>[ {{echo $lang['FUNCTION_DISC_FOPEN']}} ]</p>
-        </li>
-        {{else: $GLOBALS['check_ok'] = false;}}
-        <li class="NoCheck">
-            <h3><img src="style/images/error.png" alt="" class="img" /> {{echo sprintf($lang['FUNCTION_IS_NOT_EXISTS'], 'fopen')}}></h3>
-            <p>[ {{echo $lang['FUNCTION_DISC_FOPEN']}} ]</p>
-        </li>
-        {{endif;}}
-
-        {{if(function_exists('move_uploaded_file')):}}
-        <li class="YesCheck">
-            <h3><img src="style/images/ok.png" alt=" " class="img" /> {{echo sprintf($lang['FUNCTION_IS_EXISTS'], 'move_uploaded_file')}}</h3>
-            <p>[ {{echo $lang['FUNCTION_DISC_MUF']}} ]</p>
-        </li>
-        {{else: $GLOBALS['check_ok'] = false;}}
-        <li class="NoCheck">
-            <h3><img src="style/images/error.png" alt=" " class="img" /> {{echo sprintf($lang['FUNCTION_IS_NOT_EXISTS'], 'move_uploaded_file')}}</h3>
-            <p>[ {{echo $lang['FUNCTION_DISC_MUF']}} ]</p>
-        </li>
-        {{endif;}}
-
-        {{if(extension_loaded('pdo')):}}
-        <li class="YesCheck">
-            <h3><img src="style/images/ok.png" alt=" " class="img" /> {{echo sprintf($lang['EXTENSION_IS_EXISTS'], 'PDO')}}</h3>
-            <p>[ {{echo $lang['EXTENSION_PDO_EXISTS']}} ]</p>
-        </li>
-        {{else: $GLOBALS['check_ok'] = false;}}
-        <li class="NoCheck">
-            <h3><img src="style/images/error.png" alt=" " class="img" /> {{echo sprintf($lang['EXTENSION_IS_NOT_EXISTS'], 'PDO')}}</h3>
-            <p>[ {{echo $lang['EXTENSION_PDO_EXISTS']}} ]</p>
-        </li>
-        {{endif;}}
-    </ul>
-
-    <div class="hr"></div>
-
-    {{if($GLOBALS['advices']):}}
-    <h2 style="font-size:100%;"><img src="style/images/k_info.png" class="img" alt=" " /> {{echo $lang['ADVICES_CHECK']}} :</h2>
-    <ul class="F_Check">
-        {{if($GLOBALS['ziparchive_lib']):}}
-        <li class="NoCheck"><p style="text-indent:0;"><img src="style/images/surprised.png" alt=" " class="img" />{{echo $lang['ZIPARCHIVE_LIB']}}</p></li>
-        {{endif;}}
-    </ul>
-    <div class="hr"></div>
-    {{endif;}}
-
-    <center>
-    {{if($GLOBALS['check_ok']):}}
-        <form method="post" action="{{echo './install.php?step=c&amp;' . getlang(1)}}">
-            <button onclick="window.location.href='./install.php?step=license&amp;{{echo getlang(1)}}';return false;" name="previous" type="submit" id="submit" class="btn"><span>&laquo;  {{echo $lang['INST_PREVIOUS']}}</span></button>
-            <button name="agres" type="submit" class="btn"><span>{{echo $lang['INST_NEXT']}} &raquo;</span></button>
-        </form>
-    {{else:}}
-        <form method="post" action="{{echo './install.php?step=f&amp;' . getlang(1)}}">
-            <button onclick="window.location.href='./install.php?step=license&amp;{{echo getlang(1)}}';return false;" name="previous" type="submit" id="submit" class="btn"><span>&laquo;  {{echo $lang['INST_PREVIOUS']}}</span></button>
-            <button name="agres" type="submit" class="btn"><span>{{echo $lang['RE_CHECK']}} &raquo;</span></button>
-        </form>
-    {{endif;}}
-    </center>
-
-    <div class="clr"></div>
-</div></div><div class="BoxBottomImg"></div></div>
+            <div class="kj-actions">
+                <a class="btn btn-outline-secondary" href="./install.php?step=license&amp;{{echo getlang(1)}}">
+                    {{echo inst_icon('arrow-left', 'kj-icon-flip')}} {{echo $lang['INST_PREVIOUS']}}
+                </a>
+                {{if($GLOBALS['check_ok']):}}
+                <a class="btn btn-primary" href="./install.php?step=c&amp;{{echo getlang(1)}}">
+                    {{echo $lang['INST_NEXT']}} {{echo inst_icon('arrow-right', 'kj-icon-flip')}}
+                </a>
+                {{else:}}
+                <a class="btn btn-primary" href="./install.php?step=f&amp;{{echo getlang(1)}}">
+                    {{echo inst_icon('arrow-repeat')}} {{echo $lang['RE_CHECK']}}
+                </a>
+                {{endif;}}
+            </div>

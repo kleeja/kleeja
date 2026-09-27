@@ -26,105 +26,78 @@ include_once PATH . 'includes/functions.php';
 include_once PATH . 'includes/functions_alternative.php';
 
 include_once PATH . 'includes/pdo.php';
+include_once PATH . 'includes/usr.php';
 
 include_once 'includes/functions_install.php';
-include_once 'includes/update_schema.php';
-
-$SQL = new KleejaDatabase($dbserver, $dbuser, $dbpass, $dbname, $dbprefix, $dbtype ?? 'mysql');
 
 //
-// fix missing db_version
+// nothing to update if Kleeja is not installed, this connects $SQL too
 //
-$config['db_version'] = inst_get_config('db_version');
+if (!inst_is_installed()) {
+    header('Location: ./index.php?' . getlang(1));
 
-if ($config['db_version'] == false) {
-    $SQL->query("INSERT INTO `{$dbprefix}config` (`name` ,`value`) VALUES ('db_version', '')");
+    exit();
 }
 
-$IN_UPDATE = true;
+include_once 'includes/update_schema.php';
+
+$current_db_version = (int) inst_get_config('db_version');
+
+$available_db_updates = array_filter(array_keys($update_schema), function (int $v) use ($current_db_version): bool {
+    return $v > $current_db_version;
+});
+
+sort($available_db_updates);
+
+$update_msgs_arr = $update_errors = [];
+$login_failed = false;
 
 /**
  * print header
  */
-if (!ip('action_file_do')) {
-    echo gettpl('header.html');
-}
+echo gettpl('header.html');
 
-/**
- * Navigation ..
- */
-switch (g('step', default: 'action_file')) {
-    default:
-    case 'update_now':
-        $complete_update = true;
-        $update_msgs_arr = [];
-        $current_db_version = $config['db_version'];
+if (!sizeof($available_db_updates)) {
+    $update_msgs_arr[] = $lang['INST_UPDATE_CUR_VER_IS_UP'];
 
-        $all_db_updates = array_keys($update_schema);
+    delete_cache('', all: true);
+    echo gettpl('update_end.html');
+} elseif (!ip('update_now') || !inst_admin_login(p('username'), p('password'))) {
+    //changing the database is for admins only, and only when they ask for it
+    $login_failed = ip('update_now');
 
-        $available_db_updates = array_filter($all_db_updates, function (int $v) use ($current_db_version): bool {
-            return $v > $current_db_version;
-        });
+    echo gettpl('update.html');
+} else {
+    //old versions have no db_version
+    if (inst_get_config('db_version') === false) {
+        $SQL->query("INSERT INTO `{$dbprefix}config` (`name`, `value`) VALUES ('db_version', '')");
+    }
 
-        sort($available_db_updates);
-
-        if (!sizeof($available_db_updates)) {
-            $update_msgs_arr[] = '<span style="color:green;">' . $lang['INST_UPDATE_CUR_VER_IS_UP'] . '</span>';
-            $complete_update = false;
-        }
-
-        //
-        //is there any sqls
-        //
-        if ($complete_update) {
-            //loop through available updates
-            foreach ($available_db_updates as $db_update_version) {
-                $SQL->show_errors = false;
-
-                //sqls
-                if (
-                    isset($update_schema[$db_update_version]['sql']) &&
-                    sizeof($update_schema[$db_update_version]['sql']) > 0
-                ) {
-                    $err = '';
-
-                    $complete_update = true;
-
-                    foreach ($update_schema[$db_update_version]['sql'] as $name => $sql_content) {
-                        $err = '';
-                        $SQL->query($sql_content);
-                        $err = $SQL->get_error();
-
-                        if (strpos($err[1], 'Duplicate') !== false || $err[0] == '1062' || $err[0] == '1060') {
-                            $complete_update = false;
-                        }
-                    }
-                }
-
-                //functions
-                if ($complete_update) {
-                    if (
-                        isset($update_schema[$db_update_version]['functions']) &&
-                        sizeof($update_schema[$db_update_version]['functions']) > 0
-                    ) {
-                        foreach ($update_schema[$db_update_version]['functions'] as $n) {
-                            if (is_callable($n)) {
-                                $n();
-                            }
-                        }
-                    }
-                }
-
-                $SQL->query("UPDATE `{$dbprefix}config` SET `value` = :version WHERE `name` = 'db_version'", [
-                    'version' => UPDATE_DB_VERSION,
-                ]);
+    foreach ($available_db_updates as $db_update_version) {
+        foreach ($update_schema[$db_update_version]['sql'] ?? [] as $name => $sql_content) {
+            if (!$SQL->query($sql_content) && !inst_update_done_before($SQL->get_error())) {
+                $update_errors[] = $db_update_version . ' - ' . $name . ' : ' . implode(':', $SQL->get_error());
             }
         }
 
-        delete_cache('', all: true);
-        echo gettpl('update_end.html');
+        //stop here, so this version is applied again on the next try
+        if (sizeof($update_errors)) {
+            break;
+        }
 
-        break;
+        foreach ($update_schema[$db_update_version]['functions'] ?? [] as $n) {
+            if (is_callable($n)) {
+                $n();
+            }
+        }
+
+        $SQL->query("UPDATE `{$dbprefix}config` SET `value` = :version WHERE `name` = 'db_version'", [
+            'version' => $db_update_version,
+        ]);
+    }
+
+    delete_cache('', all: true);
+    echo gettpl('update_end.html');
 }
 
 /**

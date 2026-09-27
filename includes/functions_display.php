@@ -1167,10 +1167,6 @@ function kleeja_date(int $time, bool $human_time = true, string $format = ''): s
     }
 
     if (!empty($config['time_zone']) && strpos($config['time_zone'], '/') !== false) {
-        if (strpos($config['time_zone'], 'Buraydah') !== false) {
-            $config['time_zone'] = 'Asia/Riyadh';
-        }
-
         $timezone_offset = timezone_offset_get(new DateTimeZone($config['time_zone']), new DateTime());
     } else {
         $timezone_offset = intval($config['time_zone']) * 60 * 60;
@@ -1238,9 +1234,6 @@ function time_zones(): array
             $timezones[$tz] = timezone_offset_get(new DateTimeZone($tz), new DateTime()) / 3600;
         }
     }
-
-    // for compatibility with earlier versions.
-    $timezones['Asia/Buraydah'] = 3.01;
 
     asort($timezones);
 

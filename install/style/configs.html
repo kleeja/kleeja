@@ -1,84 +1,104 @@
-<div class="BoxInner"><div class="BoxTopImg"></div><div class="BoxBody"><div class="inner">
-<div class="clr"></div>
+            {{if(!$GLOBALS['no_config']):}}
+            <form method="post" action="./install.php?step=c&amp;{{echo getlang(1)}}" class="needs-validation" novalidate>
+                <div class="kj-page-head">
+                    <span class="kj-icon-tile">{{echo inst_icon('database')}}</span>
+                    <div>
+                        <h1>{{echo $lang['DB_INFO']}}</h1>
+                    </div>
+                </div>
 
-{{if(!$GLOBALS['no_config']):}}
-<form method="post" action="{{echo './install.php?step=c&amp;' . getlang(1)}}">
-    <h2><img src="style/images/klj_info.png" class="img" alt="!" />{{echo $lang['DB_INFO']}}</h2>
-    <table class="TableConf" dir="{{echo $lang['DIR']}}">
-        <tr>
-            <td class="TdConf">{{echo $lang['DB_TYPE']}}</td>
-            <td class="TdInput">
-                <select name="db_type" id="db_type" style="text-align:left;direction:ltr">
-                    <option value="mysql" selected>{{echo $lang['DB_TYPE_MYSQL']}}</option>
-                    {{if (in_array('sqlite', PDO::getAvailableDrivers())):}}
-                    <option value="sqlite">{{echo $lang['DB_TYPE_SQLITE']}}</option>
+                <div class="row g-3">
+                    <div class="col-12">
+                        <label class="form-label" for="db_type">{{echo $lang['DB_TYPE']}}</label>
+                        <select class="form-select" name="db_type" id="db_type">
+                            <option value="mysql" selected>{{echo $lang['DB_TYPE_MYSQL']}}</option>
+                            {{if(in_array('sqlite', PDO::getAvailableDrivers(), true)):}}
+                            <option value="sqlite">{{echo $lang['DB_TYPE_SQLITE']}}</option>
+                            {{endif;}}
+                        </select>
+                    </div>
+
+                    <div class="col-md-8">
+                        <label class="form-label" for="db_server">{{echo $lang['DB_SERVER']}}</label>
+                        <input class="form-control" name="db_server" id="db_server" type="text" value="localhost" dir="ltr" required data-kj-mysql-only>
+                        <div class="invalid-feedback">{{echo $lang['VALIDATING_FORM_WRONG']}}</div>
+                    </div>
+
+                    <div class="col-md-4">
+                        <label class="form-label" for="db_prefix">{{echo $lang['DB_PREFIX']}}</label>
+                        <input class="form-control" name="db_prefix" id="db_prefix" type="text" value="klj_" dir="ltr" pattern="[A-Za-z0-9_]*">
+                        <div class="invalid-feedback">{{echo $lang['INST_PREFIX_WRONG']}}</div>
+                    </div>
+
+                    <div class="col-12">
+                        <label class="form-label" for="db_name">{{echo $lang['DB_NAME']}}</label>
+                        <input class="form-control" name="db_name" id="db_name" type="text" value="kleeja" dir="ltr" required>
+                        <div class="invalid-feedback">{{echo $lang['VALIDATING_FORM_WRONG']}}</div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label" for="db_user">{{echo $lang['DB_USER']}}</label>
+                        <input class="form-control" name="db_user" id="db_user" type="text" dir="ltr" autocomplete="off" required data-kj-mysql-only>
+                        <div class="invalid-feedback">{{echo $lang['VALIDATING_FORM_WRONG']}}</div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label" for="db_pass">{{echo $lang['DB_PASSWORD']}}</label>
+                        <div class="input-group">
+                            <input class="form-control" name="db_pass" id="db_pass" type="password" dir="ltr" autocomplete="off" data-kj-mysql-only>
+                            <button class="btn btn-outline-secondary" type="button" data-kj-toggle-password="#db_pass" aria-pressed="false" title="{{echo $lang['INST_SHOW_PASSWORD']}}">
+                                {{echo inst_icon('eye')}}
+                                <span class="visually-hidden">{{echo $lang['INST_SHOW_PASSWORD']}}</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                {{if(!$GLOBALS['writeable_path']):}}
+                <div class="alert alert-info d-flex gap-3 mt-4 mb-0" role="alert">
+                    {{echo inst_icon('info-circle-fill')}}
+                    <div>{{echo $lang['DB_INFO_NW']}}</div>
+                </div>
+                {{endif;}}
+
+                <div class="kj-actions">
+                    <a class="btn btn-outline-secondary" href="./install.php?step=f&amp;{{echo getlang(1)}}">
+                        {{echo inst_icon('arrow-left', 'kj-icon-flip')}} {{echo $lang['INST_PREVIOUS']}}
+                    </a>
+                    {{if($GLOBALS['writeable_path']):}}
+                    <button name="dbsubmit" type="submit" class="btn btn-primary">
+                        {{echo $lang['INST_NEXT']}} {{echo inst_icon('arrow-right', 'kj-icon-flip')}}
+                    </button>
+                    {{else:}}
+                    <button name="dbsubmit" type="submit" class="btn btn-primary">
+                        {{echo inst_icon('download')}} {{echo $lang['INST_EXPORT']}}
+                    </button>
                     {{endif;}}
-                </select>
-            </td>
-        </tr>
-        <tr>
-            <td class="TdConf">{{echo $lang['DB_SERVER']}}</td>
-            <td class="TdInput"><input name="db_server" id="db_server" type="text" value="localhost" class="InputConf" /></td>
-        </tr>
-        <tr>
-            <td class="TdConf">{{echo $lang['DB_NAME']}}</td>
-            <td class="TdInput"><input name="db_name" id="db_name" type="text" value="kleeja" class="InputConf" /></td>
-        </tr>
-        <tr>
-            <td class="TdConf">{{echo $lang['DB_USER']}}</td>
-            <td class="TdInput"><input name="db_user" id="db_user" type="text" class="InputConf" /></td>
-        </tr>
-        <tr>
-            <td class="TdConf">{{echo $lang['DB_PASSWORD']}}</td>
-            <td class="TdInput"><input name="db_pass" id="db_pass" type="text" class="InputConf" /></td>
-        </tr>
-        <tr>
-            <td class="TdConf">{{echo $lang['DB_PREFIX']}}</td>
-            <td class="TdInput"><input name="db_prefix" id="db_prefix" type="text" value="klj_" class="InputConf" />
-            </td>
-        </tr>
-    </table>
-    <div class="clr"></div>
+                </div>
+            </form>
 
-    {{if(!$GLOBALS['writeable_path']):}}
-    <div class="notice">
-        <p class="justify"><img src="style/images/inst_notes.png" class="img" alt=" " />{{echo $lang['DB_INFO_NW']}}</p>
-    </div>
-    {{endif;}}
+            {{if(!$GLOBALS['writeable_path']):}}
+            <div class="kj-state mt-5 pt-4 border-top">
+                <span class="kj-state-icon">{{echo inst_icon('upload')}}</span>
+                <h2 class="h5 fw-bold mb-3">{{echo $lang['INST_SUBMIT_CONFIGOK']}}</h2>
+                <a class="btn btn-outline-secondary" href="./install.php?step=c&amp;{{echo getlang(1)}}">
+                    {{echo $lang['INST_NEXT']}} {{echo inst_icon('arrow-right', 'kj-icon-flip')}}
+                </a>
+            </div>
+            {{endif;}}
 
-    <div class="hr"></div>
-    <center>
-        <button onclick="window.location.href='./install.php?step=f&amp;{{echo getlang(1)}}';return false;" name="previous" type="submit" class="btn"><span>&laquo;  {{echo $lang['INST_PREVIOUS']}}</span></button>
-        <button name="dbsubmit" type="submit" class="btn"><span>{{echo $GLOBALS['writeable_path'] ? $lang['INST_NEXT'] : $lang['INST_EXPORT']}} &raquo;</span></button>
-    </center>
+            {{else:}}
+            <div class="kj-state">
+                <span class="kj-state-icon is-success">{{echo inst_icon('check-circle-fill')}}</span>
+                <h1>{{echo $lang['CONFIG_EXISTS']}}</h1>
+            </div>
 
-</form>
-
-    {{if(!$GLOBALS['writeable_path']):}}
-        <div class="clr"></div><br />
-        <img src="style/images/up_c.png" alt="Upload Config" />
-        <div class="clr"></div><br />
-        <h2 class="h2">{{echo $lang['INST_SUBMIT_CONFIGOK']}}</h2>
-        <div class="hr"></div>
-        <form method="post" action="{{echo './install.php?step=c&amp;' . getlang(1)}}">
-            <center>
-                <button onclick="window.location.href='./install.php?step=f&amp;{{echo getlang(1)}}';return false;" name="previous" type="submit" class="btn"><span>&laquo;  {{echo $lang['INST_PREVIOUS']}}</span></button>
-                <button type="submit" name="agres" class="btn"><span>{{echo $lang['INST_NEXT']}} &raquo;</span></button>
-            </center>
-        </form>
-    {{endif;}}
-
-    {{else:}}
-        <div class="clr"></div><br />
-        <img src="style/images/check_conf.png" alt=" " />
-        <div class="clr"></div><br />
-        <h2 class="h2">{{echo $lang['CONFIG_EXISTS']}}</h2>
-        <div class="hr"></div>
-        <form method="post" action="{{echo $_SERVER['PHP_SELF'] . '?step=check&amp;' . getlang(1)}}">
-            <button onclick="window.location.href='./install.php?step=f&amp;{{echo getlang(1)}}';return false;" name="previous" type="submit" class="btn"><span>&laquo;  {{echo $lang['INST_PREVIOUS']}}</span></button>
-            <button type="submit" name="agres" class="btn"><span>{{echo $lang['INST_NEXT']}} &raquo;</span></button>
-        </form>
-    {{endif;}}
-
-<div class="clr"></div>
-</div></div><div class="BoxBottomImg"></div></div>
+            <div class="kj-actions">
+                <a class="btn btn-outline-secondary" href="./install.php?step=f&amp;{{echo getlang(1)}}">
+                    {{echo inst_icon('arrow-left', 'kj-icon-flip')}} {{echo $lang['INST_PREVIOUS']}}
+                </a>
+                <a class="btn btn-primary" href="./install.php?step=check&amp;{{echo getlang(1)}}">
+                    {{echo $lang['INST_NEXT']}} {{echo inst_icon('arrow-right', 'kj-icon-flip')}}
+                </a>
+            </div>
+            {{endif;}}

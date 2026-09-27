@@ -1,82 +1,30 @@
-<div class="BoxInner">
-    <div class="BoxTopImg"></div>
-    <div class="BoxBody">
-        <div class="inner">
-            <div class="clr"></div>
-
             {{if(!$GLOBALS['php_ver']):}}
-            <div class="Failure">
-                <img src="style/images/official_no.png" class="img" alt="?" /><br /><br />
-                <h2>{{echo sprintf($lang['INST_PHP_LESSMIN'], MIN_PHP_VERSION, PHP_VERSION)}}</h2>
+            <div class="kj-state">
+                <span class="kj-state-icon is-danger">{{echo inst_icon('x-circle-fill')}}</span>
+                <h1>{{echo sprintf($lang['INST_PHP_LESSMIN'], MIN_PHP_VERSION, PHP_VERSION)}}</h1>
             </div>
             {{else:}}
-            {{if($GLOBALS['install_or_no']):}}
-            <div class="InstallUpdate">
-                <img src="style/images/Installer.png" alt="Install Kleeja" /><br />
-                <h2>{{echo $lang['INST_INSTALL_CLEAN_VER']}}</h2>
+            <div class="kj-state">
+                {{if($GLOBALS['install_or_no']):}}
+                <span class="kj-state-icon">{{echo inst_icon('download')}}</span>
+                <h1>{{echo $lang['INST_INSTALL_CLEAN_VER']}}</h1>
+                {{else:}}
+                <span class="kj-state-icon">{{echo inst_icon('arrow-repeat')}}</span>
+                <h1>{{echo $lang['INST_UPDATE_P_VER']}}</h1>
+                {{endif;}}
+
+                <div class="spinner-border text-primary my-3" role="status">
+                    <span class="visually-hidden">{{echo $lang['INST_NEXT']}}</span>
+                </div>
             </div>
-            <span class="loader"></span>
-            <script>
-                window.setTimeout(function () {
-                    window.location.href = './install.php?step=license&amp;{{echo getlang(1)}}';
-                }, 3000);
-            </script>
-            {{else:}}
-            <div class="InstallUpdate" onclick="window.location.href='./update.php?{{echo getlang(1)}}';">
-                <img src="style/images/update.png" alt="update Kleeja" /><br />
-                <h2>{{echo $lang['INST_UPDATE_P_VER']}}</h2>
+
+            <div class="kj-actions is-centered">
+                {{if($GLOBALS['install_or_no']):}}
+                <a class="btn btn-primary" href="./install.php?step=license&amp;{{echo getlang(1)}}" data-kj-redirect="3000">
+                {{else:}}
+                <a class="btn btn-primary" href="./update.php?{{echo getlang(1)}}" data-kj-redirect="3000">
+                {{endif;}}
+                    {{echo $lang['INST_NEXT']}} {{echo inst_icon('arrow-right', 'kj-icon-flip')}}
+                </a>
             </div>
-            <span class="loader"></span>
-            <script>
-                window.setTimeout(function () {
-                    window.location.href = './update.php?{{echo getlang(1)}}';
-                }, 3000);
-            </script>
             {{endif;}}
-            {{endif;}}
-
-            <div class="clr"></div>
-        </div>
-    </div>
-    <div class="BoxBottomImg"></div>
-</div>
-<style>
-    .loader {
-        --color-1: #fff;
-        --color-2: #ed8f91;
-        --size: 1.7px;
-
-        width: calc(48 * var(--size));
-        height: calc(48 * var(--size));
-        border: calc(3 * var(--size)) solid var(--color-1);
-        border-radius: 50%;
-        display: inline-block;
-        position: relative;
-        box-sizing: border-box;
-        animation: rotation 1s linear infinite;
-    }
-
-    .loader::after {
-        content: '';
-        box-sizing: border-box;
-        position: absolute;
-        left: 50%;
-        top: 50%;
-        transform: translate(-50%, -50%);
-        width: calc(40 * var(--size));
-        height: calc(40 * var(--size));
-        border-radius: 50%;
-        border: calc(3 * var(--size)) solid;
-        border-color: var(--color-2) transparent;
-    }
-
-    @keyframes rotation {
-        0% {
-            transform: rotate(0deg);
-        }
-
-        100% {
-            transform: rotate(360deg);
-        }
-    }
-</style>

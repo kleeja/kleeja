@@ -1,0 +1,10 @@
+            <div class="kj-state">
+                <span class="kj-state-icon is-danger">{{echo inst_icon('x-circle-fill')}}</span>
+                <h1>{{echo $GLOBALS['error_message']}}</h1>
+            </div>
+
+            <div class="kj-actions">
+                <button type="button" class="btn btn-outline-secondary" onclick="window.history.back()">
+                    {{echo inst_icon('arrow-left', 'kj-icon-flip')}} {{echo $lang['INST_PREVIOUS']}}
+                </button>
+            </div>
