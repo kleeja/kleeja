@@ -337,7 +337,7 @@ switch ($case):
             define('SQL_NO_ERRORS', true);
         }
 
-        @include PATH . KLEEJA_PLUGINS_FOLDER . '/' . $plg_name . '/init.php';
+        @include_once PATH . KLEEJA_PLUGINS_FOLDER . '/' . $plg_name . '/init.php';
 
         $install_callback = $kleeja_plugin[$plg_name]['install'];
         $plugin_info = $kleeja_plugin[$plg_name]['information'];
@@ -471,7 +471,7 @@ switch ($case):
 
             $kleeja_plugin = [];
 
-            include PATH . KLEEJA_PLUGINS_FOLDER . '/' . $plg_name . '/init.php';
+            include_once PATH . KLEEJA_PLUGINS_FOLDER . '/' . $plg_name . '/init.php';
 
             $uninstall_callback = $kleeja_plugin[$plg_name]['uninstall'];
 
