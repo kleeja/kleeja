@@ -244,8 +244,30 @@ a {
     letter-spacing: 0.02em;
 }
 
-.kj-lang .form-select {
-    min-width: 8.5rem;
+.kj-lang .input-group {
+    flex-wrap: nowrap;
+}
+
+@media (min-width: 576px) {
+    .kj-lang .form-select {
+        min-width: 8.5rem;
+    }
+}
+
+.kj-theme-toggle {
+    --bs-btn-padding-x: 0.5rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1rem;
+}
+
+/* show the logo and the toggle icon that fit the current theme */
+[data-bs-theme='light'] .kj-logo-dark,
+[data-bs-theme='light'] .kj-theme-to-light,
+[data-bs-theme='dark'] .kj-logo-light,
+[data-bs-theme='dark'] .kj-theme-to-dark {
+    display: none !important;
 }
 
 .kj-main {

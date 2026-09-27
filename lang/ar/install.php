@@ -123,6 +123,7 @@ return [
     'INST_DB_TABLES' => 'إنشاء جداول قاعدة البيانات',
     'INST_CHECK_FAILED' => 'بعض الفحوصات لم تنجح، قم بإصلاحها ثم أعد الفحص',
     'INST_ERROR_LOG' => 'سجل الأخطاء',
+    'INST_DARK_MODE' => 'الوضع الداكن',
 
     'KLEEJA_TEAM_MSG_NAME' => 'فريق تطوير كليجا',
     'KLEEJA_TEAM_MSG_TEXT' =>

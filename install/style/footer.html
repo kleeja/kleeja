@@ -101,6 +101,28 @@
             syncDbType();
         }
 
+        // light or dark theme, remembered for the next pages
+        var themeToggle = document.getElementById('kj_theme');
+
+        if (themeToggle) {
+            var root = document.documentElement;
+            var syncTheme = function () {
+                themeToggle.setAttribute('aria-pressed', root.getAttribute('data-bs-theme') === 'dark' ? 'true' : 'false');
+            };
+
+            themeToggle.addEventListener('click', function () {
+                var theme = root.getAttribute('data-bs-theme') === 'dark' ? 'light' : 'dark';
+                root.setAttribute('data-bs-theme', theme);
+                syncTheme();
+
+                try {
+                    window.localStorage.setItem('kj-install-theme', theme);
+                } catch (e) {}
+            });
+
+            syncTheme();
+        }
+
         // go to a link after a while
         all('[data-kj-redirect]').forEach(function (link) {
             window.setTimeout(function () {

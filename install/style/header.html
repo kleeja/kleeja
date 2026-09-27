@@ -8,14 +8,13 @@
     <title>{{echo $current_index !== false ? $steps[$current_step] . ' · ' : ''}}{{echo $lang['INST_INSTALL_WIZARD']}}</title>
     <link rel="icon" type="image/svg+xml" href="https://kleeja.net/images/logo.svg">
     <script>
+        // light by default, dark only if the visitor chose it before
         (function () {
-            var media = window.matchMedia('(prefers-color-scheme: dark)');
-            var apply = function () {
-                document.documentElement.setAttribute('data-bs-theme', media.matches ? 'dark' : 'light');
-            };
-
-            apply();
-            media.addEventListener('change', apply);
+            try {
+                if (window.localStorage.getItem('kj-install-theme') === 'dark') {
+                    document.documentElement.setAttribute('data-bs-theme', 'dark');
+                }
+            } catch (e) {}
         })();
     </script>
     {{if($lang['DIR'] == 'rtl'):}}
@@ -30,30 +29,36 @@
 <header class="kj-header">
     <div class="container kj-container d-flex align-items-center justify-content-between gap-3 py-3">
         <a class="kj-brand" href="./?{{echo getlang(1)}}">
-            <picture>
-                <source srcset="https://kleeja.net/images/logo-light.svg" media="(prefers-color-scheme: dark)">
-                <img src="https://kleeja.net/images/logo.svg" alt="" width="40" height="40" aria-hidden="true">
-            </picture>
+            <img class="kj-logo-light" src="https://kleeja.net/images/logo.svg" alt="" width="40" height="40" aria-hidden="true">
+            <img class="kj-logo-dark" src="https://kleeja.net/images/logo-light.svg" alt="" width="40" height="40" aria-hidden="true">
             <span>Kleeja</span>
             <span class="kj-badge d-none d-sm-inline" dir="ltr">v{{echo KLEEJA_VERSION}}</span>
         </a>
 
-        {{if(ig('step') && g('step') != 'language' && $_SERVER['REQUEST_METHOD'] != 'POST'):}}
-        <form class="kj-lang" method="post" action="?step={{echo g('step')}}&amp;change_lang=1">
-            <div class="input-group input-group-sm">
-                <label class="input-group-text" for="lang" title="{{echo $lang['LANGUAGE']}}">
-                    {{echo inst_icon('translate')}}
-                    <span class="visually-hidden">{{echo $lang['LANGUAGE']}}</span>
-                </label>
-                <select class="form-select" name="lang" id="lang" onchange="this.form.submit()">
-                    {{foreach(inst_languages() as $language):}}
-                    <option value="{{echo $language}}"{{if($language == getlang()):}} selected{{endif;}}>{{echo inst_lang_name($language)}}</option>
-                    {{endforeach;}}
-                </select>
-            </div>
-            <input type="hidden" name="step_is" value="{{echo g('step')}}">
-        </form>
-        {{endif;}}
+        <div class="d-flex align-items-center gap-2">
+            {{if(ig('step') && g('step') != 'language' && $_SERVER['REQUEST_METHOD'] != 'POST'):}}
+            <form class="kj-lang" method="post" action="?step={{echo g('step')}}&amp;change_lang=1">
+                <div class="input-group input-group-sm">
+                    <label class="input-group-text" for="lang" title="{{echo $lang['LANGUAGE']}}">
+                        {{echo inst_icon('translate')}}
+                        <span class="visually-hidden">{{echo $lang['LANGUAGE']}}</span>
+                    </label>
+                    <select class="form-select" name="lang" id="lang" onchange="this.form.submit()">
+                        {{foreach(inst_languages() as $language):}}
+                        <option value="{{echo $language}}"{{if($language == getlang()):}} selected{{endif;}}>{{echo inst_lang_name($language)}}</option>
+                        {{endforeach;}}
+                    </select>
+                </div>
+                <input type="hidden" name="step_is" value="{{echo g('step')}}">
+            </form>
+            {{endif;}}
+
+            <button type="button" class="btn btn-sm btn-outline-secondary kj-theme-toggle" id="kj_theme" aria-pressed="false" title="{{echo $lang['INST_DARK_MODE']}}">
+                {{echo inst_icon('moon-stars', 'kj-theme-to-dark')}}
+                {{echo inst_icon('sun', 'kj-theme-to-light')}}
+                <span class="visually-hidden">{{echo $lang['INST_DARK_MODE']}}</span>
+            </button>
+        </div>
     </div>
 </header>
 

@@ -131,6 +131,7 @@ return [
     'INST_DB_TABLES' => 'Creating the database tables',
     'INST_CHECK_FAILED' => 'Some checks did not pass, fix them then check again',
     'INST_ERROR_LOG' => 'Error log',
+    'INST_DARK_MODE' => 'Dark mode',
 
     'KLEEJA_TEAM_MSG_NAME' => 'Kleeja Development Team',
     'KLEEJA_TEAM_MSG_TEXT' =>
