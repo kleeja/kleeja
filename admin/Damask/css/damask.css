@@ -2066,6 +2066,78 @@ input.form-control[type="checkbox"] {
     object-fit: cover;
 }
 
+/* blog */
+.kj-post {
+    overflow: hidden;
+    transition:
+        border-color var(--kj-duration) var(--kj-ease),
+        box-shadow var(--kj-duration) var(--kj-ease);
+}
+
+.kj-post:hover {
+    border-color: var(--bs-secondary-border-subtle);
+    box-shadow: var(--kj-shadow-lg);
+}
+
+.kj-post-media {
+    border-bottom: 1px solid var(--bs-border-color);
+    background: var(--bs-tertiary-bg);
+}
+
+.kj-post-media img {
+    object-fit: cover;
+}
+
+.kj-post-date {
+    display: block;
+    margin-bottom: 0.5rem;
+    color: var(--bs-secondary-color);
+    font-size: 0.8125rem;
+    font-weight: 500;
+}
+
+.kj-post-title {
+    margin-bottom: 0.5rem;
+    font-size: 1.0625rem;
+    font-weight: 600;
+    line-height: 1.4;
+}
+
+.kj-post-title a {
+    color: var(--bs-emphasis-color);
+    text-decoration: none;
+    transition: color var(--kj-duration) var(--kj-ease);
+}
+
+.kj-post:hover .kj-post-title a {
+    color: var(--kj-accent);
+}
+
+.kj-post-author {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.8125rem;
+}
+
+.kj-post-author img {
+    width: 1.5rem;
+    height: 1.5rem;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.kj-post-author a {
+    color: var(--bs-secondary-color);
+    font-weight: 500;
+    text-decoration: none;
+}
+
+.kj-post-author a[href]:hover {
+    color: var(--kj-accent);
+    text-decoration: underline;
+}
+
 /* --- Sign-in page -------------------------------------------------------------------- */
 
 .kj-auth {

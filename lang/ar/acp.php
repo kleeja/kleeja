@@ -323,4 +323,9 @@ return [
     'ADM_ENABLED' => 'مفعّلة',
     'ADM_DISABLED' => 'معطّلة',
     'ADM_MORE_ACTIONS' => 'إجراءات أخرى',
+    'ADM_KLEEJA_BLOG' => 'مدونة كليجا',
+    'ADM_BLOG_HINT' => 'أخبار وإصدارات وأدلة من فريق كليجا.',
+    'ADM_BLOG_VISIT' => 'زيارة مدونة كليجا',
+    'ADM_BLOG_EMPTY' => 'لا توجد تدوينات منشورة بعد.',
+    'ADM_BLOG_ERROR' => 'تعذّر تحميل تدوينات المدونة حاليًا.',
 ];

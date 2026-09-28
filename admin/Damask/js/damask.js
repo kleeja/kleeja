@@ -710,6 +710,166 @@
             });
     }
 
+    /* --- Kleeja blog ------------------------------------------------------------------------ */
+
+    // only web links from the feed may become an href or an image source
+    function webUrl(value) {
+        try {
+            var url = new URL(String(value || ""), window.location.href);
+
+            return url.protocol === "https:" || url.protocol === "http:" ? url.href : "";
+        } catch (error) {
+            return "";
+        }
+    }
+
+    // the admin's language when the feed has posts in it, English otherwise
+    function blogPosts(feed, language) {
+        var own = feed && Array.isArray(feed[language]) ? feed[language] : [];
+
+        if (own.length) {
+            return { language: language, posts: own };
+        }
+
+        return { language: "en", posts: feed && Array.isArray(feed.en) ? feed.en : [] };
+    }
+
+    // "2026-09-26" in the posts' language, with Latin digits like the rest of the panel
+    function blogDate(element, value, language) {
+        var match = /^(\d{4})-(\d{2})-(\d{2})/.exec(String(value || ""));
+
+        if (!match) {
+            element.remove();
+            return;
+        }
+
+        element.dateTime = match[0];
+        element.textContent = match[0];
+
+        try {
+            element.textContent = new Intl.DateTimeFormat(language + "-u-nu-latn", {
+                dateStyle: "long",
+                timeZone: "UTC",
+            }).format(new Date(Date.UTC(+match[1], match[2] - 1, +match[3])));
+        } catch (error) {
+            // keep the ISO date
+        }
+    }
+
+    function blogNotice(list, text) {
+        var column = document.createElement("div");
+        var alert = document.createElement("div");
+
+        column.className = "col-12";
+        alert.className = "alert alert-info mb-0";
+        alert.textContent = text;
+        column.appendChild(alert);
+        list.appendChild(column);
+    }
+
+    function blogItem(template, post, language, rtl) {
+        var item = template.content.firstElementChild.cloneNode(true);
+        var card = $(".card", item);
+        var link = $("[data-kj-blog-link]", item);
+        var image = webUrl(post.image);
+        var author = post.author || {};
+        var authorLink = $("[data-kj-blog-author-link]", item);
+        var avatar = webUrl(author.avatar);
+
+        // English posts in an Arabic panel still read left to right
+        card.lang = language;
+        card.dir = rtl ? "rtl" : "ltr";
+
+        link.textContent = String(post.title || "");
+        link.href = webUrl(post.url) || "#";
+        $("[data-kj-blog-desc]", item).textContent = String(post.description || "");
+        blogDate($("[data-kj-blog-date]", item), post.date, language);
+
+        if (image) {
+            $("[data-kj-blog-image]", item).src = image;
+            $("[data-kj-blog-image]", item).addEventListener("error", function () {
+                $("[data-kj-blog-media]", item).remove();
+            });
+        } else {
+            $("[data-kj-blog-media]", item).remove();
+        }
+
+        if (author.name) {
+            authorLink.textContent = String(author.name);
+
+            if (webUrl(author.url)) {
+                authorLink.href = webUrl(author.url);
+            } else {
+                authorLink.removeAttribute("href");
+            }
+
+            if (avatar) {
+                $("[data-kj-blog-avatar]", item).src = avatar;
+            } else {
+                $("[data-kj-blog-avatar]", item).remove();
+            }
+        } else {
+            $("[data-kj-blog-author]", item).remove();
+        }
+
+        return item;
+    }
+
+    // posts are read from kleeja.net by the browser and written with textContent only
+    function initBlog() {
+        var list = $("[data-kj-blog]");
+        var template = $("#kjBlogItem");
+
+        if (!list || !template || !window.fetch) {
+            return;
+        }
+
+        var language = (list.dataset.kjBlogLang || "en").toLowerCase();
+
+        fetch(list.dataset.kjBlog, {
+            credentials: "omit",
+            referrerPolicy: "no-referrer",
+            headers: { Accept: "application/json" },
+        })
+            .then(function (response) {
+                if (!response.ok) {
+                    throw new Error("blog");
+                }
+
+                return response.json();
+            })
+            .then(function (feed) {
+                var found = blogPosts(feed, language);
+                var rtl = found.language === language && document.documentElement.dir === "rtl";
+                var posts = found.posts.filter(function (post) {
+                    return post && post.title;
+                });
+
+                list.innerHTML = "";
+
+                if (!posts.length) {
+                    blogNotice(list, list.dataset.kjBlogEmpty);
+                    return;
+                }
+
+                // newest first, whatever order the feed uses
+                posts
+                    .sort(function (a, b) {
+                        return String(b.date || "").localeCompare(String(a.date || ""));
+                    })
+                    .forEach(function (post) {
+                        list.appendChild(blogItem(template, post, found.language, rtl));
+                    });
+            })
+            .catch(function () {
+                list.innerHTML = "";
+                blogNotice(list, list.dataset.kjBlogError || msg("kjMsgError", "Error, try again."));
+            })
+            .then(function () {
+                list.setAttribute("aria-busy", "false");
+            });
+    }
+
     /* --- Image control ---------------------------------------------------------------------- */
 
     function initImagePreview() {
@@ -966,6 +1126,7 @@
     initQuickLanguage();
     initStatsChart();
     initTeam();
+    initBlog();
     initImagePreview();
     initSearchOne();
     initUpdater();

@@ -321,4 +321,9 @@ return [
     'ADM_ENABLED' => 'Enabled',
     'ADM_DISABLED' => 'Disabled',
     'ADM_MORE_ACTIONS' => 'More actions',
+    'ADM_KLEEJA_BLOG' => 'Kleeja blog',
+    'ADM_BLOG_HINT' => 'News, releases and guides from the Kleeja team.',
+    'ADM_BLOG_VISIT' => 'Visit Kleeja blog',
+    'ADM_BLOG_EMPTY' => 'No posts have been published yet.',
+    'ADM_BLOG_ERROR' => 'The blog posts could not be loaded right now.',
 ];

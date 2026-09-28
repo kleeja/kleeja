@@ -269,6 +269,12 @@ $go_menu = [
         'goto' => 'other',
         'current' => $current_smt == 'other',
     ],
+    'blog' => [
+        'name' => $lang['ADM_KLEEJA_BLOG'],
+        'link' => basename(ADMIN_PATH) . '?cp=start&amp;smt=blog',
+        'goto' => 'blog',
+        'current' => $current_smt == 'blog',
+    ],
     'team' => [
         'name' => $lang['KLEEJA_TEAM'],
         'link' => basename(ADMIN_PATH) . '?cp=start&amp;smt=team',

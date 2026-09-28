@@ -356,6 +356,53 @@
 </div>
 
 
+<ELSEIF NAME="current_smt == blog">
+
+<div class="kj-page-header">
+    <div>
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="./">{lang.R_CPINDEX}</a></li>
+                <li class="breadcrumb-item active" aria-current="page">{lang.ADM_KLEEJA_BLOG}</li>
+            </ol>
+        </nav>
+        <h1 class="kj-page-title">{lang.ADM_KLEEJA_BLOG}</h1>
+        <p class="kj-page-subtitle">{lang.ADM_BLOG_HINT}</p>
+    </div>
+</div>
+
+<!-- posts are fetched by the browser straight from kleeja.net, see initBlog() in damask.js -->
+<div class="row row-cols-1 row-cols-md-2 row-cols-xxl-3 g-3" data-kj-blog="https://kleeja.net/blog-json" data-kj-blog-lang="{config.language}" data-kj-blog-empty="{lang.ADM_BLOG_EMPTY}" data-kj-blog-error="{lang.ADM_BLOG_ERROR}" aria-live="polite" aria-busy="true">
+    <div class="col-12 d-flex align-items-center gap-2 text-body-secondary">
+        <span class="spinner-border spinner-border-sm" aria-hidden="true"></span> {lang.LOADING}…
+    </div>
+</div>
+
+<template id="kjBlogItem">
+    <div class="col">
+        <article class="card kj-post h-100">
+            <div class="ratio ratio-16x9 kj-post-media" data-kj-blog-media>
+                <img src="" alt="" loading="lazy" data-kj-blog-image>
+            </div>
+            <div class="card-body">
+                <time class="kj-post-date" data-kj-blog-date></time>
+                <h2 class="kj-post-title"><a class="stretched-link" href="#" target="_blank" rel="noopener" data-kj-blog-link></a></h2>
+                <p class="kj-desc mb-0" data-kj-blog-desc></p>
+            </div>
+            <div class="card-footer kj-post-author" data-kj-blog-author>
+                <img src="" alt="" width="24" height="24" loading="lazy" data-kj-blog-avatar>
+                <a class="position-relative z-2" href="#" target="_blank" rel="noopener" data-kj-blog-author-link></a>
+            </div>
+        </article>
+    </div>
+</template>
+
+<div class="mt-4">
+    <a class="btn btn-outline-primary" href="<IF NAME="config.language == ar">https://kleeja.net/ar/blog<ELSE>https://kleeja.net/blog</IF>" target="_blank" rel="noopener">
+        <i class="fa-solid fa-newspaper" aria-hidden="true"></i><span>{lang.ADM_BLOG_VISIT}</span><i class="fa-solid fa-arrow-up-right-from-square kj-flip-rtl small" aria-hidden="true"></i>
+    </a>
+</div>
+
 <ELSEIF NAME="current_smt == team">
 
 <div class="kj-page-header">
