@@ -145,18 +145,14 @@ function inst_current_step(): string
 }
 
 /**
- * An icon from style/icons.svg
- * @param  string $name
+ * A solid icon from Font Awesome (includes/static_shared_files/fontawesome)
+ * @param  string $name  the icon name without the fa- prefix
  * @param  string $class
  * @return string
  */
 function inst_icon(string $name, string $class = ''): string
 {
-    return '<svg class="kj-icon' .
-        ($class !== '' ? ' ' . $class : '') .
-        '" aria-hidden="true"><use href="#i-' .
-        $name .
-        '"></use></svg>';
+    return '<i class="kj-icon fa-solid fa-' . $name . ($class !== '' ? ' ' . $class : '') . '" aria-hidden="true"></i>';
 }
 
 /**
