@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="{lang.LANG_SMALL_NAME}" dir="{lang.DIR}" data-bs-theme="light">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="robots" content="noindex, nofollow">
+    <title>{lang.KLEEJA_CP} · {config.sitename}</title>
+
+    <script src="{STYLE_PATH_ADMIN}js/color-mode.js"></script>
+
+    <link rel="icon" type="image/svg+xml" href="{STYLE_PATH_ADMIN}images/logo.svg">
+    <link rel="icon" type="image/png" href="{STYLE_PATH_ADMIN}images/favicon.png">
+    <link rel="shortcut icon" href="{STYLE_PATH_ADMIN}images/favicon.ico">
+
+    <IF NAME="lang.DIR==rtl">
+    <link rel="stylesheet" href="{config.siteurl}includes/static_shared_files/bootstrap/css/bootstrap.rtl.min.css">
+    <ELSE>
+    <link rel="stylesheet" href="{config.siteurl}includes/static_shared_files/bootstrap/css/bootstrap.min.css">
+    </IF>
+    <link rel="stylesheet" href="{config.siteurl}includes/static_shared_files/fontawesome/css/all.min.css">
+    <link rel="stylesheet" href="{config.siteurl}includes/static_shared_files/fontawesome/css/v4-shims.min.css">
+    <link rel="stylesheet" href="{STYLE_PATH_ADMIN}css/damask.css">
+
+    <script>
+        var STYLE_PATH_ADMIN = '{STYLE_PATH_ADMIN}';
+        var go_to = '{go_to}';
+    </script>
+<IF ISSET="extra_admin_header_code">
+{extra_admin_header_code}
+</IF>
+</head>
+<body data-kj-page="{go_to}" data-kj-msg-confirm="{lang.ARE_YOU_SURE_DO_THIS}" data-kj-msg-error="{lang.ERROR_TRY_AGAIN}" data-kj-msg-session="{lang.SESSION_ENDED}" data-kj-site-url="{config.siteurl}">
+
+<a class="visually-hidden-focusable btn btn-primary btn-sm kj-skip" href="#kj-content">{lang.ADM_SKIP_CONTENT}</a>
+
+<div class="kj-app">
+
+    <!-- sidebar: static from lg up, an off-canvas drawer below -->
+    <aside class="kj-sidebar" data-bs-theme="dark">
+        <div class="offcanvas-lg offcanvas-start" tabindex="-1" id="kjSidebar" aria-labelledby="kjSidebarLabel">
+            <div class="kj-sidebar-brand">
+                <a class="kj-brand" href="./">
+                    <img src="{STYLE_PATH_ADMIN}images/logo-light.svg" alt="" width="32" height="32" aria-hidden="true">
+                    <span id="kjSidebarLabel">Kleeja</span>
+                    <span class="kj-version" dir="ltr">{assigned_klj_ver}</span>
+                </a>
+                <button type="button" class="btn-close d-lg-none" data-bs-dismiss="offcanvas" data-bs-target="#kjSidebar" aria-label="{lang.CLOSE}"></button>
+            </div>
+
+            <nav class="kj-sidebar-nav" aria-label="{lang.KLEEJA_CP}">
+                <ul class="kj-nav">
+                    <li>
+                        <a class="kj-nav-link<IF NAME="go_to==start"> active</IF>" href="./"<IF NAME="go_to==start"> aria-current="page"</IF>>
+                            <i class="fa-solid fa-gauge-high kj-nav-icon" aria-hidden="true"></i>
+                            <span class="kj-nav-text">{lang.R_CPINDEX}</span>
+                        </a>
+                        <IF NAME="go_to==start">
+                        <IF ISSET="go_menu_html"><ul class="kj-subnav">{go_menu_html}</ul></IF>
+                        </IF>
+                    </li>
+                </ul>
+
+                <p class="kj-nav-heading">{lang.KLEEJA_CP}</p>
+
+                <ul class="kj-nav">
+                    <LOOP NAME="adm_extensions_menu">
+                    <li id="menu_item{{i}}">
+                        <a class="kj-nav-link<IF LOOP="current"> active</IF>" href="{{link}}" title="{{title}}"<IF LOOP="current"> aria-current="page"</IF><IF LOOP="confirm"> onclick="return confirm_form();"</IF>>
+                            <i class="fa fa-fw fa-{{icon}} kj-nav-icon" aria-hidden="true"></i>
+                            <span class="kj-nav-text">{{title}}</span>
+                            <span class="kj-nav-badge bubble_{{m}}<IF LOOP="counter"><ELSE> d-none</IF>">{{counter}}</span>
+                        </a>
+                        <IF LOOP="current">
+                        <IF ISSET="go_menu_html"><ul class="kj-subnav">{go_menu_html}</ul></IF>
+                        </IF>
+                    </li>
+                    </LOOP>
+                </ul>
+            </nav>
+
+            <div class="kj-sidebar-footer">
+                <a class="kj-nav-link" href="{config.siteurl}" target="_blank" rel="noopener">
+                    <i class="fa-solid fa-arrow-up-right-from-square kj-nav-icon" aria-hidden="true"></i>
+                    <span class="kj-nav-text">{lang.ADM_VIEW_SITE}</span>
+                </a>
+            </div>
+        </div>
+    </aside>
+
+    <div class="kj-main">
+
+        <header class="kj-topbar">
+            <button class="btn kj-icon-btn d-lg-none" type="button" data-bs-toggle="offcanvas" data-bs-target="#kjSidebar" aria-controls="kjSidebar" aria-label="{lang.ADM_MENU}">
+                <i class="fa-solid fa-bars" aria-hidden="true"></i>
+            </button>
+
+            <a class="kj-brand d-lg-none" href="./" aria-label="{lang.R_CPINDEX}">
+                <img class="kj-logo-light" src="{STYLE_PATH_ADMIN}images/logo.svg" alt="" width="28" height="28">
+                <img class="kj-logo-dark" src="{STYLE_PATH_ADMIN}images/logo-light.svg" alt="" width="28" height="28">
+            </a>
+
+            <a class="kj-topbar-site d-none d-md-inline-flex" href="{config.siteurl}" target="_blank" rel="noopener" title="{lang.ADM_VIEW_SITE}">
+                <i class="fa-solid fa-globe" aria-hidden="true"></i>
+                <span>{config.sitename}</span>
+            </a>
+
+            <div class="kj-topbar-actions">
+
+                <IF ISSET="kbubbles">
+                <!-- messages and reports waiting for a look -->
+                <div class="dropdown">
+                    <button class="btn kj-icon-btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="{lang.NOTIFICATIONS}" title="{lang.NOTIFICATIONS}">
+                        <i class="fa-solid fa-bell" aria-hidden="true"></i>
+                        <span class="kj-dot d-none" data-kj-bell-dot></span>
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end">
+                        <li><h6 class="dropdown-header">{lang.NOTIFICATIONS}</h6></li>
+                        <li>
+                            <a class="dropdown-item" href="./?cp=e_calls">
+                                <i class="fa-solid fa-envelope" aria-hidden="true"></i>
+                                <span>{lang.R_CALLS}</span>
+                                <span class="kj-badge ms-auto bubble_calls<IF NAME="kbubbles.calls"><ELSE> d-none</IF>">{kbubbles.calls}</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a class="dropdown-item" href="./?cp=f_reports">
+                                <i class="fa-solid fa-flag" aria-hidden="true"></i>
+                                <span>{lang.R_REPORTS}</span>
+                                <span class="kj-badge ms-auto bubble_reports<IF NAME="kbubbles.reports"><ELSE> d-none</IF>">{kbubbles.reports}</span>
+                            </a>
+                        </li>
+                        <LOOP NAME="adm_topmenu">
+                        <li>
+                            <a class="dropdown-item" href="{{link}}">
+                                <i class="fa fa-fw fa-{{icon}}" aria-hidden="true"></i>
+                                <span>{{title}}</span>
+                                <IF LOOP="counter"><span class="kj-badge ms-auto bubble_{{m}}">{{counter}}</span></IF>
+                            </a>
+                        </li>
+                        </LOOP>
+                    </ul>
+                </div>
+                </IF>
+
+                <!-- colour mode -->
+                <div class="dropdown">
+                    <button class="btn kj-icon-btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="{lang.ADM_COLOR_MODE}" title="{lang.ADM_COLOR_MODE}">
+                        <i class="fa-solid fa-circle-half-stroke" aria-hidden="true" data-kj-color-icon></i>
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end">
+                        <li><h6 class="dropdown-header">{lang.ADM_COLOR_MODE}</h6></li>
+                        <li>
+                            <button type="button" class="dropdown-item" data-kj-color-mode="light" aria-pressed="false">
+                                <i class="fa-solid fa-sun" aria-hidden="true"></i> {lang.ADM_COLOR_LIGHT}
+                                <i class="fa-solid fa-check kj-check" aria-hidden="true"></i>
+                            </button>
+                        </li>
+                        <li>
+                            <button type="button" class="dropdown-item" data-kj-color-mode="dark" aria-pressed="false">
+                                <i class="fa-solid fa-moon" aria-hidden="true"></i> {lang.ADM_COLOR_DARK}
+                                <i class="fa-solid fa-check kj-check" aria-hidden="true"></i>
+                            </button>
+                        </li>
+                        <li>
+                            <button type="button" class="dropdown-item" data-kj-color-mode="auto" aria-pressed="false">
+                                <i class="fa-solid fa-circle-half-stroke" aria-hidden="true"></i> {lang.ADM_COLOR_AUTO}
+                                <i class="fa-solid fa-check kj-check" aria-hidden="true"></i>
+                            </button>
+                        </li>
+                    </ul>
+                </div>
+
+                <a class="btn kj-icon-btn d-none d-sm-inline-flex" href="https://kleeja.net/getting-started/introduction" target="_blank" rel="noopener" aria-label="{lang.ADM_HELP}" title="{lang.ADM_HELP}">
+                    <i class="fa-solid fa-circle-question" aria-hidden="true"></i>
+                </a>
+
+                <!-- account -->
+                <div class="dropdown ms-1">
+                    <button class="btn kj-user-btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <span class="kj-avatar" aria-hidden="true"><i class="fa-solid fa-user"></i></span>
+                        <span class="kj-user-name d-none d-md-inline">{username}</span>
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end">
+                        <li><h6 class="dropdown-header text-truncate">{username}</h6></li>
+                        <li>
+                            <a class="dropdown-item" href="{config.siteurl}" target="_blank" rel="noopener">
+                                <i class="fa-solid fa-house" aria-hidden="true"></i> {lang.RETURN_HOME}
+                            </a>
+                        </li>
+                        <li>
+                            <a class="dropdown-item" href="https://kleeja.net/getting-started/introduction" target="_blank" rel="noopener">
+                                <i class="fa-solid fa-circle-question" aria-hidden="true"></i> {lang.ADM_HELP}
+                            </a>
+                        </li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li>
+                            <a class="dropdown-item text-danger" href="./?cp=b_lgoutcp&amp;{GET_FORM_KEY_GLOBAL}" onclick="return confirm_form();">
+                                <i class="fa-solid fa-right-from-bracket" aria-hidden="true"></i> {lang.R_LGOUTCP}
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </header>
+
+        <main class="kj-content" id="kj-content" tabindex="-1">

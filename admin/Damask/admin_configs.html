@@ -1,0 +1,29 @@
+<div class="kj-page-header">
+    <div>
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="./">{lang.R_CPINDEX}</a></li>
+                <li class="breadcrumb-item"><a href="./?cp=options">{lang.R_CONFIGS}</a></li>
+                <li class="breadcrumb-item active" aria-current="page">{CONFIGEXTENDLANG}</li>
+            </ol>
+        </nav>
+        <h1 class="kj-page-title">{CONFIGEXTENDLANG}</h1>
+    </div>
+</div>
+
+<form method="post" action="{action}" id="opt_form" class="card">
+    <div class="card-body kj-options">
+        <!-- admin configs tr extra begin -->
+        {options}
+        <!-- admin configs tr extra -->
+    </div>
+
+    <div class="card-footer kj-form-actions">
+        <input type="hidden" name="submit" value="1">
+        <button type="submit" id="submit" name="_submit_" class="btn btn-primary">
+            <i class="fa-solid fa-floppy-disk" aria-hidden="true"></i><span>{n_submit}</span>
+        </button>
+    </div>
+
+    {H_FORM_KEYS}
+</form>

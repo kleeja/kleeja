@@ -1,0 +1,413 @@
+<IF NAME="current_smt == general">
+
+<div class="kj-page-header">
+    <div>
+        <h1 class="kj-page-title">{lang.R_CPINDEX}</h1>
+        <p class="kj-page-subtitle">{usernamelang}</p>
+    </div>
+    <div class="kj-page-actions">
+        <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-toggle="modal" data-bs-target="#customizationModal">
+            <i class="fa-solid fa-sliders" aria-hidden="true"></i><span>{lang.CUSTOMIZATION}</span>
+        </button>
+    </div>
+</div>
+
+<!-- choose which boxes the dashboard shows -->
+<div class="modal fade" id="customizationModal" tabindex="-1" aria-labelledby="customizationModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title" id="customizationModalLabel">{lang.CUSTOMIZATION}</h2>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="{lang.CLOSE}"></button>
+            </div>
+            <div class="modal-body" data-kj-start-boxes data-kj-form-key="{GET_FORM_KEY}">
+                <p class="text-body-secondary small">{lang.ADM_CUSTOMIZE_HINT}</p>
+                <div class="d-none" data-kj-status role="status" aria-live="polite"></div>
+                <ul class="list-group">
+                    <LOOP NAME="startBoxes">
+                    <li class="list-group-item d-flex align-items-center justify-content-between gap-3">
+                        <label class="form-check-label flex-grow-1" for="kjStartBox_{%key%}">{{title}}</label>
+                        <div class="form-check form-switch m-0">
+                            <input class="form-check-input" type="checkbox" role="switch" id="kjStartBox_{%key%}" data-kj-start-box="{%key%}"<IF LOOP="hidden==0"> checked</IF>>
+                        </div>
+                    </li>
+                    </LOOP>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<IF NAME="ADM_NOTIFICATIONS">
+<!-- notifications -->
+<section class="card mb-4<IF NAME="startBoxes.notifications.hidden"> d-none</IF>" id="notifications">
+    <div class="card-header kj-card-header">
+        <h2 class="kj-card-title"><i class="fa-solid fa-bell" aria-hidden="true"></i> {lang.NOTIFICATIONS}</h2>
+    </div>
+    <ul class="list-group list-group-flush">
+        <LOOP NAME="ADM_NOTIFICATIONS">
+        <li class="list-group-item d-flex align-items-start gap-3 py-3">
+            <IF LOOP="msg_type==error">
+            <span class="kj-icon-tile is-sm is-warning"><i class="fa-solid fa-triangle-exclamation" aria-hidden="true"></i></span>
+            <ELSE>
+            <span class="kj-icon-tile is-sm is-info"><i class="fa-solid fa-circle-info" aria-hidden="true"></i></span>
+            </IF>
+            <div class="flex-grow-1" style="min-width: 0">
+                <div class="fw-semibold">{{title}}</div>
+                <div class="small text-body-secondary">{{msg}}</div>
+            </div>
+        </li>
+        </LOOP>
+    </ul>
+</section>
+</IF>
+
+{extra_adm_start_html}
+
+<!-- stats boxes -->
+<div class="row row-cols-1 row-cols-sm-2 row-cols-xxl-4 g-3 mb-4<IF NAME="startBoxes.statsBoxes.hidden"> d-none</IF>" id="statsBoxes">
+    <div class="col">
+        <div class="card kj-stat h-100">
+            <div class="card-body">
+                <div>
+                    <div class="kj-stat-label">{lang.R_CALLS}</div>
+                    <div class="kj-stat-value">{kbubbles.calls}</div>
+                </div>
+                <span class="kj-icon-tile"><i class="fa-solid fa-envelope" aria-hidden="true"></i></span>
+            </div>
+            <div class="card-footer">
+                <a href="./?cp=e_calls">{lang.VIEW} <i class="fa-solid fa-angle-right kj-flip-rtl" aria-hidden="true"></i></a>
+                <a href="./?cp=e_calls&amp;smt=show_h24">{lang.SHOW_FROM_24H}</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="col">
+        <div class="card kj-stat h-100">
+            <div class="card-body">
+                <div>
+                    <div class="kj-stat-label">{lang.R_REPORTS}</div>
+                    <div class="kj-stat-value">{kbubbles.reports}</div>
+                </div>
+                <span class="kj-icon-tile is-navy"><i class="fa-solid fa-flag" aria-hidden="true"></i></span>
+            </div>
+            <div class="card-footer">
+                <a href="./?cp=f_reports">{lang.VIEW} <i class="fa-solid fa-angle-right kj-flip-rtl" aria-hidden="true"></i></a>
+                <a href="./?cp=f_reports&amp;smt=show_h24">{lang.SHOW_FROM_24H}</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="col">
+        <div class="card kj-stat h-100">
+            <div class="card-body">
+                <div>
+                    <div class="kj-stat-label">{lang.AFILES_NUM}</div>
+                    <div class="kj-stat-value">{files_number}</div>
+                    <div class="kj-stat-meta">{stat_files} {lang.FILE} · {stat_imgs} {lang.IMAGE}</div>
+                </div>
+                <span class="kj-icon-tile"><i class="fa-solid fa-copy" aria-hidden="true"></i></span>
+            </div>
+            <div class="card-footer">
+                <a href="./?cp=c_files">{lang.R_FILES}</a>
+                <a href="./?cp=d_img_ctrl">{lang.R_IMG_CTRL}</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="col">
+        <div class="card kj-stat h-100">
+            <div class="card-body">
+                <div>
+                    <div class="kj-stat-label">{lang.AUSERS_NUM}</div>
+                    <div class="kj-stat-value">{users_number}</div>
+                    <IF NAME="config.user_system==1">
+                    <div class="kj-stat-meta">{lang.LAST_REG}: {lst_reg}</div>
+                    </IF>
+                </div>
+                <span class="kj-icon-tile is-navy"><i class="fa-solid fa-users" aria-hidden="true"></i></span>
+            </div>
+            <div class="card-footer">
+                <a href="./?cp=g_users">{lang.R_USERS}</a>
+                <a href="./?cp=h_search&amp;smt=users">{lang.SEARCH_USERS}</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-3 mb-4">
+    <IF NAME="stats_chart">
+    <!-- uploads per day -->
+    <div class="col-xl-8<IF NAME="startBoxes.statsChart.hidden"> d-none</IF>" id="statsChart">
+        <section class="card h-100">
+            <div class="card-header kj-card-header">
+                <h2 class="kj-card-title"><i class="fa-solid fa-chart-column" aria-hidden="true"></i> {lang.STATS}</h2>
+                <ul class="kj-chart-legend ms-auto">
+                    <li><i class="kj-swatch-files" aria-hidden="true"></i>{lang.FILE}</li>
+                    <li><i class="kj-swatch-images" aria-hidden="true"></i>{lang.IMAGE}</li>
+                </ul>
+            </div>
+            <div class="card-body">
+                <div id="kjStatsChart" class="kj-chart" data-kj-label-files="{lang.FILE}" data-kj-label-images="{lang.IMAGE}"></div>
+            </div>
+        </section>
+        <script>
+            {stats_chart}
+        </script>
+    </div>
+    </IF>
+
+    <!-- storage and other info -->
+    <div class="col-xl<IF NAME="startBoxes.extraStats.hidden"> d-none</IF>" id="extraStats">
+        <section class="card h-100">
+            <div class="card-header kj-card-header">
+                <h2 class="kj-card-title"><i class="fa-solid fa-hard-drive" aria-hidden="true"></i> {lang.OTHER_INFO}</h2>
+                <a class="ms-auto small" href="./?cp=start&amp;smt=other">{lang.VIEW}</a>
+            </div>
+            <div class="card-body border-bottom">
+                <div class="kj-stat-label">{lang.AFILES_SIZE_SPACE}</div>
+                <div class="d-flex align-items-baseline justify-content-between gap-2 mb-2">
+                    <span class="kj-stat-value fs-3" dir="ltr">{files_sizes}</span>
+                    <span class="small fw-semibold text-body-secondary" dir="ltr">{per1}%</span>
+                </div>
+                <div class="progress" role="progressbar" aria-label="{lang.AFILES_SIZE_SPACE}" aria-valuenow="{per1}" aria-valuemin="0" aria-valuemax="100">
+                    <div class="progress-bar" style="width: {per1}%"></div>
+                </div>
+            </div>
+            <ul class="list-group list-group-flush">
+                <li class="list-group-item kj-kv">
+                    <span>{lang.LSTDELST}</span>
+                    <span>{last_del_fles}</span>
+                </li>
+                <li class="list-group-item kj-kv">
+                    <span>{lang.KLEEJA_VERSION}</span>
+                    <span dir="ltr">{kleeja_version}</span>
+                </li>
+                <li class="list-group-item kj-kv">
+                    <span>{lang.PHP_VER}</span>
+                    <span dir="ltr">{php_version}</span>
+                </li>
+                <li class="list-group-item kj-kv">
+                    <span>{lang.MYSQL_VER}</span>
+                    <span dir="ltr">{mysql_version}</span>
+                </li>
+            </ul>
+        </section>
+    </div>
+</div>
+
+<div class="row g-3">
+    <IF NAME="last_visit">
+    <!-- since the last visit -->
+    <div class="col-xl<IF NAME="startBoxes.lastVisitActions.hidden"> d-none</IF>" id="lastVisitActions">
+        <section class="card h-100">
+            <div class="card-header kj-card-header">
+                <h2 class="kj-card-title"><i class="fa-solid fa-clock-rotate-left" aria-hidden="true"></i> {lang.LAST_VISIT}</h2>
+                <span class="ms-auto small text-body-secondary">{last_visit}</span>
+            </div>
+            <div class="list-group list-group-flush">
+                <div class="list-group-item py-3">
+                    <div class="fw-semibold mb-2">{lang.FLS_LST_VST_SEARCH}</div>
+                    <div class="d-flex flex-wrap align-items-center gap-2">
+                        <IF NAME="files_last_visit">
+                        <a href="{h_lst_files}{files_last_visit}" class="btn btn-sm btn-primary">{lang.LAST_VIEW}</a>
+                        <span class="small text-body-secondary">{lang.OR}</span>
+                        </IF>
+                        <select class="form-select form-select-sm w-auto" data-kj-since="{h_lst_files}" aria-label="{lang.FLS_LST_VST_SEARCH}">
+                            <option value="">{lang.TIME}…</option>
+                            <option value="3600">{lang.HOUR}</option>
+                            <option value="18000">{lang.5HOURS}</option>
+                            <option value="86400">{lang.DAY}</option>
+                            <option value="604800">{lang.WEEK}</option>
+                            <option value="2592000">{lang.MONTH}</option>
+                            <option value="31536000">{lang.YEAR}</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="list-group-item py-3">
+                    <div class="fw-semibold mb-2">{lang.IMG_LST_VST_SEARCH}</div>
+                    <div class="d-flex flex-wrap align-items-center gap-2">
+                        <IF NAME="image_last_visit">
+                        <a href="{h_lst_imgs}{image_last_visit}" class="btn btn-sm btn-primary">{lang.LAST_VIEW}</a>
+                        <span class="small text-body-secondary">{lang.OR}</span>
+                        </IF>
+                        <select class="form-select form-select-sm w-auto" data-kj-since="{h_lst_imgs}" aria-label="{lang.IMG_LST_VST_SEARCH}">
+                            <option value="">{lang.TIME}…</option>
+                            <option value="3600">{lang.HOUR}</option>
+                            <option value="18000">{lang.5HOURS}</option>
+                            <option value="86400">{lang.DAY}</option>
+                            <option value="604800">{lang.WEEK}</option>
+                            <option value="2592000">{lang.MONTH}</option>
+                            <option value="31536000">{lang.YEAR}</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+    </IF>
+
+    <!-- quick actions -->
+    <div class="col-xl<IF NAME="startBoxes.hurryActions.hidden"> d-none</IF>" id="hurryActions">
+        <section class="card h-100">
+            <div class="card-header kj-card-header">
+                <h2 class="kj-card-title"><i class="fa-solid fa-bolt" aria-hidden="true"></i> {lang.HURRY_HURRY}</h2>
+            </div>
+            <div class="list-group list-group-flush">
+                <div class="list-group-item py-3">
+                    <label class="fw-semibold mb-2" for="lang_change">{lang.LANGUAGE}</label>
+                    <div class="row g-2 align-items-center">
+                        <div class="col-sm">
+                            <select name="lang_change" class="form-select form-select-sm" id="lang_change">
+                                {hurry_langs_list}
+                            </select>
+                        </div>
+                        <div class="col-auto small text-body-secondary">{lang.FOR}</div>
+                        <div class="col-sm">
+                            <select name="groups_list" class="form-select form-select-sm" id="groups_list" aria-label="{lang.GROUP}">
+                                {hurry_groups_list}
+                            </select>
+                        </div>
+                        <div class="col-12 col-sm-auto">
+                            <button type="button" class="btn btn-sm btn-outline-primary w-100" data-kj-lang-apply="{hurry_lang_link}">{lang.CHANGE}</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="list-group-item py-3 d-flex flex-wrap align-items-center justify-content-between gap-2">
+                    <div>
+                        <div class="fw-semibold">{lang.R_REPAIR}</div>
+                        <div class="small text-body-secondary">{lang.DEL_CACHE}</div>
+                    </div>
+                    <a class="btn btn-sm btn-outline-secondary" href="{del_cache_link}">
+                        <i class="fa-solid fa-broom" aria-hidden="true"></i><span>{lang.DELETE}</span>
+                    </a>
+                </div>
+            </div>
+        </section>
+    </div>
+</div>
+
+
+<ELSEIF NAME="current_smt == other">
+
+<div class="kj-page-header">
+    <div>
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="./">{lang.R_CPINDEX}</a></li>
+                <li class="breadcrumb-item active" aria-current="page">{lang.OTHER_INFO}</li>
+            </ol>
+        </nav>
+        <h1 class="kj-page-title">{lang.OTHER_INFO}</h1>
+    </div>
+</div>
+
+<div class="row row-cols-1 row-cols-lg-2 g-3">
+    <div class="col">
+        <section class="card h-100">
+            <div class="card-header kj-card-header">
+                <h2 class="kj-card-title"><i class="fa-solid fa-server" aria-hidden="true"></i> {lang.ADM_SERVER}</h2>
+            </div>
+            <ul class="list-group list-group-flush">
+                <li class="list-group-item kj-kv"><span>{lang.PHP_VER}</span><span dir="ltr">{php_version}</span></li>
+                <li class="list-group-item kj-kv"><span>{lang.MYSQL_VER}</span><span dir="ltr">{mysql_version}</span></li>
+                <li class="list-group-item kj-kv"><span>{lang.KLEEJA_VERSION}</span><span dir="ltr">{kleeja_version}</span></li>
+            </ul>
+        </section>
+    </div>
+
+    <div class="col">
+        <section class="card h-100">
+            <div class="card-header kj-card-header">
+                <h2 class="kj-card-title"><i class="fa-brands fa-php" aria-hidden="true"></i> php.ini</h2>
+            </div>
+            <ul class="list-group list-group-flush" dir="ltr">
+                <li class="list-group-item kj-kv"><code>max_execution_time</code><span>{max_execution_time}</span></li>
+                <li class="list-group-item kj-kv"><code>upload_max_filesize</code><span>{upload_max_filesize}</span></li>
+                <li class="list-group-item kj-kv"><code>post_max_size</code><span>{post_max_size}</span></li>
+                <li class="list-group-item kj-kv"><code>memory_limit</code><span>{memory_limit}</span></li>
+            </ul>
+        </section>
+    </div>
+
+    <div class="col">
+        <section class="card h-100">
+            <div class="card-header kj-card-header">
+                <h2 class="kj-card-title"><i class="fa-brands fa-google" aria-hidden="true"></i> {lang.SEARCH_STAT} · Google</h2>
+            </div>
+            <ul class="list-group list-group-flush">
+                <li class="list-group-item kj-kv"><span>{lang.LAST_GOOGLE}</span><span>{s_last_google}</span></li>
+                <li class="list-group-item kj-kv"><span>{lang.GOOGLE_NUM}</span><span>{s_google_num}</span></li>
+            </ul>
+        </section>
+    </div>
+
+    <div class="col">
+        <section class="card h-100">
+            <div class="card-header kj-card-header">
+                <h2 class="kj-card-title"><i class="fa-brands fa-microsoft" aria-hidden="true"></i> {lang.SEARCH_STAT} · Bing</h2>
+            </div>
+            <ul class="list-group list-group-flush">
+                <li class="list-group-item kj-kv"><span>{lang.LAST_BING}</span><span>{s_last_bing}</span></li>
+                <li class="list-group-item kj-kv"><span>{lang.BING_NUM}</span><span>{s_bing_num}</span></li>
+            </ul>
+        </section>
+    </div>
+</div>
+
+
+<ELSEIF NAME="current_smt == team">
+
+<div class="kj-page-header">
+    <div>
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="./">{lang.R_CPINDEX}</a></li>
+                <li class="breadcrumb-item active" aria-current="page">{lang.KLEEJA_TEAM}</li>
+            </ol>
+        </nav>
+        <h1 class="kj-page-title">{lang.KLEEJA_TEAM}</h1>
+    </div>
+    <div class="kj-page-actions">
+        <a class="btn btn-outline-secondary btn-sm" href="https://github.com/kleeja/kleeja" target="_blank" rel="noopener">
+            <i class="fa-brands fa-github" aria-hidden="true"></i><span>GitHub</span>
+        </a>
+    </div>
+</div>
+
+<div class="row row-cols-1 row-cols-sm-2 row-cols-lg-3 row-cols-xxl-4 g-3" data-kj-team="https://api.github.com/repos/kleeja/kleeja/contributors">
+    <div class="col-12 d-flex align-items-center gap-2 text-body-secondary">
+        <span class="spinner-border spinner-border-sm" aria-hidden="true"></span> {lang.LOADING}…
+    </div>
+</div>
+
+<template id="kjTeamItem">
+    <div class="col">
+        <a class="card kj-card-link kj-person h-100" href="#" target="_blank" rel="noopener" data-kj-team-link>
+            <div class="card-body d-flex align-items-center gap-3">
+                <img src="" alt="" width="48" height="48" loading="lazy">
+                <div class="flex-grow-1" style="min-width: 0">
+                    <div class="fw-semibold text-truncate" dir="ltr" data-kj-team-login></div>
+                    <div class="small text-body-secondary"><i class="fa-solid fa-code-commit" aria-hidden="true"></i> <span data-kj-team-count></span></div>
+                </div>
+            </div>
+        </a>
+    </div>
+</template>
+
+<IF NAME="translator_copyrights">
+<p class="small text-body-secondary mt-4 mb-0">{translator_copyrights}</p>
+</IF>
+
+<div class="card mt-4">
+    <div class="card-body d-flex flex-wrap align-items-center gap-3">
+        <span class="kj-icon-tile"><i class="fa-solid fa-heart" aria-hidden="true"></i></span>
+        <div class="flex-grow-1" dir="ltr">
+            <div class="fw-semibold">Trusted since 2007</div>
+            <div class="small text-body-secondary">You can support Kleeja by reporting or fixing a bug, designing a style or building a plugin on <a href="https://github.com/kleeja/kleeja" target="_blank" rel="noopener">github.com/kleeja/kleeja</a>.</div>
+        </div>
+        <span class="small text-body-secondary" dir="ltr">{kleeja_version}</span>
+    </div>
+</div>
+
+</IF>

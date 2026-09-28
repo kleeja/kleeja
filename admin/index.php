@@ -171,11 +171,11 @@ $ext_formkey = [];
 //default icons
 $ext_icons = [
     'configs' => 'sliders',
-    'files' => 'folder-open-o',
+    'files' => 'folder-open',
     'img_ctrl' => 'image',
     'calls' => 'envelope',
     'reports' => 'bell',
-    'users' => 'user-o',
+    'users' => 'user',
     'search' => 'search',
     'plugins' => 'plug',
     'ban' => 'minus-circle',

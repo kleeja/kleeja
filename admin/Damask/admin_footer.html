@@ -1,0 +1,20 @@
+        </main>
+
+        <footer class="kj-footer">
+            <span>{lang.KLEEJA_CP} · <a href="./?cp=p_check_update" dir="ltr">Kleeja {assigned_klj_ver}</a></span>
+            <a href="https://kleeja.net" target="_blank" rel="noopener">Powered by Kleeja</a>
+        </footer>
+    </div>
+</div>
+
+<script src="{config.siteurl}includes/static_shared_files/bootstrap/js/bootstrap.bundle.min.js"></script>
+<IF NAME="go_to==start" AND="stats_chart">
+<script src="{config.siteurl}includes/static_shared_files/echarts.min.js"></script>
+</IF>
+<script src="{STYLE_PATH_ADMIN}js/damask.js"></script>
+
+<IF ISSET="extra_admin_footer_code">
+{extra_admin_footer_code}
+</IF>
+</body>
+</html>

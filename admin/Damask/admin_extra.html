@@ -1,0 +1,39 @@
+<div class="kj-page-header">
+    <div>
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="./">{lang.R_CPINDEX}</a></li>
+                <li class="breadcrumb-item"><a href="./?cp=n_extra">{lang.R_EXTRA}</a></li>
+                <li class="breadcrumb-item active" aria-current="page"><IF NAME="current_smt == fe">{lang.ADD_FOOTER_EXTRA}<ELSE>{lang.ADD_HEADER_EXTRA}</IF></li>
+            </ol>
+        </nav>
+        <h1 class="kj-page-title">{lang.R_EXTRA}</h1>
+    </div>
+</div>
+
+<nav class="nav nav-underline mb-4" aria-label="{lang.R_EXTRA}">
+    <a class="nav-link<IF NAME="current_smt == he"> active</IF>" href="./?cp=n_extra&amp;smt=he"<IF NAME="current_smt == he"> aria-current="page"</IF>>{lang.ADD_HEADER_EXTRA}</a>
+    <a class="nav-link<IF NAME="current_smt == fe"> active</IF>" href="./?cp=n_extra&amp;smt=fe"<IF NAME="current_smt == fe"> aria-current="page"</IF>>{lang.ADD_FOOTER_EXTRA}</a>
+</nav>
+
+<form method="post" action="{action}" id="extra_form" class="card">
+    <div class="card-body">
+        <IF NAME="current_smt == he">
+        <label class="form-label" for="ex_header">{lang.ADD_HEADER_EXTRA}</label>
+        <p class="form-text mt-0 mb-2">{lang.EX_HEADER_N}</p>
+        <textarea id="ex_header" name="ex_header" class="form-control font-monospace" rows="12" dir="ltr">{ex_header}</textarea>
+        <ELSEIF NAME="current_smt == fe">
+        <label class="form-label" for="ex_footer">{lang.ADD_FOOTER_EXTRA}</label>
+        <p class="form-text mt-0 mb-2">{lang.EX_FOOTER_N}</p>
+        <textarea id="ex_footer" name="ex_footer" class="form-control font-monospace" rows="12" dir="ltr">{ex_footer}</textarea>
+        </IF>
+    </div>
+
+    <div class="card-footer kj-form-actions">
+        <button type="submit" name="submit" value="1" class="btn btn-primary">
+            <i class="fa-solid fa-floppy-disk" aria-hidden="true"></i><span>{lang.UPDATE_EXTRA}</span>
+        </button>
+    </div>
+
+    {H_FORM_KEYS}
+</form>

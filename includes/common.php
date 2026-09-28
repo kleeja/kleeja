@@ -253,7 +253,7 @@ if (empty($config['h_key'])) {
 }
 
 //current Kleeja admin style
-define('ACP_STYLE_NAME', 'Masmak');
+define('ACP_STYLE_NAME', 'Damask');
 
 //path variables for Kleeja
 $STYLE_PATH =

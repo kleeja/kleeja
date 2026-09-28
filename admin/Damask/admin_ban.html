@@ -1,0 +1,81 @@
+<div class="kj-page-header">
+    <div>
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="./">{lang.R_CPINDEX}</a></li>
+                <li class="breadcrumb-item active" aria-current="page">{lang.R_BAN}</li>
+            </ol>
+        </nav>
+        <h1 class="kj-page-title">{lang.R_BAN}</h1>
+        <p class="kj-page-subtitle">{lang.BAN_EXP1}</p>
+    </div>
+    <div class="kj-page-actions">
+        <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#new_item_form">
+            <i class="fa-solid fa-plus" aria-hidden="true"></i><span>{lang.NEW}</span>
+        </button>
+    </div>
+</div>
+
+<IF NAME="show_message">
+<div class="alert alert-info alert-dismissible fade show d-flex align-items-start gap-2" role="status" data-kj-autohide>
+    <i class="fa-solid fa-circle-info kj-alert-icon" aria-hidden="true"></i>
+    <div>{show_message}</div>
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="{lang.CLOSE}"></button>
+</div>
+</IF>
+
+<div class="card">
+    <IF NAME="banned_items">
+    <div class="table-responsive">
+        <table class="table table-hover">
+            <thead>
+                <tr>
+                    <th scope="col" style="width: 4rem">#</th>
+                    <th scope="col">{lang.IP} / {lang.USERNAME}</th>
+                    <th scope="col" class="text-end"><span class="visually-hidden">{lang.DELETE}</span></th>
+                </tr>
+            </thead>
+            <tbody>
+                <LOOP NAME="banned_items">
+                <tr>
+                    <td class="text-body-secondary">{{id}}</td>
+                    <td class="fw-semibold" dir="ltr" style="text-align: start">{{content}}</td>
+                    <td class="text-end">
+                        <a class="btn btn-sm btn-outline-danger" href="{delete_item}{{del_key}}" data-kj-confirm title="{lang.DELETE}">
+                            <i class="fa-solid fa-trash-can" aria-hidden="true"></i><span class="visually-hidden">{lang.DELETE}</span>
+                        </a>
+                    </td>
+                </tr>
+                </LOOP>
+            </tbody>
+        </table>
+    </div>
+    <ELSE>
+    <div class="card-body text-center py-5">
+        <span class="kj-icon-tile is-lg is-secondary mb-3"><i class="fa-solid fa-ban" aria-hidden="true"></i></span>
+        <p class="text-body-secondary mb-0">{lang.NOTHING}</p>
+    </div>
+    </IF>
+</div>
+
+<!-- new banned item -->
+<div id="new_item_form" class="modal fade" tabindex="-1" aria-labelledby="addNewBannedItem" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <form method="post" action="{new_item_action}" class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title" id="addNewBannedItem">{lang.IP} / {lang.USERNAME}</h2>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="{lang.CLOSE}"></button>
+            </div>
+            <div class="modal-body">
+                <label class="form-label" for="k">{lang.IP} {lang.OR} {lang.USERNAME}</label>
+                <input type="text" class="form-control" id="k" name="k" dir="ltr" required>
+                <div class="form-text">{lang.BAN_EXP2}</div>
+                {H_FORM_KEYS}
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">{lang.CLOSE}</button>
+                <button type="submit" name="submit" value="1" class="btn btn-primary">{lang.SUBMIT}</button>
+            </div>
+        </form>
+    </div>
+</div>

@@ -39,7 +39,8 @@ $result = $SQL->build($query);
 $current_ban_data = $SQL->fetch_array($result);
 $SQL->freeresult($result);
 
-$banned_items = explode('|', $current_ban_data['ban']);
+//an empty ban list must not become one empty entry
+$banned_items = array_values(array_filter(explode('|', (string) $current_ban_data['ban'])));
 
 $show_message = false;
 
@@ -79,7 +80,7 @@ if ($case == 'new') {
 }
 
 if ($update_ban_content) {
-    $banned_items = array_filter($banned_items);
+    $banned_items = array_values(array_filter($banned_items));
     //update
     $update_query = [
         'UPDATE' => "{$dbprefix}stats",

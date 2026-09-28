@@ -177,10 +177,7 @@ if (sizeof($del_nums)) {
 }
 
 $total_pages = $Pager->getTotalPages();
-$page_nums = $Pager->print_nums(
-    basename(ADMIN_PATH) . '?cp=' . basename(__FILE__, '.php'),
-    'onclick="javascript:get_kleeja_link($(this).attr(\'href\'), \'#content\'); return false;"',
-);
+$page_nums = $Pager->print_nums(basename(ADMIN_PATH) . '?cp=' . basename(__FILE__, '.php'));
 
 //after submit
 if (ip('submit')) {
