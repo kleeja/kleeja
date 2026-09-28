@@ -346,18 +346,21 @@ bdi {
 }
 
 #sidebar_box {
-    padding: 14px 8px 8px;
-    background: var(--gray-50);
-    border: 1px solid #DFDFDF;
+    padding: 16px 10px 10px;
+    background: linear-gradient(#FFFFFF, var(--gray-50) 120px);
+    border: 1px solid #DCDCDC;
     border-radius: var(--radius);
-    box-shadow: 0 1px 0 #FFFFFF inset;
+    box-shadow: 0 1px 0 #FFFFFF inset, 0 1px 2px rgba(0, 0, 0, .04);
 }
 
 .user-card {
     display: grid;
     justify-items: center;
-    gap: 8px;
-    margin-bottom: 12px;
+    gap: 10px;
+    margin-bottom: 14px;
+    padding-bottom: 14px;
+    border-bottom: 1px solid var(--gray-150);
+    box-shadow: 0 1px 0 #FFFFFF;
     text-align: center;
 }
 
@@ -369,13 +372,37 @@ bdi {
     background: #FFFFFF;
     border: 1px solid var(--gray-200);
     border-radius: var(--radius);
-    box-shadow: 0 1px 3px rgba(0, 0, 0, .08);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, .08);
+}
+
+.user-hello {
+    display: grid;
+    justify-items: center;
+    gap: 1px;
+    max-width: 100%;
+    min-width: 0;
+}
+
+/* the smile of the old welcome */
+.user-greeting {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    color: var(--sky-600);
+    font-size: .75rem;
+    font-weight: 700;
+}
+
+.user-greeting img {
+    width: 16px;
+    height: 16px;
 }
 
 .user-name {
     max-width: 100%;
     overflow: hidden;
-    color: var(--gray-700);
+    color: var(--gray-900);
+    font-size: .9375rem;
     font-weight: 700;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -383,7 +410,7 @@ bdi {
 
 .side-menu {
     display: grid;
-    gap: 4px;
+    gap: 5px;
     margin: 0;
     padding: 0;
     list-style: none;
@@ -393,30 +420,48 @@ bdi {
     display: flex;
     align-items: center;
     gap: 10px;
-    padding: 9px 12px;
-    background: linear-gradient(#A5D0E5, var(--sky-400));
-    border: 1px solid #7FB4CF;
+    padding: 6px 12px 6px 6px;
+    background: linear-gradient(#B9DCEE, #97C7DF);
+    border: 1px solid #86BBD6;
     border-radius: var(--radius);
-    box-shadow: 0 1px 0 rgba(255, 255, 255, .45) inset;
+    box-shadow: 0 1px 0 rgba(255, 255, 255, .55) inset, 0 1px 1px rgba(31, 92, 130, .08);
     color: var(--sky-ink);
     font-size: .8125rem;
     font-weight: 700;
     text-decoration: none;
+    text-shadow: 0 1px 0 rgba(255, 255, 255, .35);
     transition: background 150ms var(--ease), color 150ms var(--ease), border-color 150ms var(--ease);
 }
 
+[dir="rtl"] .side-menu a {
+    padding: 6px 6px 6px 12px;
+}
+
+/* the white icons of the old menu, on a darker badge */
 .side-menu a img {
     flex: none;
+    box-sizing: content-box;
     width: 16px;
     height: 16px;
+    padding: 5px;
+    background: rgba(31, 92, 130, .38);
+    border-radius: var(--radius-sm);
+    box-shadow: 0 1px 0 rgba(255, 255, 255, .35);
 }
 
 .side-menu a:hover,
 .side-menu a.current {
-    background: var(--gray-700);
+    background: linear-gradient(#5A5F63, var(--gray-700));
     border-color: var(--gray-800);
     color: #FFFFFF;
     text-decoration: none;
+    text-shadow: 0 -1px 0 rgba(0, 0, 0, .3);
+}
+
+.side-menu a:hover img,
+.side-menu a.current img {
+    background: rgba(255, 255, 255, .14);
+    box-shadow: none;
 }
 
 .sidebar-dots {
@@ -531,9 +576,9 @@ bdi {
 #content {
     padding: 20px 24px 24px;
     background: var(--gray-25);
-    border: 1px solid var(--gray-300);
+    border: 1px solid #D2D2D2;
     border-radius: var(--radius);
-    box-shadow: 0 1px 2px rgba(0, 0, 0, .04);
+    box-shadow: 0 1px 0 #FFFFFF inset, 0 1px 3px rgba(0, 0, 0, .05);
 }
 
 /* the title of a page, with its bullet and the etched line under it */
@@ -1125,42 +1170,40 @@ a.paginate.dots {
 
 /* --- Upload, index_body.html --------------------------------------------- */
 
-.welcome {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    margin: 4px 0 6px;
-}
-
-.welcome img {
-    flex: none;
-}
-
-.welcome-title {
-    margin: 0;
-    color: var(--sky-600);
-    font-size: 1.1875rem;
-}
-
-.welcome-title span {
-    color: var(--gray-800);
-}
-
-.welcome-msg {
-    margin: 0 0 20px;
-    color: var(--gray-700);
-}
-
-.welcome-msg > :last-child {
-    margin-bottom: 0;
+/* results of an upload, under the upload box */
+.upload-results {
+    display: grid;
+    gap: 14px;
+    margin-top: 20px;
 }
 
 .upload-results:empty {
     display: none;
 }
 
+.upload-results > .up-result,
+.upload-results > .notice {
+    margin: 0;
+}
+
 .upload-results:focus {
     outline: none;
+}
+
+/* the welcome message of the site */
+.welcome-msg {
+    margin: 20px 0 0;
+    padding: 14px 18px;
+    background: #FFFFFF;
+    border: 1px solid var(--gray-200);
+    border-inline-start: 3px solid var(--sky-400);
+    border-radius: var(--radius);
+    color: var(--gray-700);
+    line-height: 1.7;
+}
+
+.welcome-msg > :last-child {
+    margin-bottom: 0;
 }
 
 /* the tab of the upload box */
@@ -1303,8 +1346,35 @@ a.paginate.dots {
     text-decoration: underline;
 }
 
+.dropzone-exts {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 4px;
+    max-width: 480px;
+    margin-top: 10px;
+}
+
+.ext-chip {
+    padding: 1px 7px;
+    background: #FFFFFF;
+    border: 1px solid var(--sky-200);
+    border-radius: 3px;
+    color: var(--sky-700);
+    font-family: var(--mono);
+    font-size: .6875rem;
+    font-weight: 700;
+    direction: ltr;
+}
+
+.ext-chip-more {
+    background: var(--sky-150);
+}
+
 .dropzone-count {
     margin-top: 4px;
+    direction: ltr;
+    unicode-bidi: isolate;
     color: var(--gray-500);
     font-size: .6875rem;
     font-weight: 700;
@@ -2271,7 +2341,7 @@ ul.index_err {
         padding: 14px 14px 32px;
     }
 
-    /* the sidebar becomes a bar: the user then the buttons in a row */
+    /* the sidebar becomes one bar: the user, then the buttons as icons */
     #sidebar {
         padding: 0;
         background: none;
@@ -2279,34 +2349,52 @@ ul.index_err {
 
     #sidebar_box {
         display: flex;
-        flex-wrap: wrap;
         align-items: center;
-        gap: 8px 12px;
-        padding: 8px;
+        gap: 12px;
+        padding: 8px 10px;
     }
 
     .user-card {
         grid-auto-flow: column;
         align-items: center;
-        gap: 8px;
+        gap: 10px;
+        min-width: 0;
         margin: 0;
+        padding: 0;
+        border: 0;
+        box-shadow: none;
+        text-align: start;
+    }
+
+    .user-hello {
+        justify-items: start;
     }
 
     .user-avatar {
-        width: 36px;
-        height: 36px;
+        width: 38px;
+        height: 38px;
         padding: 2px;
     }
 
     .side-menu {
         display: flex;
-        flex-wrap: wrap;
-        flex: 1 1 auto;
-        justify-content: flex-end;
+        flex: none;
+        gap: 6px;
+        margin-inline-start: auto;
     }
 
-    .side-menu a {
-        padding: 6px 10px;
+    .side-menu a,
+    [dir="rtl"] .side-menu a {
+        padding: 4px;
+    }
+
+    .side-label {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        overflow: hidden;
+        clip: rect(0, 0, 0, 0);
+        white-space: nowrap;
     }
 
     .sidebar-dots {

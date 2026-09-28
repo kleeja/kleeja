@@ -1,28 +1,6 @@
 <!-- Powered by kleeja -->
 <div id="content_index">
 
-    <!-- welcome -->
-    <div class="welcome">
-        <img src="{STYLE_PATH}images/Smile.png" width="24" height="24" alt="">
-        <h1 class="welcome-title">{lang.WELCOME}<IF NAME="user_is"> <span>{username}</span></IF></h1>
-    </div>
-    <IF NAME="welcome_msg">
-    <div class="welcome-msg">{welcome_msg}</div>
-    </IF>
-    <!-- @end-welcome -->
-
-
-    <!-- upload results and errors, js/script.js adds them here too after a background upload -->
-    <div id="upload-results" class="upload-results" tabindex="-1" aria-live="polite"><IF NAME="info"><LOOP NAME="info"><IF LOOP="message_type==error">
-        <div class="notice notice-error" role="alert"><img src="{STYLE_PATH}images/err.gif" width="29" height="29" alt=""><div class="notice-body">{{message_content}}</div></div>
-    <ELSE>
-        <div class="up-result">{{message_content}}</div>
-    </IF></LOOP></IF></div>
-
-    <template id="tpl-upload-result"><div class="up-result" data-slot></div></template>
-    <template id="tpl-upload-error"><div class="notice notice-error" role="alert"><img src="{STYLE_PATH}images/err.gif" width="29" height="29" alt=""><div class="notice-body" data-slot></div></div></template>
-
-
     <!-- form upload -->
     <form id="uploader" class="upload-form" action="{action}" method="post" enctype="multipart/form-data" data-filetypes="{config.siteurl}images/filetypes/">
 
@@ -50,6 +28,7 @@
                     <span class="dropzone-icon" aria-hidden="true"><svg class="icon"><use href="#i-upload"/></svg></span>
                     <span class="dropzone-title">{lang.DRAG_AND_DROP}</span>
                     <span class="dropzone-hint">{lang.OR_MANUAL_SELECT}</span>
+                    <span class="dropzone-exts" data-upload-exts hidden></span>
                     <span class="dropzone-count" data-upload-count></span>
                     <input type="file" id="upload-picker" class="visually-hidden" multiple data-dropzone-input>
                 </label>
@@ -92,7 +71,7 @@
     <!-- @end-form-upload -->
 
 
-    <!-- box loading, shown while the files are uploading -->
+    <!-- box loading, takes the place of the form while the files are uploading -->
     <div id="loadbox" hidden>
         <p class="waitloading" role="status">{lang.WAIT_LOADING}</p>
         <img class="loading-img" src="{STYLE_PATH}images/loading.gif" width="220" height="19" alt="">
@@ -102,6 +81,23 @@
         </div>
     </div>
     <!-- @end-box-loading -->
+
+
+    <!-- upload results and errors, js/script.js adds them here too after a background upload -->
+    <div id="upload-results" class="upload-results" tabindex="-1" aria-live="polite"><IF NAME="info"><LOOP NAME="info"><IF LOOP="message_type==error">
+        <div class="notice notice-error" role="alert"><img src="{STYLE_PATH}images/err.gif" width="29" height="29" alt=""><div class="notice-body">{{message_content}}</div></div>
+    <ELSE>
+        <div class="up-result">{{message_content}}</div>
+    </IF></LOOP></IF></div>
+
+    <template id="tpl-upload-result"><div class="up-result" data-slot></div></template>
+    <template id="tpl-upload-error"><div class="notice notice-error" role="alert"><img src="{STYLE_PATH}images/err.gif" width="29" height="29" alt=""><div class="notice-body" data-slot></div></div></template>
+
+
+    <IF NAME="welcome_msg">
+    <!-- welcome message of the site -->
+    <div class="welcome-msg">{welcome_msg}</div>
+    </IF>
 
 
     <IF NAME="show_online">

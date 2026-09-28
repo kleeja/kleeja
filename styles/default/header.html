@@ -57,13 +57,17 @@
         <aside id="sidebar">
             <div id="sidebar_box">
                 <div class="user-card">
-                    <img class="user-avatar" src="{user_avatar}" alt="" width="92" height="92">
-                    <div class="user-name">{username}</div>
+                    <!-- gravatar sends a missing avatar through its proxy, which fails for sites it can not reach -->
+                    <img class="user-avatar" src="{user_avatar}" alt="" width="92" height="92" onerror="this.onerror=null;this.src='{STYLE_PATH}images/user_avater.png';">
+                    <div class="user-hello">
+                        <span class="user-greeting"><img src="{STYLE_PATH}images/Smile.png" width="16" height="16" alt="">{lang.WELCOME}</span>
+                        <span class="user-name">{username}</span>
+                    </div>
                 </div>
                 <ul class="menu side-menu">
                     <LOOP NAME="side_menu">
                         <IF LOOP="show">
-                        <li><a href="{{url}}"(go_current=={{name}}? class="current":)><img src="{STYLE_PATH}images/{{name}}.png" alt="" width="16" height="16" onerror="this.style.visibility='hidden'">{{title}}</a></li>
+                        <li><a href="{{url}}" title="{{title}}"(go_current=={{name}}? class="current":)><img src="{STYLE_PATH}images/{{name}}.png" alt="" width="16" height="16" onerror="this.style.visibility='hidden'"><span class="side-label">{{title}}</span></a></li>
                         </IF>
                     </LOOP>
                 </ul>
