@@ -1,6 +1,14 @@
 
-<div class="alert alert-danger">
-    {text}
-    <br>
-    <a href="javascript:history.go(-1)" class="alert-link">{go_back_browser}</a>
+<div class="row justify-content-center">
+    <div class="col-lg-8 col-xl-7">
+        <div class="alert alert-danger d-flex align-items-start gap-3 p-4 shadow-sm" role="alert">
+            <i class="fa-solid fa-circle-exclamation fs-4 flex-shrink-0"></i>
+            <div class="flex-grow-1">
+                <div>{text}</div>
+                <a href="javascript:history.go(-1)" class="alert-link d-inline-block mt-3">
+                    <i class="fa-solid fa-arrow-left icon-dir me-1"></i>{go_back_browser}
+                </a>
+            </div>
+        </div>
+    </div>
 </div>

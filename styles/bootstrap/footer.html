@@ -1,139 +1,62 @@
 
-
-
     <IF NAME="extras.footer">
         <div class="extras_footer mt-5">{extras.footer}</div>
     </IF>
 
+    </div><!-- end container -->
+</main>
 
-<footer class="mt-5">
-    <!-- Powered by kleeja.net -->
+<footer class="site-footer border-top bg-body-tertiary py-4 mt-auto">
+    <div class="container">
+        <div class="d-flex flex-column flex-md-row align-items-center justify-content-between gap-3">
+            <p class="mb-0 small text-body-secondary text-center text-md-start">
+                &copy; <a href="{config.siteurl}" class="link-body-emphasis text-decoration-none fw-semibold">{config.sitename}</a>
+                &middot; {lang.COPYRIGHTS_X}
+            </p>
 
-    <div class="row justify-content-between">
-        <small class="col col-md-auto">{lang.COPYRIGHTS_X} &copy; <a href="{config.siteurl}">{config.sitename}</a></small>
-        <IF NAME="admin_page"><div class="col col-md-auto"><span class="btn btn-outline-primary">{admin_page}</span></div></IF>
+            <ul class="nav justify-content-center small">
+                <LOOP NAME="top_menu">
+                    <IF LOOP="show">
+                    <li class="nav-item"><a href="{{url}}" class="nav-link px-2 link-secondary">{{title}}</a></li>
+                    </IF>
+                </LOOP>
+            </ul>
+        </div>
+
+        <div class="d-flex flex-wrap align-items-center justify-content-center justify-content-md-between gap-2 mt-3 pt-3 border-top small text-body-secondary">
+            <!-- Powered by kleeja.net -->
+            <span>Powered by <a href="https://kleeja.net/" target="_blank" rel="noopener" class="link-secondary" title="Kleeja">Kleeja</a></span>
+            <IF NAME="admin_page">
+            <!-- admin_page is only set for users who can enter the control panel -->
+            <a href="{config.siteurl}admin/index.php" class="btn btn-info btn-sm px-3"><i class="fa-solid fa-gauge-high me-1"></i>{lang.ADMINCP}</a>
+            </IF>
+        </div>
+
+        <IF NAME="page_stats">
+        <!-- footer stats -->
+        <div class="page-stats mt-2 small text-body-secondary text-center text-md-start">{page_stats}</div>
+        </IF>
     </div>
-
-
-<div
-    style="padding:1px;font-size:11px;display:block !important;background:#f7f7f7 !important; color:#999 !important;
-    margin:3px; position:fixed;bottom:0;left:1%;z-index:99999;text-align:center;">
-    Powered by
-    <a style="display:inline !important;color:#999 !important;" href="https://kleeja.net/"
-        onclick="window.open(this.href,'_blank');return false;" title="Kleeja">Kleeja</a>
-</div>
-
-    <IF NAME="page_stats">
-    <!-- footer stats -->
-    <div class="text-muted">
-        <small>{page_stats}</small>
-    </div>
-    </IF>
-
 </footer>
-</div><!-- end container -->
 
 
 {googleanalytics}
 
-
-<script type="text/javascript" src="{STYLE_PATH}js/jquery.min.js"></script>
-<script type="text/javascript" src="{STYLE_PATH}js/bootstrap.min.js"></script>
+<script>
+    var STYLE_LANG = {
+        copy: '{lang.COPY}',
+        copied: '{lang.COPIED}',
+        noFileSelected: '{lang.NO_FILE_SELECTED}',
+        wrongName: '{lang.WRONG_F_NAME}',
+        forbidExt: '{lang.FORBID_EXT}',
+        sizeTooBig: '{lang.SIZE_F_BIG}'
+    };
+</script>
+<script src="{config.siteurl}includes/static_shared_files/bootstrap/js/bootstrap.bundle.min.js"></script>
+<script src="{STYLE_PATH}js/script.js"></script>
 
 <!-- don't ever delete this -->
 {run_queue}
 
-<script type="text/javascript">
-$(function () {
-    $('[data-toggle="tooltip"]').tooltip()
-})
-
-<IF NAME="isset({js_allowed_extensions_types})">
-$(document).ready(function(){
-    $('#uploader').submit(function(){
-        var numfiles = 0;
-        $("#uploader input:file").each(function() {
-            if ($(this).get(0).files.length !== 0) {
-                numfiles++;
-            }
-        });
-
-
-        if(numfiles == 0){
-            alert('{lang.NO_FILE_SELECTED}');
-            return false;
-        }
-
-
-        $('#loadbox').css('display', 'block');
-        $('#uploader').css('display', 'none');
-
-    });
-
-
-    $("#uploader input:file").change(function (){
-        if(!check_selected_file(this)){
-            $(this).val('');
-        }else{
-            if($(this).data('number') !== null){
-                var selected_text = $('#file-text' + $(this).data('number'));
-                selected_text.val($(this).val());
-                //show another one
-                var current_plus_one = Number($(this).data('number')) + 1;
-                if($('#file-block-' + current_plus_one) !== null){
-                    $('#file-block-' + current_plus_one).show();
-                }else{
-                    //alert reached limit
-                }
-            }
-        }
-    });
-
-});
-
-
-var allowed_exts = {js_allowed_extensions_types};
-var allowed_sizes = {js_allowed_extensions_sizes};
-
-function check_selected_file(file) {
-    var selected_file = file.files[0];
-    var file_name = selected_file.name;
-    var ext_dot_position = file_name.lastIndexOf(".");
-
-    if(ext_dot_position === -1){
-        alert('{lang.WRONG_F_NAME}'.replace('%s', file_name));
-        return false;
-    }
-    var file_extension = file_name.substring(ext_dot_position + 1).toLowerCase();
-    var file_size = selected_file.size;
-
-    if(!(allowed_exts.indexOf(file_extension) > -1)){
-        //extension not allowed message alert
-        alert('{lang.FORBID_EXT}'.replace('%s', file_extension));
-        return false;
-    }else{
-
-        //check size
-        var ext_allowed_size = allowed_sizes[allowed_exts.indexOf(file_extension)];
-        if(file_size > ext_allowed_size){
-            //size is larger than allowed message alert
-            alert('{lang.SIZE_F_BIG}'.replace('%1$s', file_name).replace('%2$s', (ext_allowed_size/1048576).toFixed(2) + ' MB'));
-            return false;
-        }
-    }
-
-    return true;
-}
-</IF>
-
-function update_kleeja_captcha(captcha_file, input_id)
-{
-    document.getElementById(input_id).value = '';
-    //Get a reference to CAPTCHA image
-    img = document.getElementById('kleeja_img_captcha');
-    //Change the image
-    img.src = captcha_file + '&' + Math.random();
-}
-</script>
 </body>
 </html>

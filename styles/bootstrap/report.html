@@ -1,94 +1,85 @@
 
+<div class="row justify-content-center">
+    <div class="col-lg-8 col-xl-7">
+        <div class="card shadow-sm">
+            <div class="card-body p-4 p-md-5">
 
-<div class="mt-3 mb-3">
-    <h2>{title}</h2>
-</div>
-
-
-
-<!-- error messages -->
-<IF NAME="ERRORS">
-<div class="alert alert-danger">
-    <ul>
-    <LOOP NAME="ERRORS">
-        <li>{%value%}</li>
-    </LOOP>
-    </ul>
-</div>
-</IF>
+                <div class="d-flex align-items-center gap-3 mb-4">
+                    <div class="form-icon bg-danger-subtle text-danger-emphasis flex-shrink-0"><i class="fa-solid fa-flag"></i></div>
+                    <h1 class="h4 mb-0">{title}</h1>
+                </div>
 
 
-
-<form action="{action}" method="post">
-
-
-        <IF NAME="NOT_USER">
-
-            <div class="form-group">
-                <label for="rname">{lang.YOURNAME}</label>
-                <input type="text" class="form-control" id="rname"  name="rname" value="{t_rname}" >
-            </div>
-
-            <div class="form-group">
-                <label for="rmail">{lang.EMAIL}</label>
-                <input type="email" class="form-control" id="rmail" name="rmail" value="{t_rmail}" style="direction:ltr">
-            </div>
-
-        </IF>
+                <!-- error messages -->
+                <IF NAME="ERRORS">
+                <div class="alert alert-danger small" role="alert">
+                    <ul class="mb-0 ps-3">
+                        <LOOP NAME="ERRORS">
+                        <li>{%value%}</li>
+                        </LOOP>
+                    </ul>
+                </div>
+                </IF>
 
 
+                <form action="{action}" method="post">
 
-        <IF NAME="id_d">
+                    <IF NAME="NOT_USER">
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-6">
+                            <label for="rname" class="form-label">{lang.YOURNAME}</label>
+                            <input type="text" class="form-control" id="rname" name="rname" value="{t_rname}" autocomplete="name">
+                        </div>
+                        <div class="col-md-6">
+                            <label for="rmail" class="form-label">{lang.EMAIL}</label>
+                            <input type="email" class="form-control" id="rmail" name="rmail" value="{t_rmail}" dir="ltr" autocomplete="email">
+                        </div>
+                    </div>
+                    </IF>
 
-            <div class="form-group">
-                <label for="rurl">{lang.FILENAME}</label>
-                <input type="text" class="form-control" id="rurl"  name="rurl" value="{filename_for_show}" readonly="readonly">
-            </div>
+                    <IF NAME="id_d">
+                    <div class="mb-3">
+                        <label for="rurl" class="form-label">{lang.FILENAME}</label>
+                        <input type="text" class="form-control" id="rurl" name="rurl" value="{filename_for_show}" readonly>
+                    </div>
+                    <ELSE>
+                    <div class="mb-3">
+                        <label for="surl" class="form-label">{lang.URL_F_FILE}</label>
+                        <input type="text" class="form-control" id="surl" name="surl" value="{s_url}" dir="ltr">
+                    </div>
+                    </IF>
 
-        <ELSE>
-
-            <div class="form-group">
-                <label for="surl">{lang.URL_F_FILE}</label>
-                <input type="text" class="form-control" id="surl"  name="surl" value="{s_url}" style="direction:ltr">
-            </div>
-
-        </IF>
+                    <div class="mb-3">
+                        <label for="rtext" class="form-label">{lang.REASON}</label>
+                        <textarea class="form-control" id="rtext" name="rtext" rows="4">{t_rtext}</textarea>
+                    </div>
 
 
-    <div class="form-group">
-        <label for="surl">{lang.REASON}</label>
-        <textarea class="form-control" id="rtext" name="rtext" rows="3">{t_rtext}</textarea>
-    </div>
+                    <!-- verification code -->
+                    <IF NAME="config.enable_captcha==1">
+                    <div class="mb-3">
+                        <label for="kleeja_code_answer" class="form-label">{lang.VERTY_CODE}</label>
+                        <div class="d-flex flex-wrap align-items-center gap-2">
+                            <img id="kleeja_img_captcha" class="captcha-img rounded border" src="{captcha_file_path}" alt="{lang.REFRESH_CAPTCHA}" title="{lang.REFRESH_CAPTCHA}" onclick="update_kleeja_captcha('{captcha_file_path}', 'kleeja_code_answer');">
+                            <button type="button" class="btn btn-outline-secondary" title="{lang.REFRESH_CAPTCHA}" aria-label="{lang.REFRESH_CAPTCHA}" onclick="update_kleeja_captcha('{captcha_file_path}', 'kleeja_code_answer');"><i class="fa-solid fa-arrow-rotate-right"></i></button>
+                            <input type="text" name="kleeja_code_answer" id="kleeja_code_answer" class="form-control captcha-input" autocomplete="off" aria-describedby="kleeja_code_answer_help">
+                        </div>
+                        <div id="kleeja_code_answer_help" class="form-text">{lang.NOTE_CODE}</div>
+                    </div>
+                    </IF>
 
-    <!-- verification code -->
-    <IF NAME="config.enable_captcha==1">
+                    <IF NAME="id_d">
+                    <input type="hidden" name="rid" value="{id_d}">
+                    </IF>
 
-        <div class="form-group safe_code">
-            <label for="kleeja_code_answer" class=" control-label">{lang.VERTY_CODE}</label>
-            <div class="">
-                <img style="vertical-align:middle;"
-                     id="kleeja_img_captcha"
-                     src="{captcha_file_path}"
-                     alt="{lang.REFRESH_CAPTCHA}"
-                     title="{lang.REFRESH_CAPTCHA}"
-                     onclick="javascript:update_kleeja_captcha('{captcha_file_path}', 'kleeja_code_answer');" />
+                    {H_FORM_KEYS}
 
-                <input type="text" name="kleeja_code_answer" class="form-control" style="max-width: 300px" autocomplete="false" id="kleeja_code_answer" aria-describedby="kleeja_code_answer_help"/>
-                <small id="helpBlock" id="kleeja_code_answer_help" class="form-text text-muted">{lang.NOTE_CODE}</small>
+                    <button type="submit" name="submit" value="{lang.REPORT}" class="btn btn-danger px-4 mt-2">
+                        <i class="fa-solid fa-flag me-2"></i>{lang.REPORT}
+                    </button>
+                </form>
+
             </div>
         </div>
-
-    </IF>
-
-    <IF NAME="id_d">
-        <input name="rid" value="{id_d}" type="hidden" />
-    </IF>
-
-    {H_FORM_KEYS}
-
-    <div class="form-group">
-        <input type="submit" name="submit" value="{lang.REPORT}" class="btn btn-primary"/>
     </div>
-
-</form>
-
+</div>

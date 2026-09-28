@@ -1,75 +1,70 @@
 
+<div class="row justify-content-center">
+    <div class="col-md-8 col-lg-6 col-xl-5">
+        <div class="card shadow-sm">
+            <div class="card-body p-4 p-md-5">
 
-<div class="mt-3 mb-3">
-    <h2>{title}</h2>
-</div>
-
-
-
-<!-- error messages -->
-<IF NAME="ERRORS">
-    <div class="alert alert-danger">
-        <ul>
-            <LOOP NAME="ERRORS">
-                <li>{%value%}</li>
-            </LOOP>
-        </ul>
-    </div>
-</IF>
+                <div class="text-center mb-4">
+                    <div class="form-icon bg-primary-subtle text-primary-emphasis mx-auto mb-3"><i class="fa-solid fa-user-plus"></i></div>
+                    <h1 class="h4 mb-0">{title}</h1>
+                </div>
 
 
-
-<form action="{action}" method="post">
-
-    <div class="form-group">
-        <label for="lname">{lang.USERNAME}</label>
-        <input type="text" class="form-control" id="lname"  name="lname" value="{t_lname}">
-    </div>
-
-    <div class="form-group">
-        <label for="lpass">{lang.PASSWORD}</label>
-        <input type="password" class="form-control" id="lpass"  name="lpass" value="{t_lpass}">
-    </div>
-
-    <div class="form-group">
-        <label for="lpass2">{lang.REPEAT_PASS}</label>
-        <input type="password" class="form-control" id="lpass2"  name="lpass2" value="{t_lpass2}">
-    </div>
+                <!-- error messages -->
+                <IF NAME="ERRORS">
+                <div class="alert alert-danger small" role="alert">
+                    <ul class="mb-0 ps-3">
+                        <LOOP NAME="ERRORS">
+                        <li>{%value%}</li>
+                        </LOOP>
+                    </ul>
+                </div>
+                </IF>
 
 
-    <div class="form-group">
-        <label for="lmail">{lang.EMAIL}</label>
-        <input type="email" class="form-control" id="lmail"  name="lmail" value="{t_lmail}" style="direction:ltr;">
-    </div>
+                <form action="{action}" method="post">
+
+                    <div class="mb-3">
+                        <label for="lname" class="form-label">{lang.USERNAME}</label>
+                        <input type="text" class="form-control" id="lname" name="lname" value="{t_lname}" autocomplete="username">
+                    </div>
+
+                    <div class="row g-3 mb-3">
+                        <div class="col-sm-6">
+                            <label for="lpass" class="form-label">{lang.PASSWORD}</label>
+                            <input type="password" class="form-control" id="lpass" name="lpass" value="{t_lpass}" autocomplete="new-password">
+                        </div>
+                        <div class="col-sm-6">
+                            <label for="lpass2" class="form-label">{lang.REPEAT_PASS}</label>
+                            <input type="password" class="form-control" id="lpass2" name="lpass2" value="{t_lpass2}" autocomplete="new-password">
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="lmail" class="form-label">{lang.EMAIL}</label>
+                        <input type="email" class="form-control" id="lmail" name="lmail" value="{t_lmail}" dir="ltr" autocomplete="email">
+                    </div>
 
 
+                    <!-- verification code -->
+                    <IF NAME="config.enable_captcha==1">
+                    <div class="mb-3">
+                        <label for="kleeja_code_answer" class="form-label">{lang.VERTY_CODE}</label>
+                        <div class="d-flex flex-wrap align-items-center gap-2">
+                            <img id="kleeja_img_captcha" class="captcha-img rounded border" src="{captcha_file_path}" alt="{lang.REFRESH_CAPTCHA}" title="{lang.REFRESH_CAPTCHA}" onclick="update_kleeja_captcha('{captcha_file_path}', 'kleeja_code_answer');">
+                            <button type="button" class="btn btn-outline-secondary" title="{lang.REFRESH_CAPTCHA}" aria-label="{lang.REFRESH_CAPTCHA}" onclick="update_kleeja_captcha('{captcha_file_path}', 'kleeja_code_answer');"><i class="fa-solid fa-arrow-rotate-right"></i></button>
+                            <input type="text" name="kleeja_code_answer" id="kleeja_code_answer" class="form-control captcha-input" autocomplete="off" aria-describedby="kleeja_code_answer_help">
+                        </div>
+                        <div id="kleeja_code_answer_help" class="form-text">{lang.NOTE_CODE}</div>
+                    </div>
+                    </IF>
 
-    <!-- verification code -->
-    <IF NAME="config.enable_captcha==1">
+                    {H_FORM_KEYS}
 
-        <div class="form-group safe_code">
-            <label for="kleeja_code_answer" class=" control-label">{lang.VERTY_CODE}</label>
-            <div class="">
-                <img style="vertical-align:middle;"
-                     id="kleeja_img_captcha"
-                     src="{captcha_file_path}"
-                     alt="{lang.REFRESH_CAPTCHA}"
-                     title="{lang.REFRESH_CAPTCHA}"
-                     onclick="javascript:update_kleeja_captcha('{captcha_file_path}', 'kleeja_code_answer');" />
+                    <button type="submit" name="submit" value="{lang.REGISTER}" class="btn btn-primary btn-lg w-100 mt-2">{lang.REGISTER}</button>
+                </form>
 
-                <input type="text" name="kleeja_code_answer" class="form-control" style="max-width: 300px" autocomplete="false" id="kleeja_code_answer" aria-describedby="kleeja_code_answer_help"/>
-                <small id="helpBlock" id="kleeja_code_answer_help" class="form-text text-muted">{lang.NOTE_CODE}</small>
             </div>
         </div>
-
-    </IF>
-
-
-
-    {H_FORM_KEYS}
-
-    <div class="form-group mt-3">
-        <input type="submit" name="submit" value="{lang.REGISTER}" class="btn btn-primary"/>
     </div>
-
-</form>
+</div>

@@ -1,89 +1,102 @@
 
-<div class="mt-3 mb-5">
-    <h2 style="word-wrap:break-word;">{title}</h2>
-</div>
+<div class="row justify-content-center">
+    <div class="col-lg-10 col-xl-9">
+        <div class="card shadow-sm">
+            <div class="card-body p-4 p-md-5">
 
+                <div class="d-flex align-items-center gap-3 mb-4">
+                    <div class="file-icon bg-primary-subtle text-primary-emphasis flex-shrink-0"><i class="fa-regular fa-file"></i></div>
+                    <div class="overflow-hidden">
+                        <h1 class="h4 mb-1 text-break">{name}</h1>
+                        <div class="small text-body-secondary">
+                            <span class="badge bg-secondary-subtle text-secondary-emphasis text-uppercase me-1">{type}</span><bdi>{size}</bdi>
+                        </div>
+                    </div>
+                </div>
 
+                <div class="row g-4 align-items-center">
+                    <!-- file information -->
+                    <div class="col-md-7">
+                        <ul class="list-group list-group-flush file-details">
+                            <li class="list-group-item d-flex justify-content-between gap-3 px-0">
+                                <span class="text-body-secondary">{lang.FILETYPE}</span>
+                                <span class="text-end">{type}</span>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between gap-3 px-0">
+                                <span class="text-body-secondary">{lang.FILESIZE}</span>
+                                <span class="text-end"><bdi>{size}</bdi></span>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between gap-3 px-0">
+                                <span class="text-body-secondary">{lang.FILEDATE}</span>
+                                <span class="text-end">{time}</span>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between gap-3 px-0">
+                                <span class="text-body-secondary">{lang.FILEUPS}</span>
+                                <span class="text-end">{uploads}</span>
+                            </li>
+                            <IF NAME="fusername">
+                            <li class="list-group-item d-flex justify-content-between gap-3 px-0">
+                                <span class="text-body-secondary">{lang.USERNAME}</span>
+                                <a href="{userfolder}" class="text-end text-decoration-none">{fusername}</a>
+                            </li>
+                            </IF>
+                        </ul>
+                    </div>
 
-<div class="row">
-    <div class="col-md-6 mt-2">
-        <!-- Information File -->
-        <!-- <p class="text-center"><strong>{lang.FILE_INFO}</strong></p> -->
+                    <!-- download box -->
+                    <div class="col-md-5">
+                        <div class="text-center p-4 rounded-3 border bg-body-tertiary">
+                            <p class="fw-semibold mb-3">
+                                <i class="fa-solid fa-circle-check text-success me-1"></i>{lang.FILE_FOUNDED}
+                            </p>
 
-            <ul class="list-group">
-                <li class="list-group-item d-flex justify-content-between flex-column">
-                    <span class="text-secondary">{lang.FILENAME}</span>
-                    <div class="list-group-item-text break-all" style="word-wrap:break-word!important;">{name}</div>
-                </li>
-                <li class="list-group-item d-flex justify-content-between">
-                    <span class="text-secondary">{lang.FILETYPE}</span>
-                    <div class="list-group-item-text">{type}</div>
-                </li>
-                <li class="list-group-item d-flex justify-content-between">
-                    <span class="text-secondary">{lang.FILESIZE}</span>
-                    <div class="list-group-item-text">{size}</div>
-                </li>
-                <li class="list-group-item d-flex justify-content-between">
-                    <span class="text-secondary">{lang.FILEDATE}</span>
-                    <div class="list-group-item-text">{time}</div>
-                </li>
-                <li class="list-group-item d-flex justify-content-between">
-                    <span class="text-secondary">{lang.FILEUPS}</span>
-                    <div class="list-group-item-text">{uploads}</div>
-                </li>
-                <IF NAME="fusername">
-                <li class="list-group-item d-flex justify-content-between">
-                    <span class="list-group-item-heading text-secondary">{lang.USERNAME}</span>
-                    <div class="list-group-item-text"><a href="{userfolder}">{fusername}</a></div>
-                </li>
-                </IF>
-                <li class="list-group-item list-group-item-info text-center justify-content-end">
-                    <small><a href="{REPORT}" rel="nofollow"> {lang.FILEREPORT}</a></small>
-                </li>
-            </ul>
+                            <div id="download-wait">
+                                <div class="display-5 fw-bold text-primary lh-1 mb-2" id="download-countdown">{seconds_w}</div>
+                                <div class="small text-body-secondary">{lang.WAIT}</div>
+                            </div>
 
-    </div>
-    <!-- @end-Information-File -->
+                            <a href="{url_file}" id="download-button" class="btn btn-primary btn-lg w-100 d-none" target="_blank">
+                                <i class="fa-solid fa-download me-2"></i>{lang.CLICK_DOWN}
+                            </a>
 
-
-
-    <!-- Download box -->
-    <div class="col-md-6 mt-2">
-            <div class="jumbotron text-center">
-                <b>{lang.FILE_FOUNDED}</b>
-                <br>
-                <img src="{STYLE_PATH}images/spin_lg.gif" id="loadingImage" class="mb-5" alt="{lang.WAIT}" />
-
-                <h2 id="url" class="text">
-                    <div class="alert alert-danger">{lang.JS_MUST_ON}</div>
-                </h2>
-
+                            <noscript>
+                                <div class="alert alert-warning small mt-3 mb-0">{lang.JS_MUST_ON}</div>
+                            </noscript>
+                        </div>
+                    </div>
+                </div>
             </div>
+
+            <div class="card-footer bg-body-tertiary text-center small py-3">
+                <a href="{REPORT}" rel="nofollow" class="link-danger link-underline-opacity-0 link-underline-opacity-75-hover">
+                    <i class="fa-solid fa-flag me-1"></i>{lang.FILEREPORT}
+                </a>
+            </div>
+        </div>
     </div>
-
-
 </div>
 
 
+<script>
+    (function () {
+        var seconds = parseInt('{seconds_w}', 10) || 0;
+        var counter = document.getElementById('download-countdown');
+        var wait = document.getElementById('download-wait');
+        var button = document.getElementById('download-button');
 
+        function tick() {
+            if (seconds > 0) {
+                counter.textContent = seconds;
+                seconds--;
+                setTimeout(tick, 1000);
 
-<script type="text/javascript">
-<!--
-var timer = {seconds_w};
-ti();
-function ti()
-{
-    if(timer > 0)
-    {
-        document.getElementById("url").innerHTML = '<div class="wait">{lang.WAIT} ' + timer + ' <\/div>';
-        timer = timer - 1;
-        setTimeout("ti()", 1000)
-    }
-    else
-    {
-        document.getElementById('loadingImage').src = '{STYLE_PATH}images/download.png';
-        document.getElementById("url").innerHTML = '<p class="download"><a href="{url_file}" target="_blank" class="btn btn-outline-primary btn-lg">{lang.CLICK_DOWN}<\/a><br /><span class="badge badge-default">{size}<\/span><\/p>';
-    }
-}
-//-->
+                return;
+            }
+
+            wait.classList.add('d-none');
+            button.classList.remove('d-none');
+        }
+
+        tick();
+    })();
 </script>
