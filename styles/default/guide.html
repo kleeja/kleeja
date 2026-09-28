@@ -1,49 +1,43 @@
 <!-- List of allowed file template -->
-<div id="content" class="border_radius">
+<div id="content">
 
     <!-- title -->
-    <h1 class="title">&#9679; {lang.GUIDE_EXP}</h1>
+    <h1 class="title">{lang.GUIDE_EXP}</h1>
     <!-- @end-title -->
 
-    <!-- line top -->
-    <div class="line"></div>
-    <!-- @end-line -->
-
-    <!-- table files allowed -->
-    <table id="guide" border="0" cellspacing="0" cellpadding="0">        
-        <!-- group list files -->
+    <IF NAME="ttgroups">
+    <!-- the groups, one box each, gray and sky in turn -->
+    <div class="guide-grid">
         <LOOP NAME="ttgroups">
-        <IF LOOP="firstrow">
-        <IF LOOP="most_firstrow"><ELSE>
-        </td>
-        </tr>
-        <!-- @end-clear -->
-        <tr>
-        <td style="width:2%">&nbsp;</td>
-        </tr>
-        </IF>
-        <tr>
-        <td>
-        <div class="guide_({{rando}}?right:left)_th">{{group_name}}</div>
+            <IF LOOP="firstrow">
+                <UNLESS LOOP="most_firstrow">
+                    </tbody></table></div>
+                </section>
+                </UNLESS>
 
-        </IF>
-    
-        <div class="guide_({{rando}}?right:left)_ext">
-            <span class="guide_({{rando}}?right:left)_ext_lang">{lang.EXT} : </span>
-            <span class="guide_({{rando}}?right:left)_ext_color">{{ext}}</span>
-            &mdash;
-            <span class="guide_({{rando}}?right:left)_ext_lang">{lang.SIZE} : </span>
-            <span class="guide_({{rando}}?right:left)_ext_color">{{size}}</span>
-        </div>
+                <section class="box guide-group({{rando}}? guide-group-sky:)">
+                    <h2 class="box-title({{rando}}? box-title-sky:)">{{group_name}}</h2>
+                    <div class="table-wrap">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th scope="col">{lang.EXT}</th>
+                                    <th scope="col" class="num">{lang.SIZE}</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+            </IF>
+                                <tr>
+                                    <td class="ext-name">{{ext}}</td>
+                                    <td class="num"><bdi>{{size}}</bdi></td>
+                                </tr>
         </LOOP>
-        </td>
-        </tr>
-        <!-- @end-group-list-files -->
+                    </tbody></table></div>
+                </section>
+    </div>
+    <ELSE>
+    <p class="notice"><img src="{STYLE_PATH}images/info.png" width="29" height="29" alt=""><span class="notice-body">{lang.NOTHING}</span></p>
+    </IF>
 
-    </table>
-    <!-- @end-table-files-allowed -->
-
-    <div class="clr"></div>
-   
 </div>
 <!-- @end-List-allowed-file-template -->

@@ -2,94 +2,122 @@
 <div id="content_index">
 
     <!-- welcome -->
-    <h6><img src="{STYLE_PATH}images/Smile.png" width="20" height="20" alt="{lang.WELCOME}" style="vertical-align:middle;" /> {lang.WELCOME} .. <IF NAME="user_is">[ {username} ]</IF></h6>
-    <div class="wolcome_msg">{welcome_msg}</div>
+    <div class="welcome">
+        <img src="{STYLE_PATH}images/Smile.png" width="24" height="24" alt="">
+        <h1 class="welcome-title">{lang.WELCOME}<IF NAME="user_is"> <span>{username}</span></IF></h1>
+    </div>
+    <IF NAME="welcome_msg">
+    <div class="welcome-msg">{welcome_msg}</div>
+    </IF>
     <!-- @end-welcome -->
 
-    <div class="clr"></div>
 
-    <IF NAME="info">
-    <!-- msg, Infos & Alerts & Errors -->
-    <div id="system-message">
-        <LOOP NAME="info">
-        <ul class="{{t}}">
-            <li>{lang.INFORMATION} : <span> {{i}} </span></li>
-        </ul>
-        </LOOP>
-    </div><!-- @end-msg -->
-    </IF>
+    <!-- upload results and errors, js/script.js adds them here too after a background upload -->
+    <div id="upload-results" class="upload-results" tabindex="-1" aria-live="polite"><IF NAME="info"><LOOP NAME="info"><IF LOOP="message_type==error">
+        <div class="notice notice-error" role="alert"><img src="{STYLE_PATH}images/err.gif" width="29" height="29" alt=""><div class="notice-body">{{message_content}}</div></div>
+    <ELSE>
+        <div class="up-result">{{message_content}}</div>
+    </IF></LOOP></IF></div>
 
-    <div class="clr"></div>
+    <template id="tpl-upload-result"><div class="up-result" data-slot></div></template>
+    <template id="tpl-upload-error"><div class="notice notice-error" role="alert"><img src="{STYLE_PATH}images/err.gif" width="29" height="29" alt=""><div class="notice-body" data-slot></div></div></template>
+
 
     <!-- form upload -->
-    <form id="uploader" action="{action}" method="post" enctype="multipart/form-data">
+    <form id="uploader" class="upload-form" action="{action}" method="post" enctype="multipart/form-data" data-filetypes="{config.siteurl}images/filetypes/">
 
-        <!-- upload boxes -->
         <div class="tabmain">
-
             <ul class="tabnav">
-                <!-- First-Tab -->
-                <li title="{lang.DOWNLOAD_F}">{lang.DOWNLOAD_F}</li>
-                <!-- @First-Tab -->
-
-                <!--you-can-add-another-tab-here-->
+                <li class="tab">
+                    <svg class="icon" aria-hidden="true"><use href="#i-upload"/></svg>{lang.DOWNLOAD_F}
+                </li>
+                <li>
+                    <a class="tab-link" href="{config.siteurl}(config.mod_writer?guide.html:go.php?go=guide)">
+                        <svg class="icon" aria-hidden="true"><use href="#i-list"/></svg>{lang.GUIDE}
+                    </a>
+                </li>
             </ul>
 
-            <!-- First-Box -->
-            <div class="tabcon" title="{lang.DOWNLOAD_F}">
-            <div class="go_up">
-                <!-- upload normal -->
-                <LOOP NAME=FILES_NUM_LOOP>
-                <input class="file" type="file" name="file_{{i}}_" data-number="{{i}}" style="{{show}}" size="60" />
-                </LOOP>
-                <div class="agree"><span>{terms_msg}</span></div>
-                <div class="bn_up"><input type="submit" id="submitr" name="submitr" value="{lang.DOWNLOAD_F}" /></div>
-                <div class="clr"></div>
-                <!-- @upload normal -->
-            </div>
-            </div>
-            <!-- @First-Box -->
+            <div class="tabcon">
 
-            <!--you-can-add-another-box-here-->
+                <div id="upload-errors" class="notice notice-error" role="alert" hidden>
+                    <img src="{STYLE_PATH}images/err.gif" width="29" height="29" alt="">
+                    <div class="notice-body" data-upload-errors></div>
+                </div>
 
+                <!-- drop zone, shown by js/script.js when the browser supports it -->
+                <label class="dropzone" for="upload-picker" data-dropzone hidden>
+                    <span class="dropzone-icon" aria-hidden="true"><svg class="icon"><use href="#i-upload"/></svg></span>
+                    <span class="dropzone-title">{lang.DRAG_AND_DROP}</span>
+                    <span class="dropzone-hint">{lang.OR_MANUAL_SELECT}</span>
+                    <span class="dropzone-count" data-upload-count></span>
+                    <input type="file" id="upload-picker" class="visually-hidden" multiple data-dropzone-input>
+                </label>
+
+                <ul class="upload-queue" data-upload-queue hidden></ul>
+
+                <!-- the fields the server reads, one file each; the next one shows up once a file is chosen -->
+                <div class="upload-fields" data-upload-fields>
+                    <LOOP NAME="FILES_NUM_LOOP">
+                    <div class="upload-field" style="{{show}}">
+                        <input class="file" type="file" name="file_{{i}}_" data-number="{{i}}" aria-label="{lang.OPEN} {{i}}">
+                    </div>
+                    </LOOP>
+                </div>
+
+                <IF NAME="config.safe_code">
+                <!-- verification code -->
+                <div class="safe_code">
+                    <label class="label" for="kleeja_code_answer">{lang.VERTY_CODE}</label>
+                    <div class="captcha">
+                        <img id="kleeja_img_captcha" src="{captcha_file_path}" alt="{lang.REFRESH_CAPTCHA}" title="{lang.REFRESH_CAPTCHA}" data-captcha-refresh="{captcha_file_path}">
+                        <button type="button" class="btn btn-icon" title="{lang.REFRESH_CAPTCHA}" aria-label="{lang.REFRESH_CAPTCHA}" data-captcha-refresh="{captcha_file_path}"><svg class="icon" aria-hidden="true"><use href="#i-refresh"/></svg></button>
+                        <input type="text" name="kleeja_code_answer" id="kleeja_code_answer" autocomplete="off" autocapitalize="off" spellcheck="false" aria-describedby="kleeja_code_answer_help">
+                    </div>
+                    <p class="explain" id="kleeja_code_answer_help">{lang.NOTE_CODE}</p>
+                </div>
+                <!-- @end-verification-code -->
+                </IF>
+
+                <div class="upload-actions">
+                    <p class="agree">{terms_msg}</p>
+                    <button type="submit" id="submitr" name="submitr" value="{lang.DOWNLOAD_F}" class="btn btn-primary btn-lg">
+                        <svg class="icon" aria-hidden="true"><use href="#i-upload"/></svg>{lang.DOWNLOAD_F}
+                    </button>
+                </div>
+            </div>
         </div>
-        <!-- @upload boxes -->
+
+    </form>
+    <!-- @end-form-upload -->
 
 
-        <IF NAME="config.safe_code">
-        <!-- verification code -->
-        <div class="safe_code IEs_c">
-            <p>{lang.VERTY_CODE}</p>
-            <div class="clr"></div>
-            <div>
-                <img style="vertical-align:middle;" id="kleeja_img_captcha" src="{captcha_file_path}" alt="{lang.REFRESH_CAPTCHA}" title="{lang.REFRESH_CAPTCHA}" onclick="javascript:update_kleeja_captcha('{captcha_file_path}', 'kleeja_code_answer');" />
-                <input type="text" name="kleeja_code_answer" id="kleeja_code_answer" />
-            </div>
-            <div class="clr"></div>
-            <p class="explain">{lang.NOTE_CODE}</p>
+    <!-- box loading, shown while the files are uploading -->
+    <div id="loadbox" hidden>
+        <p class="waitloading" role="status">{lang.WAIT_LOADING}</p>
+        <img class="loading-img" src="{STYLE_PATH}images/loading.gif" width="220" height="19" alt="">
+        <div class="progress" role="progressbar" aria-label="{lang.WAIT_LOADING}" aria-valuemin="0" aria-valuemax="100" data-progress>
+            <div class="progress-bar" data-progress-bar></div>
+            <span class="progress-value" data-progress-value></span>
         </div>
-        <div class="clr"></div>
-        <!-- @end-verification-code -->
-        </IF>
+    </div>
+    <!-- @end-box-loading -->
 
-    </form><!-- @end-form-upload -->
-
-    <!-- box loading -->
-    <div id="loadbox">
-        <div class="waitloading">{lang.WAIT_LOADING}</div>
-        <div class="clr"></div><br />
-            <img src="{STYLE_PATH}images/loading.gif" alt="loading ..." />
-        <div class="clr"></div><br /><br /><br />
-    </div><!-- @end-box-loading -->
 
     <IF NAME="show_online">
-        <!-- OnLine -->
-        <div class="online">
-            <p class="onlineall">{lang.NUMBER_ONLINE} : [ {current_online_users} ]</p>
-            <LOOP NAME="show_names">
-                <p class="name_users"><!--{{separator}}-->{{name}}</p>
-            </LOOP>
-        </div><!-- @end-OnLine -->
+    <!-- OnLine -->
+    <ul class="online">
+        <li class="onlineall">{lang.NUMBER_ONLINE} : <strong>{current_online_users}</strong></li>
+        <LOOP NAME="show_names">
+        <li class="name_users">{{name}}</li>
+        </LOOP>
+    </ul>
+    <!-- @end-OnLine -->
     </IF>
-<div class="clr"></div>
+
 </div>
+
+<script>
+    var UPLOAD_ALLOWED_EXTS = {js_allowed_extensions_types};
+    var UPLOAD_ALLOWED_SIZES = {js_allowed_extensions_sizes};
+</script>

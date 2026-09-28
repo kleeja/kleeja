@@ -1,34 +1,51 @@
 <!-- stats template -->
-<div id="content" class="border_radius">
+<div id="content">
 
     <!-- title -->
-    <h1 class="title">&#9679; {title}</h1>
+    <h1 class="title">{title}</h1>
     <!-- @end-title -->
 
-    <!-- line top -->
-    <div class="line"></div>
-    <!-- @end-line -->
-
     <!-- box stats -->
-    <div class="stats">
-    <ul>
-        <li>{lang.FILES_ST} : <span>[ {files_st} {lang.FILE} {lang.AND} {imgs_st} {lang.IMAGE} ] </span></li>
-        <IF NAME="config.user_system==1">
-            <li>{lang.USERS_ST} : <span>[ {users_st} {lang.USER} ] </span></li>
-            <li>{lang.LAST_REG} : <span>[ {lst_reg} ]  </span></li>
-        </IF>
-        <li>{lang.SIZES_ST} : <span style="color:red;">[ {sizes_st} ] </span></li>
-        <IF NAME="lst_dl_st">
-            <li>{lang.LSTDELST} : <span>{lst_dl_st} </span></li>
-        </IF>
-        <IF NAME="config.allow_online==1">
-            <li>{lang.MOST_EVER_ONLINE} : <span>[ {most_online} ]</span> {lang.ON} <span>[ {on_muoe} ]</span></li>
-        </IF>
-    </ul>
-        <div class="clr"></div><br />
-            <p class="st"><i>{lang.LAST_1_H}</i></p>
-        <div class="clr"></div><br />
+    <div class="stats-layout">
+        <ul class="stats-list">
+            <li>
+                <span class="stat-label">{lang.FILES_ST}</span>
+                <span class="stat-value">{files_st} {lang.FILE} {lang.AND} {imgs_st} {lang.IMAGE}</span>
+            </li>
+            <IF NAME="config.user_system==1">
+            <li>
+                <span class="stat-label">{lang.USERS_ST}</span>
+                <span class="stat-value">{users_st} {lang.USER}</span>
+            </li>
+            <li>
+                <span class="stat-label">{lang.LAST_REG}</span>
+                <span class="stat-value">{lst_reg}</span>
+            </li>
+            </IF>
+            <li>
+                <span class="stat-label">{lang.SIZES_ST}</span>
+                <span class="stat-value stat-value-strong"><bdi>{sizes_st}</bdi></span>
+            </li>
+            <IF NAME="lst_dl_st">
+            <li>
+                <span class="stat-label">{lang.LSTDELST}</span>
+                <span class="stat-value">{lst_dl_st}</span>
+            </li>
+            </IF>
+            <IF NAME="config.allow_online==1">
+            <li>
+                <span class="stat-label">{lang.MOST_EVER_ONLINE}</span>
+                <span class="stat-value">{most_online}</span>
+                <span>{lang.ON}</span>
+                <span class="stat-value">{on_muoe}</span>
+            </li>
+            </IF>
+        </ul>
+
+        <img class="page-art" src="{STYLE_PATH}images/stats.gif" width="128" height="128" alt="">
     </div>
+
+    <p class="st"><i>{lang.LAST_1_H}</i></p>
     <!-- @end-box-stats -->
 
 </div>

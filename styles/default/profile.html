@@ -1,90 +1,103 @@
 <!-- Profile template -->
-<div id="content" class="border_radius">
+<div id="content">
 
     <!-- title -->
-    <h1 class="title">&#9679; {title}</h1>
+    <h1 class="title">{title}</h1>
     <!-- @end-title -->
 
-    <!-- line top -->
-    <div class="line"></div>
-    <!-- @end-line -->
-    
     <IF NAME="ERRORS">
-    <!-- msg, Infos & Alerts & Errors -->
-    <dl id="system-message">
-        <dd class="error">
-            <ul>
-                <li>
-                <LOOP NAME="ERRORS">
-                <strong>{lang.INFORMATION} : </strong>{%value%}<br />
-                </LOOP>
-                </li>
-            </ul>
-        </dd>
-    </dl>
+    <!-- msg, Alerts & Errors -->
+    <div class="notice notice-error" role="alert">
+        <img src="{STYLE_PATH}images/err.gif" width="29" height="29" alt="">
+        <ul class="notice-body">
+            <LOOP NAME="ERRORS">
+            <li>{%value%}</li>
+            </LOOP>
+        </ul>
+    </div>
     <!-- @end-msg -->
     </IF>
 
     <IF NAME="data_forum">
     <!-- profile -->
-    <form action="{action}" method="post">
-    <div id="profile">
-        <div class="boxdata">
-            <h6 class="tit">{lang.EDIT_U_DATA}</h6>
-            <div class="boxdata_inner">
-                <label>{lang.USERNAME}</label>
-                <input type="text" readonly="readonly" class="bu_username" value="{name}" />
-                <label>{lang.SHOW_MY_FILECP}</label>
-                <select name="show_my_filecp">
-                    <option value="1" <IF NAME="show_my_filecp==1">selected="selected"</IF> >{lang.YES}</option>
-                    <option value="0" <IF NAME="show_my_filecp==0">selected="selected"</IF> >{lang.NO}</option>
-                </select>
-             </div>
+    <form id="profile" action="{action}" method="post">
+
+        <div class="profile-grid">
+            <section class="box boxdata">
+                <h2 class="box-title box-title-sky">{lang.EDIT_U_DATA}</h2>
+                <div class="box-body">
+                    <div class="field">
+                        <label for="uname">{lang.USERNAME}</label>
+                        <input class="input-username" type="text" id="uname" value="{name}" readonly>
+                    </div>
+                    <div class="field">
+                        <label for="show_my_filecp">{lang.SHOW_MY_FILECP}</label>
+                        <select id="show_my_filecp" name="show_my_filecp">
+                            <option value="1" <IF NAME="show_my_filecp==1">selected</IF>>{lang.YES}</option>
+                            <option value="0" <IF NAME="show_my_filecp==0">selected</IF>>{lang.NO}</option>
+                        </select>
+                    </div>
+                </div>
+            </section>
+
+            <section class="box boxdata">
+                <h2 class="box-title box-title-sky">{lang.EMAIL}</h2>
+                <div class="box-body">
+                    <div class="field">
+                        <label for="pmail">{lang.EMAIL}</label>
+                        <input type="email" id="pmail" name="pmail" value="{mail}" dir="ltr" autocomplete="email">
+                    </div>
+                    <div class="field">
+                        <label for="pppass_old">{lang.PASSWORD}</label>
+                        <input class="input-password" type="password" id="pppass_old" name="pppass_old" value="{t_pppass_old}" autocomplete="current-password" aria-describedby="email-help">
+                        <p class="explain" id="email-help">{lang.EMAIL_CHANGE_REQ_PASS}</p>
+                    </div>
+                </div>
+            </section>
+
+            <section class="box boxdata">
+                <h2 class="box-title box-title-sky">{lang.PASS_ON_CHANGE}</h2>
+                <div class="box-body">
+                    <div class="field">
+                        <label for="ppass_old">{lang.OLD}</label>
+                        <input class="input-password" type="password" id="ppass_old" name="ppass_old" value="{t_ppass_old}" autocomplete="current-password">
+                    </div>
+                    <div class="field">
+                        <label for="ppass_new">{lang.NEW}</label>
+                        <input class="input-password" type="password" id="ppass_new" name="ppass_new" value="{t_ppass_new}" autocomplete="new-password">
+                    </div>
+                    <div class="field">
+                        <label for="ppass_new2">{lang.NEW_AGAIN}</label>
+                        <input class="input-password" type="password" id="ppass_new2" name="ppass_new2" value="{t_ppass_new2}" autocomplete="new-password">
+                    </div>
+                </div>
+            </section>
         </div>
-                
-        <div class="boxdata">
-            <h6 class="tit">{lang.EMAIL}</h6>
-            <div class="boxdata_inner">
-                <label>{lang.PASSWORD} :</label>
-                <input type="password" name="pppass_old" value="{t_pppass_old}" tabindex="1" />
-                <label>{lang.EMAIL} :</label>
-                <input type="text" name="pmail" value="{mail}" style="direction:ltr" tabindex="2" />
+
+        <section class="box boxdata avatar-box">
+            <h2 class="box-title box-title-sky">{lang.EDIT_U_AVATER}</h2>
+            <div class="box-body avatar-row">
+                <img src="{user_avatar}" width="64" height="64" alt="">
+                <p class="explain">{link_avater}</p>
             </div>
-        </div>
-            
-        <div class="boxdata">
-            <h6 class="tit">{lang.PASS_ON_CHANGE}</h6>
-            <div class="boxdata_inner">
-                <label>{lang.OLD} :</label>
-                <input type="password" name="ppass_old" value="{t_ppass_old}" tabindex="3" />
-                <label>{lang.NEW} :</label>
-                <input type="password" name="ppass_new" value="{t_ppass_new}" tabindex="4" />
-                <label>{lang.NEW_AGAIN} :</label>
-                <input type="password" name="ppass_new2" value="{t_ppass_new2}" tabindex="5" />
-                {H_FORM_KEYS}
-            </div>
-        </div>
-        <div class="boxdata" style="width:97%;height: 70px;">
-            <h6 class="tit">{lang.EDIT_U_AVATER}</h6>
-            <div class="boxdata_inner">
-             <div class="edit_avater_u"><span>{link_avater}</span></div>
-             </div>
-        </div>
-        <div class="clr"></div>
-                
+        </section>
+
+        {H_FORM_KEYS}
+
         <!-- button -->
-        <div class="buttons_center"><input type="submit" name="submit_data" value="{lang.EDIT_U_DATA}" tabindex="6" /></div>
-        <!-- @end-button -->        
-    </div>    
+        <div class="buttons_center">
+            <button type="submit" name="submit_data" value="{lang.EDIT_U_DATA}" class="btn btn-primary btn-lg">{lang.EDIT_U_DATA}</button>
+        </div>
+        <!-- @end-button -->
     </form>
     <!-- @end-profile -->
-    
+
     <ELSE>
-    
-    <div class="buttons_center"><a href="{goto_forum_link}">{lang.PFILE_4_FORUM}</a></div>
-    
+
+    <!-- users of an integrated script, like phpBB, edit their data there -->
+    <div class="buttons_center"><a class="btn btn-primary btn-lg" href="{goto_forum_link}">{lang.PFILE_4_FORUM}</a></div>
+
     </IF>
-     
-    <div class="clr"></div>
+
 </div>
 <!-- @end-Profile-template -->

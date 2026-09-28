@@ -1,15 +1,12 @@
 <!-- Infos template -->
 <div id="content_index">
-    <div class="clr"></div>
-        <!-- msg, Infos & Alerts -->
-        <dl id="system-message">
-            <dd class="info">
-                <ul>
-                    <li>{text} !</li>
-                </ul>
-            </dd>
-        </dl>
-        <!-- @end-msg -->
-    <div class="clr"></div>
+    <div class="notice message" role="status">
+        <img src="{STYLE_PATH}images/info.png" width="29" height="29" alt="">
+        <div class="notice-body">
+            <IF NAME="title"><h1 class="message-title">{title}</h1></IF>
+            <div>{text}</div>
+            <p class="message-actions"><a href="{config.siteurl}">{lang.RETURN_HOME}</a></p>
+        </div>
+    </div>
 </div>
-<!-- @end-Infos-template --> 
+<!-- @end-Infos-template -->
