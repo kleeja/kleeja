@@ -659,8 +659,9 @@ function get_olang(string $name): bool
     if (is_null($olang) || !is_array($olang)) {
         $olang = [];
     }
-    $lang_to_add = [];
     if (!($lang_to_add = cache()->get('data_lang' . $name))) {
+        $lang_to_add = [];
+
         $query = [
             'SELECT' => 'l.word, l.trans',
             'FROM' => "{$dbprefix}lang l",
