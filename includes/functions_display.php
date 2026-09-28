@@ -663,6 +663,7 @@ function big_error(string $error_title, string $msg_text, bool $error = true): v
         $error_template = preg_replace('/<!-- BEGIN DETAILS -->.*?<!-- END DETAILS -->/s', '', $error_template);
 
         echo strtr($error_template, [
+            '{ROOT}' => htmlspecialchars(kleeja_web_root(), ENT_QUOTES, 'UTF-8'),
             '{TITLE}' => $error_title,
             '{BADGE}' => $error ? 'Kleeja Error' : 'Kleeja Information',
             '{TYPE}' => $error ? 'error' : 'info',

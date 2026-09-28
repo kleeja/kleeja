@@ -8,9 +8,9 @@
 
     <script src="{STYLE_PATH_ADMIN}js/color-mode.js"></script>
 
-    <link rel="icon" type="image/svg+xml" href="{STYLE_PATH_ADMIN}images/logo.svg">
-    <link rel="icon" type="image/png" href="{STYLE_PATH_ADMIN}images/favicon.png">
-    <link rel="shortcut icon" href="{STYLE_PATH_ADMIN}images/favicon.ico">
+    <link rel="icon" type="image/svg+xml" href="{config.siteurl}images/logo.svg">
+    <link rel="icon" type="image/png" href="{config.siteurl}images/favicon.png">
+    <link rel="shortcut icon" href="{config.siteurl}images/favicon.ico">
 
     <IF NAME="lang.DIR==rtl">
     <link rel="stylesheet" href="{config.siteurl}includes/static_shared_files/bootstrap/css/bootstrap.rtl.min.css">
@@ -40,8 +40,8 @@
         <div class="offcanvas-lg offcanvas-start" tabindex="-1" id="kjSidebar" aria-labelledby="kjSidebarLabel">
             <div class="kj-sidebar-brand">
                 <a class="kj-brand" href="./">
-                    <img class="kj-logo-light" src="{STYLE_PATH_ADMIN}images/logo.svg" alt="" width="32" height="32" aria-hidden="true">
-                    <img class="kj-logo-dark" src="{STYLE_PATH_ADMIN}images/logo-light.svg" alt="" width="32" height="32" aria-hidden="true">
+                    <img class="kj-logo-light" src="{config.siteurl}images/logo.svg" alt="" width="32" height="32" aria-hidden="true">
+                    <img class="kj-logo-dark" src="{config.siteurl}images/logo-light.svg" alt="" width="32" height="32" aria-hidden="true">
                     <span id="kjSidebarLabel">Kleeja</span>
                     <span class="kj-version" dir="ltr">{assigned_klj_ver}</span>
                 </a>
@@ -96,8 +96,8 @@
             </button>
 
             <a class="kj-brand d-lg-none" href="./" aria-label="{lang.R_CPINDEX}">
-                <img class="kj-logo-light" src="{STYLE_PATH_ADMIN}images/logo.svg" alt="" width="28" height="28">
-                <img class="kj-logo-dark" src="{STYLE_PATH_ADMIN}images/logo-light.svg" alt="" width="28" height="28">
+                <img class="kj-logo-light" src="{config.siteurl}images/logo.svg" alt="" width="28" height="28">
+                <img class="kj-logo-dark" src="{config.siteurl}images/logo-light.svg" alt="" width="28" height="28">
             </a>
 
             <a class="kj-topbar-site d-none d-md-inline-flex" href="{config.siteurl}" target="_blank" rel="noopener" title="{lang.ADM_VIEW_SITE}">
