@@ -80,8 +80,9 @@
     --radius: 6px;
     --radius-lg: 10px;
 
-    --shell: 1100px;
-    --sidebar: 232px;
+    --shell: 1200px;
+    /* the width of sidebar.png, the bottom of the user box */
+    --sidebar: 226px;
     --ease: cubic-bezier(.2, .8, .2, 1);
 }
 
@@ -224,7 +225,7 @@ bdi {
    3. Page frame
    ========================================================================== */
 
-/* the page, bg_main.png draws its paper with the swooshes, fading to the background at its bottom */
+/* the page, bg_main.png draws its paper with the two rings, fading to the background at its bottom */
 #main {
     max-width: var(--shell);
     margin: 20px auto 0;
@@ -253,14 +254,18 @@ bdi {
 
 /* --- Menu bar ------------------------------------------------------------ */
 
+/*
+ * menu-bg.gif and current-bg.gif are drawn 40px high, like the old style:
+ * the bar starts 6px down with its own top line and ends with its sky strip,
+ * the current link is sky from top to bottom, so it rises over the bar and runs into the strip.
+ * Their last rows are for a taller bar, and drew a white line under the current link.
+ */
 .top_nav {
     position: relative;
     /* inside the paper of bg_main.png, 10px of its 960px */
     margin: 0 1.05%;
-    background: #E8E8E8 url("../images/menu-bg.gif") repeat-x left top;
-    border-top: 1px solid var(--gray-300);
-    border-bottom: 4px solid var(--sky-400);
-    box-shadow: 0 1px 0 var(--sky-200);
+    background: url("../images/menu-bg.gif") repeat-x left top;
+    filter: drop-shadow(0 2px 2px rgba(31, 92, 130, .12));
 }
 
 .top_nav .menu {
@@ -283,12 +288,12 @@ bdi {
 .top_nav .menu a {
     position: relative;
     display: block;
-    height: 44px;
+    height: 40px;
     padding: 0 22px;
     color: #444444;
     font-size: .8125rem;
     font-weight: 700;
-    line-height: 44px;
+    line-height: 40px;
     white-space: nowrap;
     text-decoration: none;
     text-shadow: 0 1px 0 rgba(255, 255, 255, .8);
@@ -302,17 +307,18 @@ bdi {
 
 .top_nav .menu a.current {
     background: var(--sky-400) url("../images/current-bg.gif") repeat-x left top;
+    border-start-start-radius: 3px;
+    border-start-end-radius: 3px;
     color: var(--sky-ink);
-    box-shadow: 1px 0 0 rgba(255, 255, 255, .5) inset, -1px 0 0 rgba(255, 255, 255, .5) inset;
 }
 
-/* separators between the links */
+/* separators between the links, on the silver part of the bar */
 .top_nav .menu li + li a::before {
     content: "";
     position: absolute;
     inset-inline-start: 0;
-    top: 12px;
-    bottom: 12px;
+    top: 13px;
+    bottom: 13px;
     width: 1px;
     background: rgba(0, 0, 0, .08);
     box-shadow: 1px 0 0 rgba(255, 255, 255, .7);
@@ -1170,11 +1176,11 @@ a.paginate.dots {
 
 /* --- Upload, index_body.html --------------------------------------------- */
 
-/* results of an upload, under the upload box */
+/* results of an upload, above the upload box */
 .upload-results {
     display: grid;
     gap: 14px;
-    margin-top: 20px;
+    margin-bottom: 20px;
 }
 
 .upload-results:empty {
@@ -1190,16 +1196,21 @@ a.paginate.dots {
     outline: none;
 }
 
-/* the welcome message of the site */
+/* the welcome message of the site, above the upload box, the paper shows through its end */
 .welcome-msg {
-    margin: 20px 0 0;
-    padding: 14px 18px;
-    background: #FFFFFF;
-    border: 1px solid var(--gray-200);
+    margin: 0 0 18px;
+    padding: 12px 16px;
+    background: linear-gradient(to right, rgba(255, 255, 255, .95), rgba(255, 255, 255, .5));
+    border: 1px solid rgba(255, 255, 255, .9);
     border-inline-start: 3px solid var(--sky-400);
     border-radius: var(--radius);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, .06);
     color: var(--gray-700);
     line-height: 1.7;
+}
+
+[dir="rtl"] .welcome-msg {
+    background-image: linear-gradient(to left, rgba(255, 255, 255, .95), rgba(255, 255, 255, .5));
 }
 
 .welcome-msg > :last-child {
@@ -1275,46 +1286,206 @@ a.paginate.dots {
     z-index: 1;
 }
 
-.dropzone {
+/* the file fields, one file each */
+.upload-fields {
+    display: grid;
+    /* a file field is wide by itself, it must not widen the box on a phone */
+    grid-template-columns: minmax(0, 1fr);
+    gap: 8px;
+}
+
+.upload-field {
     display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 0;
+    min-height: 48px;
+    padding: 7px;
+    padding-inline-end: 10px;
+    background: rgba(255, 255, 255, .94);
+    border: 1px solid var(--gray-200);
+    border-radius: var(--radius);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, .04);
+    transition: border-color 150ms var(--ease), background-color 150ms var(--ease), box-shadow 150ms var(--ease);
+    animation: rise 180ms var(--ease);
+}
+
+.upload-field:hover {
+    border-color: var(--sky-300);
+}
+
+.upload-field:focus-within {
+    border-color: var(--sky-500);
+    box-shadow: 0 0 0 3px rgba(98, 180, 232, .22);
+}
+
+.upload-field.has-file {
+    background: var(--sky-50);
+    border-color: var(--sky-300);
+}
+
+/* the number of the field, the icon of the file type once a file is chosen */
+.upload-field-num {
+    display: grid;
+    flex: none;
+    place-items: center;
+    width: 32px;
+    height: 32px;
+    background: linear-gradient(var(--sky-150), var(--sky-200));
+    border: 1px solid var(--sky-300);
+    border-radius: var(--radius-sm);
+    box-shadow: 0 1px 0 rgba(255, 255, 255, .7) inset;
+    color: var(--sky-700);
+    font-size: .8125rem;
+    font-weight: 700;
+}
+
+.upload-field.has-file .upload-field-num {
+    background: #FFFFFF;
+    border-color: var(--sky-200);
+}
+
+.upload-field-num img {
+    width: 24px;
+    height: 24px;
+}
+
+.upload-field input.file {
+    flex: 1 1 0;
+    width: auto;
+    min-width: 0;
+    padding: 0;
+    background: none;
+    border: 0;
+    color: var(--gray-600);
+    font-size: .8125rem;
+    cursor: pointer;
+}
+
+.upload-field input.file:focus-visible {
+    outline: none;
+}
+
+.upload-field.has-file input.file {
+    color: var(--gray-900);
+    font-weight: 600;
+}
+
+.upload-field input.file::file-selector-button {
+    margin-inline-end: 12px;
+    padding: 6px 16px;
+    background: linear-gradient(#FFFFFF, #E6E9EB);
+    border: 1px solid var(--gray-300);
+    border-radius: var(--radius-sm);
+    box-shadow: 0 1px 0 #FFFFFF inset, 0 1px 1px rgba(0, 0, 0, .05);
+    transition: background 150ms var(--ease), border-color 150ms var(--ease), color 150ms var(--ease);
+}
+
+.upload-field input.file:hover::file-selector-button {
+    background: linear-gradient(#EEF7FC, #D3E7F3);
+    border-color: var(--sky-400);
+    color: var(--sky-ink);
+}
+
+.upload-field-meta {
+    display: flex;
+    flex: none;
+    align-items: center;
+    gap: 10px;
+}
+
+.upload-field-size {
+    color: var(--gray-600);
+    font-size: .75rem;
+    font-weight: 600;
+    white-space: nowrap;
+    direction: ltr;
+    unicode-bidi: isolate;
+}
+
+.upload-field-remove {
+    display: grid;
+    flex: none;
+    place-items: center;
+    width: 26px;
+    height: 26px;
+    padding: 0;
+    background: var(--pink-100);
+    border: 1px solid var(--pink-200);
+    border-radius: 50%;
+    color: var(--red-600);
+    cursor: pointer;
+    transition: background 150ms var(--ease);
+}
+
+.upload-field-remove:hover {
+    background: var(--pink-200);
+}
+
+.upload-field-remove .icon {
+    width: 12px;
+    height: 12px;
+    stroke-width: 3;
+}
+
+/* files can be dropped: a line under the fields, and the box lights up while they are dragged */
+.upload-hint {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px 16px;
+    margin-top: 10px;
+    color: var(--gray-600);
+    font-size: .75rem;
+}
+
+.upload-hint-text {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-weight: 600;
+}
+
+.upload-hint-text .icon {
+    width: 14px;
+    height: 14px;
+    color: var(--sky-500);
+}
+
+.upload-exts {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+}
+
+.tabcon > .drop-overlay {
+    position: absolute;
+    inset: 8px;
+    z-index: 5;
+    display: none;
     flex-direction: column;
     align-items: center;
-    gap: 4px;
-    padding: 28px 20px;
-    background: rgba(243, 249, 253, .85);
-    border: 2px dashed var(--sky-300);
-    border-radius: var(--radius-lg);
-    text-align: center;
-    cursor: pointer;
-    transition: background 150ms var(--ease), border-color 150ms var(--ease);
-}
-
-.dropzone:hover,
-.dropzone.is-dragover {
-    background: var(--sky-100);
-    border-color: var(--sky-500);
-}
-
-.dropzone.is-dragover {
-    border-style: solid;
-}
-
-.dropzone:focus-within {
-    outline: 2px solid var(--focus);
-    outline-offset: 2px;
-}
-
-.dropzone.is-full {
-    opacity: .6;
+    justify-content: center;
+    gap: 10px;
+    background: rgba(243, 249, 253, .95);
+    border: 2px dashed var(--sky-500);
+    border-radius: var(--radius);
+    color: var(--sky-700);
+    font-size: 1rem;
+    font-weight: 700;
     pointer-events: none;
 }
 
-.dropzone-icon {
+.upload-form.is-dragover .drop-overlay {
+    display: flex;
+}
+
+.drop-overlay-icon {
     display: grid;
     place-items: center;
     width: 50px;
     height: 50px;
-    margin-bottom: 6px;
     background: linear-gradient(#AED6EA, #80B9D6);
     border: 1px solid #5E9FC3;
     border-radius: 50%;
@@ -1322,37 +1493,10 @@ a.paginate.dots {
     color: #FFFFFF;
 }
 
-.dropzone-icon .icon {
+.drop-overlay-icon .icon {
     width: 22px;
     height: 22px;
     stroke-width: 2.25;
-}
-
-.dropzone-title {
-    color: var(--gray-900);
-    font-size: .9375rem;
-    font-weight: 700;
-}
-
-.dropzone-hint {
-    color: var(--gray-600);
-    font-size: .8125rem;
-}
-
-.dropzone-hint em {
-    color: var(--sky-600);
-    font-style: normal;
-    font-weight: 700;
-    text-decoration: underline;
-}
-
-.dropzone-exts {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 4px;
-    max-width: 480px;
-    margin-top: 10px;
 }
 
 .ext-chip {
@@ -1369,92 +1513,6 @@ a.paginate.dots {
 
 .ext-chip-more {
     background: var(--sky-150);
-}
-
-.dropzone-count {
-    margin-top: 4px;
-    direction: ltr;
-    unicode-bidi: isolate;
-    color: var(--gray-500);
-    font-size: .6875rem;
-    font-weight: 700;
-}
-
-.upload-queue {
-    display: grid;
-    gap: 6px;
-    margin: 14px 0 0;
-    padding: 0;
-    list-style: none;
-}
-
-.upload-item {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 6px 8px;
-    background: #FFFFFF;
-    border: 1px solid var(--sky-200);
-    border-radius: var(--radius);
-    animation: rise 180ms var(--ease);
-}
-
-.upload-item-icon {
-    flex: none;
-    width: 24px;
-    height: 24px;
-}
-
-.upload-item-info {
-    flex: 1 1 auto;
-    min-width: 0;
-}
-
-.upload-item-name {
-    overflow: hidden;
-    color: var(--gray-900);
-    font-size: .8125rem;
-    font-weight: 700;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-}
-
-.upload-item-size {
-    color: var(--gray-500);
-    font-size: .6875rem;
-}
-
-.upload-item-remove {
-    display: grid;
-    flex: none;
-    place-items: center;
-    width: 26px;
-    height: 26px;
-    padding: 0;
-    background: var(--pink-100);
-    border: 1px solid var(--pink-200);
-    border-radius: 50%;
-    color: var(--red-600);
-    cursor: pointer;
-}
-
-.upload-item-remove:hover {
-    background: var(--pink-200);
-}
-
-.upload-item-remove .icon {
-    width: 12px;
-    height: 12px;
-    stroke-width: 3;
-}
-
-.upload-fields {
-    display: grid;
-    gap: 6px;
-}
-
-.upload-form.is-enhanced .upload-fields {
-    display: none;
 }
 
 .upload-actions {
@@ -1678,7 +1736,6 @@ a.paginate.dots {
 .data_menu {
     width: 100%;
     margin: 0;
-    table-layout: fixed;
 }
 
 .data_menu th,
@@ -1689,8 +1746,10 @@ a.paginate.dots {
     font-size: .8125rem;
 }
 
+/* the labels take their own width, the values the rest */
 .data_menu th {
-    width: 38%;
+    width: 1%;
+    white-space: nowrap;
     background: var(--sky-200) url("../images/headline_bg.png") repeat-x right top;
     background-size: auto 100%;
     color: var(--sky-ink);
@@ -1955,7 +2014,7 @@ a.paginate.dots {
 
 .profile-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(min(100%, 210px), 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 250px), 1fr));
     gap: 16px;
 }
 
@@ -1973,24 +2032,30 @@ a.paginate.dots {
     margin-bottom: 0;
 }
 
-.avatar-box {
-    margin-top: 16px;
-}
-
+/* the avatar, as the sidebar shows it, with the link to change it */
 .avatar-row {
     display: flex;
+    flex-direction: column;
     align-items: center;
-    gap: 16px;
+    justify-content: center;
+    gap: 12px;
+    text-align: center;
 }
 
 .avatar-row img {
     flex: none;
-    width: 64px;
-    height: 64px;
+    width: 92px;
+    height: 92px;
     padding: 3px;
+    object-fit: cover;
     background: #FFFFFF;
     border: 1px solid var(--gray-200);
     border-radius: var(--radius);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, .08);
+}
+
+.avatar-row .explain {
+    margin: 0;
 }
 
 .buttons_center {
@@ -2473,6 +2538,16 @@ ul.index_err {
 
     .tabcon {
         padding: 14px;
+    }
+
+    /* room for the name of the file */
+    .upload-field input.file::file-selector-button {
+        margin-inline-end: 8px;
+        padding: 6px 10px;
+    }
+
+    .upload-field-size {
+        display: none;
     }
 
     .tabcon::after {

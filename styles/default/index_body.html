@@ -1,6 +1,21 @@
 <!-- Powered by kleeja -->
 <div id="content_index">
 
+    <IF NAME="welcome_msg">
+    <!-- welcome message of the site -->
+    <div class="welcome-msg">{welcome_msg}</div>
+    </IF>
+
+    <!-- upload results and errors, above the upload box; js/script.js adds them here too after a background upload -->
+    <div id="upload-results" class="upload-results" tabindex="-1" aria-live="polite"><IF NAME="info"><LOOP NAME="info"><IF LOOP="message_type==error">
+        <div class="notice notice-error" role="alert"><img src="{STYLE_PATH}images/err.gif" width="29" height="29" alt=""><div class="notice-body">{{message_content}}</div></div>
+    <ELSE>
+        <div class="up-result">{{message_content}}</div>
+    </IF></LOOP></IF></div>
+
+    <template id="tpl-upload-result"><div class="up-result" data-slot></div></template>
+    <template id="tpl-upload-error"><div class="notice notice-error" role="alert"><img src="{STYLE_PATH}images/err.gif" width="29" height="29" alt=""><div class="notice-body" data-slot></div></div></template>
+
     <!-- form upload -->
     <form id="uploader" class="upload-form" action="{action}" method="post" enctype="multipart/form-data" data-filetypes="{config.siteurl}images/filetypes/">
 
@@ -23,25 +38,25 @@
                     <div class="notice-body" data-upload-errors></div>
                 </div>
 
-                <!-- drop zone, shown by js/script.js when the browser supports it -->
-                <label class="dropzone" for="upload-picker" data-dropzone hidden>
-                    <span class="dropzone-icon" aria-hidden="true"><svg class="icon"><use href="#i-upload"/></svg></span>
-                    <span class="dropzone-title">{lang.DRAG_AND_DROP}</span>
-                    <span class="dropzone-hint">{lang.OR_MANUAL_SELECT}</span>
-                    <span class="dropzone-exts" data-upload-exts hidden></span>
-                    <span class="dropzone-count" data-upload-count></span>
-                    <input type="file" id="upload-picker" class="visually-hidden" multiple data-dropzone-input>
-                </label>
-
-                <ul class="upload-queue" data-upload-queue hidden></ul>
-
-                <!-- the fields the server reads, one file each; the next one shows up once a file is chosen -->
+                <!-- one field for each file, the next one shows up once a file is chosen -->
                 <div class="upload-fields" data-upload-fields>
                     <LOOP NAME="FILES_NUM_LOOP">
                     <div class="upload-field" style="{{show}}">
+                        <span class="upload-field-num" aria-hidden="true">{{i}}</span>
                         <input class="file" type="file" name="file_{{i}}_" data-number="{{i}}" aria-label="{lang.OPEN} {{i}}">
                     </div>
                     </LOOP>
+                </div>
+
+                <!-- shown by js/script.js when the browser can take dropped files -->
+                <div class="upload-hint" data-upload-hint hidden>
+                    <span class="upload-hint-text"><svg class="icon" aria-hidden="true"><use href="#i-upload"/></svg>{lang.DRAG_AND_DROP}</span>
+                    <span class="upload-exts" data-upload-exts hidden></span>
+                </div>
+
+                <div class="drop-overlay" aria-hidden="true">
+                    <span class="drop-overlay-icon"><svg class="icon"><use href="#i-upload"/></svg></span>
+                    <span class="drop-overlay-title">{lang.DRAG_AND_DROP}</span>
                 </div>
 
                 <IF NAME="config.safe_code">
@@ -82,22 +97,6 @@
     </div>
     <!-- @end-box-loading -->
 
-
-    <!-- upload results and errors, js/script.js adds them here too after a background upload -->
-    <div id="upload-results" class="upload-results" tabindex="-1" aria-live="polite"><IF NAME="info"><LOOP NAME="info"><IF LOOP="message_type==error">
-        <div class="notice notice-error" role="alert"><img src="{STYLE_PATH}images/err.gif" width="29" height="29" alt=""><div class="notice-body">{{message_content}}</div></div>
-    <ELSE>
-        <div class="up-result">{{message_content}}</div>
-    </IF></LOOP></IF></div>
-
-    <template id="tpl-upload-result"><div class="up-result" data-slot></div></template>
-    <template id="tpl-upload-error"><div class="notice notice-error" role="alert"><img src="{STYLE_PATH}images/err.gif" width="29" height="29" alt=""><div class="notice-body" data-slot></div></div></template>
-
-
-    <IF NAME="welcome_msg">
-    <!-- welcome message of the site -->
-    <div class="welcome-msg">{welcome_msg}</div>
-    </IF>
 
 
     <IF NAME="show_online">
