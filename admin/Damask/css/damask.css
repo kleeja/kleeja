@@ -58,6 +58,16 @@
     --kj-shadow-sm: 0 1px 2px rgba(11, 31, 58, 0.06);
     --kj-shadow-lg: 0 8px 24px rgba(11, 31, 58, 0.12);
     --kj-row-selected: var(--kj-coral-100);
+    /* sidebar: a white rail beside the white top bar, carrying the primary mark */
+    --kj-side-bg: #fff;
+    --kj-side-text: var(--kj-navy-700);
+    --kj-side-muted: var(--kj-navy-600);
+    --kj-side-strong: var(--kj-navy);
+    --kj-side-hover: var(--kj-navy-50);
+    --kj-side-active: var(--kj-navy-100);
+    --kj-side-border: var(--kj-navy-200);
+    --kj-side-line: var(--kj-navy-200);
+    --kj-side-dot: var(--kj-navy-300);
 
     --bs-body-bg: #fff;
     --bs-body-bg-rgb: 255, 255, 255;
@@ -154,6 +164,16 @@
     --kj-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
     --kj-shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.5);
     --kj-row-selected: var(--kj-coral-900);
+    /* sidebar: navy, carrying the reverse mark */
+    --kj-side-bg: var(--kj-navy);
+    --kj-side-text: var(--kj-navy-300);
+    --kj-side-muted: var(--kj-navy-400);
+    --kj-side-strong: #fff;
+    --kj-side-hover: rgba(255, 255, 255, 0.06);
+    --kj-side-active: var(--kj-navy-800);
+    --kj-side-border: var(--kj-navy-700);
+    --kj-side-line: var(--kj-navy-700);
+    --kj-side-dot: var(--kj-navy-600);
 
     --bs-body-bg: var(--kj-navy-800);
     --bs-body-bg-rgb: 35, 53, 78;
@@ -338,26 +358,14 @@ h6 {
     color: var(--bs-emphasis-color);
 }
 
-/* --- Sidebar (navy in both colour modes, so it carries the reverse mark) ---------- */
-
-.kj-sidebar {
-    --kj-side-text: var(--kj-navy-300);
-    --kj-side-muted: var(--kj-navy-400);
-    --kj-side-hover: rgba(255, 255, 255, 0.06);
-    --kj-side-active: var(--kj-navy-800);
-    --kj-side-border: var(--kj-navy-800);
-}
-
-[data-bs-theme="dark"] .kj-sidebar {
-    --kj-side-border: var(--kj-navy-700);
-}
+/* --- Sidebar (follows the colour mode; its --kj-side-* tokens live with each mode) --- */
 
 .kj-sidebar .offcanvas-lg {
     --bs-offcanvas-width: 18rem;
-    --bs-offcanvas-bg: var(--kj-navy);
-    --bs-offcanvas-color: #fff;
-    --bs-offcanvas-border-color: var(--kj-navy-700);
-    color: #fff;
+    --bs-offcanvas-bg: var(--kj-side-bg);
+    --bs-offcanvas-color: var(--kj-side-strong);
+    --bs-offcanvas-border-color: var(--kj-side-border);
+    color: var(--kj-side-strong);
 }
 
 @media (min-width: 992px) {
@@ -369,7 +377,7 @@ h6 {
         height: 100vh;
         height: 100dvh;
         border-inline-end: 1px solid var(--kj-side-border);
-        background: var(--kj-navy);
+        background: var(--kj-side-bg);
     }
 
     .kj-sidebar .offcanvas-lg {
@@ -412,9 +420,9 @@ h6 {
 
 .kj-version {
     padding: 0.125rem 0.5rem;
-    border: 1px solid var(--kj-navy-700);
+    border: 1px solid var(--kj-side-line);
     border-radius: 999px;
-    color: var(--kj-navy-300);
+    color: var(--kj-side-muted);
     font-size: 0.6875rem;
     font-weight: 600;
     line-height: 1.4;
@@ -425,7 +433,7 @@ h6 {
     min-height: 0;
     overflow-y: auto;
     padding: 1rem 0.75rem;
-    scrollbar-color: var(--kj-navy-700) transparent;
+    scrollbar-color: var(--kj-side-line) transparent;
     scrollbar-width: thin;
 }
 
@@ -468,17 +476,17 @@ h6 {
 .kj-nav-link:hover,
 .kj-nav-link:focus-visible {
     background: var(--kj-side-hover);
-    color: #fff;
+    color: var(--kj-side-strong);
 }
 
 .kj-nav-link:focus-visible {
-    outline: 2px solid var(--kj-coral);
+    outline: 2px solid var(--kj-accent);
     outline-offset: -2px;
 }
 
 .kj-nav-link.active {
     background: var(--kj-side-active);
-    color: #fff;
+    color: var(--kj-side-strong);
 }
 
 /* the coral stem of the mark, reused as the active marker */
@@ -491,7 +499,7 @@ h6 {
     width: 4px;
     border-start-end-radius: 2px;
     border-end-end-radius: 2px;
-    background: var(--kj-coral);
+    background: var(--kj-accent);
 }
 
 .kj-nav-icon {
@@ -504,11 +512,11 @@ h6 {
 }
 
 .kj-nav-link:hover .kj-nav-icon {
-    color: #fff;
+    color: var(--kj-side-strong);
 }
 
 .kj-nav-link.active .kj-nav-icon {
-    color: var(--kj-coral);
+    color: var(--kj-accent);
 }
 
 .kj-nav-text {
@@ -537,7 +545,7 @@ h6 {
     margin-inline-start: 1.375rem;
     padding: 0;
     padding-inline-start: 0.75rem;
-    border-inline-start: 1px solid var(--kj-navy-700);
+    border-inline-start: 1px solid var(--kj-side-line);
     list-style: none;
 }
 
@@ -566,23 +574,23 @@ h6 {
     width: 5px;
     height: 5px;
     border-radius: 50%;
-    background: var(--kj-navy-600);
+    background: var(--kj-side-dot);
     transform: translateY(-50%);
 }
 
 .kj-subnav a:hover,
 .kj-subnav a:focus-visible {
     background: var(--kj-side-hover);
-    color: #fff;
+    color: var(--kj-side-strong);
 }
 
 .kj-subnav .active > a {
-    color: #fff;
+    color: var(--kj-side-strong);
     font-weight: 600;
 }
 
 .kj-subnav .active > a::before {
-    background: var(--kj-coral);
+    background: var(--kj-accent);
 }
 
 .kj-sidebar-footer {
