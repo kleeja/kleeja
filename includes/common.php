@@ -47,6 +47,7 @@ define('ADM_FILES_PATH', PATH . 'includes/adm');
 error_reporting(defined('DEV_STAGE') ? E_ALL : E_ALL ^ E_NOTICE);
 if (defined('DEV_STAGE')) {
     ini_set('display_errors', 1);
+    include PATH . 'includes/dev_tools.php';
 }
 
 //the error handler, it shows the Kleeja error page
@@ -274,6 +275,7 @@ $DEFAULT_PATH_ADMIN = $config['siteurl'] . 'admin/' . ACP_STYLE_NAME . '/';
 
 //get languge of common
 get_lang('common');
+get_olang($config['language']);
 
 //run ban system
 get_ban();
