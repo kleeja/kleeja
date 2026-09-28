@@ -647,6 +647,45 @@ function get_lang(string $name, string $folder = ''): bool
     return true;
 }
 
+/**
+ * Include translation from the database
+ * @param  string $name -> the value of $config['language']
+ * @return bool
+ */
+function get_olang(string $name): bool
+{
+    global $olang, $dbprefix, $SQL;
+
+    if (is_null($olang) || !is_array($olang)) {
+        $olang = [];
+    }
+    $lang_to_add = [];
+    if (!($lang_to_add = cache()->get('data_lang' . $name))) {
+        $query = [
+            'SELECT' => 'l.word, l.trans',
+            'FROM' => "{$dbprefix}lang l",
+            'WHERE' => 'l.lang_id = :lang_id',
+            'BIND' => ['lang_id' => kleeja_html_encode($name)],
+        ];
+
+        extract(runHook('qr_select_lang_cache', get_defined_vars()));
+
+        $result = $SQL->build($query);
+
+        while ($row = $SQL->fetch_array($result)) {
+            $lang_to_add[$row['word']] = $row['trans'];
+        }
+
+        $SQL->freeresult($result);
+
+        cache()->save('data_lang' . $name, $lang_to_add);
+    }
+
+    $olang = array_merge($olang, $lang_to_add);
+
+    return true;
+}
+
 /*
  * Get fresh config value
  * some time cache doesn't not work as well, so some important

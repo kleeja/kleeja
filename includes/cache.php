@@ -107,32 +107,6 @@ if (!($config = $cache->get('data_config'))) {
 }
 
 //
-//get language terms from lang table  ...
-//
-
-if (!($olang = $cache->get('data_lang' . $config['language']))) {
-    $olang = [];
-    $query = [
-        'SELECT' => 'l.word, l.trans',
-        'FROM' => "{$dbprefix}lang l",
-        'WHERE' => 'l.lang_id = :lang_id',
-        'BIND' => ['lang_id' => kleeja_html_encode($config['language'])],
-    ];
-
-    extract(runHook('qr_select_lang_cache', get_defined_vars()));
-
-    $result = $SQL->build($query);
-
-    while ($row = $SQL->fetch_array($result)) {
-        $olang[$row['word']] = $row['trans'];
-    }
-
-    $SQL->freeresult($result);
-
-    $cache->save('data_lang' . $config['language'], $olang);
-}
-
-//
 //stats to cache
 //
 if (!($stats = $cache->get('data_stats'))) {
