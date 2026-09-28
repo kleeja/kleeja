@@ -796,6 +796,47 @@ h6 {
     font-weight: 700;
 }
 
+/* a section title with a hint below it and an optional link at the far end */
+.kj-section-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 0.5rem 1rem;
+    margin: 2rem 0 1rem;
+}
+
+.kj-section-head .kj-section-title {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin: 0;
+    font-size: 1.0625rem;
+}
+
+.kj-section-head .kj-badge:empty {
+    display: none;
+}
+
+.kj-section-hint {
+    margin: 0.25rem 0 0;
+    color: var(--bs-secondary-color);
+    font-size: 0.875rem;
+}
+
+.kj-section-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.kj-section-link:hover {
+    text-decoration: underline;
+}
+
 /* --- Cards ----------------------------------------------------------------------- */
 
 .card {
@@ -2058,12 +2099,393 @@ input.form-control[type="checkbox"] {
     vertical-align: 0.125em;
 }
 
-/* team */
-.kj-person img {
-    width: 3rem;
-    height: 3rem;
+/* team: a navy hero in both colour modes, so it always carries the reverse mark */
+.kj-team-hero {
+    --bs-card-bg: var(--kj-navy);
+    --bs-card-color: #fff;
+    --bs-card-border-color: var(--kj-navy);
+    position: relative;
+    overflow: hidden;
+}
+
+[data-bs-theme="dark"] .kj-team-hero {
+    --bs-card-border-color: var(--kj-navy-700);
+}
+
+/* a faint dot grid fading toward the text; texture only, never a stand-in for the mark */
+.kj-team-hero::before {
+    position: absolute;
+    inset: 0;
+    background-image: radial-gradient(rgba(255, 255, 255, 0.1) 1px, transparent 1.5px);
+    background-size: 18px 18px;
+    -webkit-mask-image: linear-gradient(to left, #000, transparent 70%);
+    mask-image: linear-gradient(to left, #000, transparent 70%);
+    content: "";
+    pointer-events: none;
+}
+
+[dir="rtl"] .kj-team-hero::before {
+    -webkit-mask-image: linear-gradient(to right, #000, transparent 70%);
+    mask-image: linear-gradient(to right, #000, transparent 70%);
+}
+
+.kj-team-hero .card-body {
+    position: relative;
+    display: grid;
+    gap: 1.75rem 3rem;
+    padding: 1.75rem;
+}
+
+@media (min-width: 768px) {
+    .kj-team-hero .card-body {
+        padding: 2.25rem 2.5rem;
+    }
+}
+
+@media (min-width: 1200px) {
+    .kj-team-hero .card-body {
+        grid-template-columns: minmax(0, 1fr) minmax(0, 26rem);
+        align-items: center;
+    }
+}
+
+.kj-team-intro {
+    display: flex;
+    align-items: flex-start;
+    gap: 1.25rem;
+}
+
+/* 56px mark, 20px gap: well past the 25% clear space the brand asks for */
+.kj-team-mark {
+    flex: 0 0 auto;
+    width: 3.5rem;
+    height: 3.5rem;
+}
+
+/* on phones the mark sits above the text so the copy keeps the full width */
+@media (max-width: 575.98px) {
+    .kj-team-intro {
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .kj-team-mark {
+        width: 3rem;
+        height: 3rem;
+    }
+}
+
+/* coral on navy is 5.15:1, so the brand coral can carry this small label */
+.kj-team-eyebrow {
+    display: flex;
+    align-items: center;
+    gap: 0.625rem;
+    margin: 0 0 0.625rem;
+    color: var(--kj-coral);
+    font-size: 0.8125rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+}
+
+[dir="rtl"] .kj-team-eyebrow {
+    letter-spacing: 0;
+}
+
+.kj-team-eyebrow::before {
+    width: 1.5rem;
+    height: 3px;
+    border-radius: 2px;
+    background: currentColor;
+    content: "";
+}
+
+.kj-team-heading {
+    margin: 0 0 0.5rem;
+    color: #fff;
+    font-size: 1.5rem;
+    font-weight: 700;
+    line-height: 1.3;
+}
+
+.kj-team-lead {
+    max-width: 40rem;
+    margin: 0;
+    color: var(--kj-navy-300);
+    line-height: 1.6;
+}
+
+/* hairline dividers come from the 1px gap showing the translucent background through */
+.kj-team-stats {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1px;
+    margin: 0;
+    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: var(--bs-border-radius-lg);
+    background: rgba(255, 255, 255, 0.12);
+}
+
+@media (min-width: 768px) and (max-width: 1199.98px) {
+    .kj-team-stats {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+}
+
+.kj-team-stats > div {
+    padding: 1rem 1.25rem;
+    background: var(--kj-navy);
+}
+
+.kj-team-stats dt {
+    margin-bottom: 0.25rem;
+    color: var(--kj-navy-300);
+    font-size: 0.8125rem;
+    font-weight: 500;
+}
+
+.kj-team-stats dd {
+    margin: 0;
+    color: #fff;
+    font-size: 1.625rem;
+    font-weight: 700;
+    line-height: 1.2;
+    letter-spacing: -0.02em;
+    font-variant-numeric: tabular-nums;
+}
+
+a.kj-person,
+.kj-team-action {
+    transition:
+        border-color var(--kj-duration) var(--kj-ease),
+        box-shadow var(--kj-duration) var(--kj-ease);
+}
+
+a.kj-person:hover,
+.kj-team-action:hover {
+    border-color: var(--bs-secondary-border-subtle);
+    box-shadow: var(--kj-shadow-lg);
+}
+
+a.kj-person:focus-visible,
+.kj-team-action:focus-visible {
+    outline: 2px solid var(--kj-accent);
+    outline-offset: 2px;
+}
+
+.kj-person-avatar {
+    flex: 0 0 auto;
+    width: 2.5rem;
+    height: 2.5rem;
     border-radius: 50%;
+    background: var(--bs-secondary-bg);
+    box-shadow: 0 0 0 1px var(--bs-border-color-translucent);
     object-fit: cover;
+}
+
+.kj-person-head {
+    display: flex;
+    align-items: center;
+    gap: 0.875rem;
+}
+
+/* GitHub logins stay left to right, but line up with the page's start edge */
+.kj-person-name {
+    color: var(--bs-emphasis-color);
+    font-weight: 600;
+    transition: color var(--kj-duration) var(--kj-ease);
+}
+
+[dir="rtl"] .kj-person-name {
+    text-align: right;
+}
+
+a.kj-person:hover .kj-person-name {
+    color: var(--kj-accent);
+}
+
+.kj-person-meta {
+    display: flex;
+    align-items: center;
+    gap: 0.375rem;
+    margin-top: 0.125rem;
+    color: var(--bs-secondary-color);
+    font-size: 0.8125rem;
+}
+
+/* the three leading contributors; whoever ranks first carries the coral */
+.kj-person.is-lead .card-body {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+}
+
+.kj-person.is-lead .kj-person-avatar {
+    width: 3.5rem;
+    height: 3.5rem;
+    box-shadow:
+        0 0 0 2px var(--bs-body-bg),
+        0 0 0 4px var(--bs-border-color);
+}
+
+.kj-person.is-lead .kj-person-name {
+    font-size: 1.0625rem;
+}
+
+.kj-person-rank {
+    align-self: flex-start;
+    padding: 0.125rem 0.5rem;
+    border-radius: 999px;
+    background: var(--bs-secondary-bg);
+    color: var(--bs-emphasis-color);
+    font-size: 0.75rem;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+}
+
+.kj-person-foot {
+    margin-top: auto;
+}
+
+.kj-person-stats {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    margin: 0 0 0.625rem;
+}
+
+.kj-person-stats > :last-child {
+    text-align: end;
+}
+
+.kj-person-stats dt {
+    color: var(--bs-secondary-color);
+    font-size: 0.75rem;
+    font-weight: 500;
+}
+
+.kj-person-stats dd {
+    margin: 0;
+    color: var(--bs-emphasis-color);
+    font-size: 1.25rem;
+    font-weight: 700;
+    line-height: 1.3;
+    font-variant-numeric: tabular-nums;
+}
+
+.kj-person-bar {
+    --bs-progress-height: 0.375rem;
+    --bs-progress-bar-bg: var(--kj-navy);
+}
+
+[data-bs-theme="dark"] .kj-person-bar {
+    --bs-progress-bar-bg: var(--kj-navy-300);
+}
+
+.kj-person.is-lead.is-top .kj-person-avatar {
+    box-shadow:
+        0 0 0 2px var(--bs-body-bg),
+        0 0 0 4px var(--kj-coral);
+}
+
+.kj-person.is-lead.is-top .kj-person-rank {
+    background: var(--bs-primary-bg-subtle);
+    color: var(--kj-badge-color);
+}
+
+.kj-person.is-lead.is-top .kj-person-bar {
+    --bs-progress-bar-bg: var(--kj-coral);
+}
+
+/* everyone else, in a dense grid */
+.kj-person.is-compact .card-body {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem 1rem;
+}
+
+.kj-person.is-compact .kj-person-name {
+    min-width: 0;
+    font-size: 0.9375rem;
+}
+
+.kj-person-count {
+    display: inline-flex;
+    flex: 0 0 auto;
+    align-items: center;
+    gap: 0.375rem;
+    margin-inline-start: auto;
+    color: var(--bs-secondary-color);
+    font-size: 0.8125rem;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+}
+
+/* skeletons shown until GitHub answers */
+.kj-person.is-loading .placeholder {
+    display: block;
+    min-height: 0.875rem;
+    border-radius: var(--bs-border-radius);
+    background-color: var(--bs-secondary-bg);
+    opacity: 1;
+}
+
+.kj-person.is-loading .flex-grow-1 > .placeholder + .placeholder {
+    margin-top: 0.5rem;
+}
+
+.kj-person.is-loading .placeholder-sm {
+    min-height: 0.625rem;
+}
+
+.kj-person.is-loading .placeholder-lg {
+    min-height: 2.75rem;
+}
+
+.kj-person.is-loading .kj-person-avatar {
+    border-radius: 50%;
+    box-shadow: none;
+}
+
+/* ways to take part */
+.kj-team-action-title {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    margin: 1rem 0 0.375rem;
+    font-size: 1rem;
+    font-weight: 600;
+    transition: color var(--kj-duration) var(--kj-ease);
+}
+
+.kj-team-action-title > i {
+    color: var(--bs-tertiary-color);
+    font-size: 0.75rem;
+    transition: color var(--kj-duration) var(--kj-ease);
+}
+
+.kj-team-action:hover .kj-team-action-title,
+.kj-team-action:hover .kj-team-action-title > i {
+    color: var(--kj-accent);
+}
+
+.kj-team-action-text {
+    margin: 0;
+    color: var(--bs-secondary-color);
+    font-size: 0.875rem;
+    line-height: 1.55;
+}
+
+.kj-team-thanks .kj-badge a {
+    color: inherit;
+    text-decoration: none;
+}
+
+.kj-team-thanks .kj-badge a:hover {
+    text-decoration: underline;
 }
 
 /* blog */

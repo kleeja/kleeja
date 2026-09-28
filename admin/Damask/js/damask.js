@@ -668,16 +668,83 @@
         }
     }
 
-    // contributors are read from GitHub and written with textContent only
-    function initTeam() {
-        var list = $("[data-kj-team]");
-        var template = $("#kjTeamItem");
+    /* --- Kleeja team ------------------------------------------------------------------------ */
 
-        if (!list || !template || !window.fetch) {
+    // numbers in the panel's language, with Latin digits like the rest of the panel
+    function numberFormat(options) {
+        try {
+            var format = new Intl.NumberFormat((document.documentElement.lang || "en") + "-u-nu-latn", options);
+
+            return format.format;
+        } catch (error) {
+            return String;
+        }
+    }
+
+    // a GitHub avatar at twice its rendered size, so it stays sharp on dense screens
+    function avatarUrl(value, size) {
+        var url = webUrl(value);
+
+        if (!url) {
+            return "";
+        }
+
+        url = new URL(url);
+        url.searchParams.set("s", String(size * 2));
+
+        return url.href;
+    }
+
+    // the rank, share and bar only exist on the leading contributors' cards
+    function teamItem(template, person, rank, share, format) {
+        var item = template.content.firstElementChild.cloneNode(true);
+        var avatar = $("[data-kj-team-avatar]", item);
+        var rankBadge = $("[data-kj-team-rank]", item);
+        var shareText = $("[data-kj-team-share]", item);
+        var bar = $("[data-kj-team-bar]", item);
+
+        $("[data-kj-team-link]", item).href =
+            webUrl(person.html_url) || "https://github.com/" + encodeURIComponent(person.login);
+        $("[data-kj-team-login]", item).textContent = person.login;
+        $("[data-kj-team-count]", item).textContent = format.count(person.contributions);
+        avatar.src = avatarUrl(person.avatar_url, +avatar.getAttribute("width"));
+
+        if (rankBadge) {
+            rankBadge.textContent = "#" + rank;
+            $("[data-kj-team-link]", item).classList.toggle("is-top", rank === 1);
+        }
+
+        if (shareText) {
+            shareText.textContent = format.percent(share);
+        }
+
+        if (bar) {
+            bar.style.width = (share * 100).toFixed(2) + "%";
+        }
+
+        return item;
+    }
+
+    // contributors are read from GitHub and written with textContent only; the three with the
+    // most commits lead the page, everyone else follows in a compact grid
+    function initTeam() {
+        var root = $("[data-kj-team]");
+        var leadTemplate = $("#kjTeamLead");
+        var itemTemplate = $("#kjTeamItem");
+
+        if (!root || !leadTemplate || !itemTemplate || !window.fetch) {
             return;
         }
 
-        fetch(list.dataset.kjTeam, { cache: "force-cache" })
+        var leads = $("[data-kj-team-leads]", root);
+        var list = $("[data-kj-team-list]", root);
+
+        fetch(root.dataset.kjTeam, {
+            cache: "force-cache",
+            credentials: "omit",
+            referrerPolicy: "no-referrer",
+            headers: { Accept: "application/vnd.github+json" },
+        })
             .then(function (response) {
                 if (!response.ok) {
                     throw new Error("GitHub");
@@ -686,27 +753,71 @@
                 return response.json();
             })
             .then(function (people) {
+                // automated accounts such as dependabot are not part of the team
+                people = (Array.isArray(people) ? people : [])
+                    .filter(function (person) {
+                        return person && person.login && person.type !== "Bot";
+                    })
+                    .map(function (person) {
+                        return {
+                            login: String(person.login),
+                            html_url: person.html_url,
+                            avatar_url: person.avatar_url,
+                            contributions: Math.max(0, parseInt(person.contributions, 10) || 0),
+                        };
+                    })
+                    .sort(function (a, b) {
+                        return b.contributions - a.contributions;
+                    });
+
+                if (!people.length) {
+                    throw new Error("GitHub");
+                }
+
+                var total = people.reduce(function (sum, person) {
+                    return sum + person.contributions;
+                }, 0);
+                var others = people.slice(3);
+                var format = {
+                    count: numberFormat(),
+                    percent: numberFormat({ style: "percent", maximumFractionDigits: 1 }),
+                };
+
+                $("[data-kj-team-people]").textContent = format.count(people.length);
+                $("[data-kj-team-commits]").textContent = format.count(total);
+
+                leads.innerHTML = "";
                 list.innerHTML = "";
 
-                people.forEach(function (person) {
-                    var item = template.content.firstElementChild.cloneNode(true);
-                    var link = $("[data-kj-team-link]", item);
+                var rank = 0;
 
-                    $("img", item).src = person.avatar_url + "&s=96";
-                    $("img", item).alt = person.login;
-                    $("[data-kj-team-login]", item).textContent = person.login;
-                    $("[data-kj-team-count]", item).textContent = person.contributions;
-                    link.href = person.html_url;
-                    list.appendChild(item);
+                people.forEach(function (person, index) {
+                    var share = total ? person.contributions / total : 0;
+
+                    // contributors with the same number of commits share a rank
+                    if (!index || person.contributions !== people[index - 1].contributions) {
+                        rank = index + 1;
+                    }
+
+                    if (index < 3) {
+                        leads.appendChild(teamItem(leadTemplate, person, rank, share, format));
+                    } else {
+                        list.appendChild(teamItem(itemTemplate, person, rank, share, format));
+                    }
                 });
+
+                $("[data-kj-team-community-count]", root).textContent = format.count(others.length);
+                $("[data-kj-team-community]", root).classList.toggle("d-none", !others.length);
             })
             .catch(function () {
-                list.innerHTML = "";
-                var alert = document.createElement("div");
-                alert.className = "col-12";
-                alert.innerHTML = '<div class="alert alert-info mb-0"></div>';
-                alert.firstChild.textContent = msg("kjMsgError", "Error, try again.");
-                list.appendChild(alert);
+                $$("[data-kj-team-section]", root).forEach(function (section) {
+                    section.remove();
+                });
+                $("[data-kj-team-error]", root).classList.remove("d-none");
+            })
+            .then(function () {
+                $("[data-kj-team-loading]", root).remove();
+                root.setAttribute("aria-busy", "false");
             });
     }
 
