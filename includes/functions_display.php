@@ -748,12 +748,18 @@ function kleeja_check_form_key_get(string $request_id): bool
 {
     global $config;
 
-    $token = substr(sha1($config['h_key'] . date('H-d-m') . $request_id), 0, 20);
-
     $return = false;
 
-    if ($token == g('formkey')) {
-        $return = true;
+    //the key changes every hour, the one of the last hour is still good,
+    //so a page opened at 10:59 and used at 11:00 (or a long update between its steps) is not refused
+    foreach ([time(), time() - 3600] as $key_time) {
+        $token = substr(sha1($config['h_key'] . date('H-d-m', $key_time) . $request_id), 0, 20);
+
+        if ($token == g('formkey')) {
+            $return = true;
+
+            break;
+        }
     }
 
     extract(runHook('kleeja_check_form_key_get_func', get_defined_vars()));

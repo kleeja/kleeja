@@ -119,14 +119,29 @@ class FetchFile
         //let's open new file to save it in.
         if (!empty($this->destinationPath)) {
             $out = fopen($this->destinationPath, 'w');
+
+            if ($out === false) {
+                return false;
+            }
+
             curl_setopt($ch, CURLOPT_FILE, $out);
             $result = curl_exec($ch);
+            $status = curl_getinfo($ch, CURLINFO_RESPONSE_CODE);
 
             if ($result === false) {
                 kleeja_log(sprintf("cUrl error (#%d): %s\n", curl_errno($ch), htmlspecialchars(curl_error($ch))));
+            } elseif ($status >= 400) {
+                kleeja_log(sprintf("FetchFile error (HTTP %d): %s\n", $status, $this->url));
             }
 
             fclose($out);
+
+            //an error page (404, rate limit ...) is not the file we asked for, so don't leave it behind
+            if ($result === false || $status >= 400) {
+                kleeja_unlink($this->destinationPath);
+
+                return false;
+            }
 
             return true;
         } else {

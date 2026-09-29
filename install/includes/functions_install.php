@@ -414,18 +414,6 @@ function inst_admin_login(string $name, string $password): bool
 }
 
 /**
- * Is a failed query of an update about something that is there already, which means it was done before
- * @param  array $error [code, message] of $SQL->get_error()
- * @return bool
- */
-function inst_update_done_before(array $error): bool
-{
-    //MySQL: 1060 duplicate column, 1061 duplicate key, 1062 duplicate entry
-    return in_array((int) ($error[0] ?? 0), [1060, 1061, 1062], true) ||
-        preg_match('/duplicate|already exists|UNIQUE constraint failed/i', (string) ($error[1] ?? '')) === 1;
-}
-
-/**
  * trying to detect cookies settings
  * @return array
  */

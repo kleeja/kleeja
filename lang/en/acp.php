@@ -294,6 +294,8 @@ return [
     'UPDATE_ERR_FETCH_PACKAGE' => 'We have encountered a problem while downloading the package from the server!',
     'UPDATE_BACKUP_CREATE_FAILED' => 'We couldn\'t create a backup archive in cache folder!',
     'UPDATE_PROCESS_FAILED' => 'The update process has failed!',
+    'UPDATE_FILES_NOT_WRITABLE' => 'These files or folders are not writable, fix their permissions and try again: %s',
+    'UPDATE_DB_FAILED' => 'The files have been updated to version `%s`, but the database upgrade has failed: %s',
     'UPDATE_PROCESS_DONE' => 'Kleeja has been updated to version `%s` successfully...',
     'UPDATE_PROCESS_STEP1' => 'Fetching the package of latest version of Kleeja ...',
     'UPDATE_PROCESS_STEP2' => 'Create a backup container and extract the new package ...',
@@ -303,8 +305,6 @@ return [
     'CANT_DEL_DEFAULT_STYLE' =>
         'You can not delete the current default style! choose another style to be the default then try again.',
     'NOTIFICATIONS' => 'Notifications',
-    'PHP_8_REQUIRED' => 'PHP 8 is required to upgrade to the next versions',
-    'PDO_EXT_REQUIRED' => 'PDO Extension is required to upgrade to next versions',
     //Damask admin theme
     'ADM_SKIP_CONTENT' => 'Skip to content',
     'ADM_MENU' => 'Menu',
