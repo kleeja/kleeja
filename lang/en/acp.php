@@ -123,6 +123,7 @@ return [
     'NEW_PLUGIN_ADDED' => 'Plugin added ... ',
     'PLUGIN_EXISTS_BEFORE' => 'This plugin exists before with same version or above, so no need to update it!.',
     'R_CHECK_UPDATE' => 'Check for updates',
+    'R_HELP' => 'Help',
     'ERROR_CHECK_VER' => 'Error: cannot get any update information at this moment , try again later !',
     'UPDATE_KLJ_NOW' => 'update now!',
     'U_LAST_VER_KLJ' => 'You are using the latest version of Kleeja...',

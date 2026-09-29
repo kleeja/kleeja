@@ -171,7 +171,8 @@
                     </ul>
                 </div>
 
-                <a class="btn kj-icon-btn d-none d-sm-inline-flex" href="https://kleeja.net/getting-started/introduction" target="_blank" rel="noopener" aria-label="{lang.ADM_HELP}" title="{lang.ADM_HELP}">
+                <!-- opens the guide of this page on the help page -->
+                <a class="btn kj-icon-btn d-none d-sm-inline-flex<IF NAME="go_to==s_help"> active</IF>" href="{help_link}" aria-label="{lang.ADM_HELP}" title="{lang.ADM_HELP}"<IF NAME="go_to==s_help"> aria-current="page"</IF>>
                     <i class="fa-solid fa-circle-question" aria-hidden="true"></i>
                 </a>
 
@@ -189,7 +190,7 @@
                             </a>
                         </li>
                         <li>
-                            <a class="dropdown-item" href="https://kleeja.net/getting-started/introduction" target="_blank" rel="noopener">
+                            <a class="dropdown-item" href="{help_link}">
                                 <i class="fa-solid fa-circle-question" aria-hidden="true"></i> {lang.ADM_HELP}
                             </a>
                         </li>

@@ -1224,6 +1224,199 @@
         });
     }
 
+    /* --- Help ------------------------------------------------------------------------------ */
+
+    // lower case, without Arabic diacritics and with one form of each letter, so "إضافة" finds "اضافه"
+    function helpNormalize(text) {
+        return String(text || "")
+            .toLowerCase()
+            .replace(/[ً-ٰٟـ]/g, "")
+            .replace(/[أإآٱ]/g, "ا")
+            .replace(/ى/g, "ي")
+            .replace(/ة/g, "ه")
+            .replace(/\s+/g, " ")
+            .trim();
+    }
+
+    function initHelp() {
+        var root = $("[data-kj-help]");
+
+        if (!root) {
+            return;
+        }
+
+        var input = $("[data-kj-help-search]", root);
+        var status = $("[data-kj-help-status]", root);
+        var empty = $("[data-kj-help-empty]", root);
+        var toc = $("[data-kj-help-toc]", root);
+        var narrow = window.matchMedia("(max-width: 991.98px)");
+        var guides = $$("[data-kj-help-guide]", root).map(function (element) {
+            return {
+                element: element,
+                text: helpNormalize(element.textContent),
+                link: $('[data-kj-help-link="' + element.id.replace(/^help-/, "") + '"]', root),
+            };
+        });
+
+        // on small screens the contents start folded above the guides
+        if (toc && narrow.matches) {
+            toc.open = false;
+        }
+
+        function search() {
+            var words = helpNormalize(input.value).split(" ").filter(Boolean);
+            var shown = 0;
+
+            guides.forEach(function (guide) {
+                var match = words.every(function (word) {
+                    return guide.text.indexOf(word) !== -1;
+                });
+
+                guide.element.hidden = !match;
+
+                if (guide.link) {
+                    guide.link.parentNode.hidden = !match;
+                }
+
+                if (match) {
+                    shown++;
+
+                    // open the answers that hold the words
+                    if (words.length) {
+                        $$("details", guide.element).forEach(function (details) {
+                            var text = helpNormalize(details.textContent);
+
+                            details.open = words.every(function (word) {
+                                return text.indexOf(word) !== -1;
+                            });
+                        });
+                    }
+                }
+            });
+
+            // a group with nothing left to show hides its title too
+            $$("[data-kj-help-group]", root).forEach(function (group) {
+                group.hidden = !$("[data-kj-help-guide]:not([hidden])", group);
+            });
+
+            $$("[data-kj-help-toc-group]", root).forEach(function (group) {
+                group.hidden = !$(":scope > ul > li:not([hidden])", group);
+            });
+
+            empty.hidden = shown > 0;
+            status.textContent = words.length ? (status.dataset.kjHelpCount || "%d").replace("%d", shown) : "";
+        }
+
+        input.addEventListener("input", search);
+
+        input.addEventListener("keydown", function (event) {
+            if (event.key === "Escape" && input.value) {
+                event.preventDefault();
+                input.value = "";
+                search();
+            }
+        });
+
+        $("[data-kj-help-clear]", root).addEventListener("click", function () {
+            input.value = "";
+            search();
+            input.focus();
+        });
+
+        // "/" jumps to the search box, unless the reader is typing somewhere
+        document.addEventListener("keydown", function (event) {
+            var target = event.target;
+
+            if (
+                event.key !== "/" ||
+                event.ctrlKey ||
+                event.metaKey ||
+                event.altKey ||
+                /^(INPUT|TEXTAREA|SELECT)$/.test(target.tagName) ||
+                target.isContentEditable
+            ) {
+                return;
+            }
+
+            event.preventDefault();
+            input.focus();
+        });
+
+        // a link in the contents folds them on small screens, the guide takes the whole width
+        if (toc) {
+            toc.addEventListener("click", function (event) {
+                if (event.target.closest("a") && narrow.matches) {
+                    toc.open = false;
+                }
+            });
+        }
+
+        // the contents mark the guide being read
+        if ("IntersectionObserver" in window) {
+            var current = null;
+            var observer = new IntersectionObserver(
+                function (entries) {
+                    entries.forEach(function (entry) {
+                        if (!entry.isIntersecting) {
+                            return;
+                        }
+
+                        var guide = guides.filter(function (item) {
+                            return item.element === entry.target;
+                        })[0];
+
+                        if (!guide || !guide.link || guide.link === current) {
+                            return;
+                        }
+
+                        if (current) {
+                            current.classList.remove("active");
+                            current.removeAttribute("aria-current");
+                        }
+
+                        current = guide.link;
+                        current.classList.add("active");
+                        current.setAttribute("aria-current", "true");
+
+                        // keep it in view inside the scrolling contents
+                        if (!narrow.matches && toc) {
+                            var box = toc.getBoundingClientRect();
+                            var link = current.getBoundingClientRect();
+
+                            if (link.top < box.top || link.bottom > box.bottom) {
+                                toc.scrollTop += link.top - box.top - box.height / 2;
+                            }
+                        }
+                    });
+                },
+                { rootMargin: "-15% 0px -70% 0px" },
+            );
+
+            guides.forEach(function (guide) {
+                observer.observe(guide.element);
+            });
+        }
+
+        // the help button of a page opens here, on the guide of that page
+        var focus = root.dataset.kjHelpFocus && document.getElementById("help-" + root.dataset.kjHelpFocus);
+
+        if (focus && !window.location.hash) {
+            // jump like an anchor would, Bootstrap makes scrolling smooth
+            document.documentElement.style.scrollBehavior = "auto";
+            focus.scrollIntoView({ block: "start" });
+            document.documentElement.style.scrollBehavior = "";
+            focus.focus({ preventScroll: true });
+            focus.classList.add("is-focused");
+            focus.addEventListener(
+                "animationend",
+                function () {
+                    focus.classList.remove("is-focused");
+                },
+                { once: true },
+            );
+        }
+    }
+
     /* --- Boot --------------------------------------------------------------------------------- */
 
     upgradeLegacyDataApi();
@@ -1242,4 +1435,5 @@
     initSearchOne();
     initUpdater();
     initStore();
+    initHelp();
 })();

@@ -2560,6 +2560,452 @@ a.kj-person:hover .kj-person-name {
     text-decoration: underline;
 }
 
+/* help: the search and contents stay in view beside the guides on wide screens */
+@media (min-width: 992px) {
+    .kj-help-aside {
+        position: sticky;
+        top: calc(var(--kj-topbar-height) + 1.5rem);
+        display: flex;
+        flex-direction: column;
+        max-height: calc(100vh - var(--kj-topbar-height) - 3rem);
+    }
+
+    .kj-help-toc {
+        min-height: 0;
+        overflow-y: auto;
+    }
+}
+
+.kj-help-search {
+    position: relative;
+    margin-bottom: 1rem;
+}
+
+.kj-help-search > .fa-magnifying-glass {
+    position: absolute;
+    top: 50%;
+    inset-inline-start: 0.875rem;
+    color: var(--bs-tertiary-color);
+    transform: translateY(-50%);
+    pointer-events: none;
+}
+
+.kj-help-search .form-control {
+    padding-inline: 2.5rem;
+}
+
+.kj-help-search kbd {
+    position: absolute;
+    top: 50%;
+    inset-inline-end: 0.625rem;
+    padding: 0.0625rem 0.4375rem;
+    border: 1px solid var(--bs-border-color);
+    border-radius: var(--bs-border-radius);
+    background: var(--bs-tertiary-bg);
+    color: var(--bs-secondary-color);
+    font-size: 0.75rem;
+    transform: translateY(-50%);
+    pointer-events: none;
+}
+
+.kj-help-search .form-control:focus ~ kbd,
+.kj-help-search .form-control:not(:placeholder-shown) ~ kbd {
+    display: none !important;
+}
+
+.kj-help-toc {
+    padding: 0.5rem;
+}
+
+.kj-help-toc > summary {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.5rem 0.75rem;
+    border-radius: var(--bs-border-radius);
+    font-weight: 600;
+    list-style: none;
+    cursor: pointer;
+}
+
+.kj-help-toc > summary::-webkit-details-marker {
+    display: none;
+}
+
+.kj-help-toc > summary > i {
+    color: var(--bs-tertiary-color);
+    font-size: 0.75rem;
+    transition: transform var(--kj-duration) var(--kj-ease);
+}
+
+.kj-help-toc[open] > summary > i {
+    transform: rotate(180deg);
+}
+
+/* the contents are always open beside the guides */
+@media (min-width: 992px) {
+    .kj-help-toc > summary {
+        pointer-events: none;
+    }
+
+    .kj-help-toc > summary > i {
+        display: none;
+    }
+}
+
+.kj-help-toc-heading {
+    margin: 0.75rem 0 0.25rem;
+    padding-inline: 0.75rem;
+    color: var(--bs-tertiary-color);
+    font-size: 0.6875rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+}
+
+.kj-help-toc ul {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.kj-help-toc a {
+    display: flex;
+    align-items: center;
+    gap: 0.625rem;
+    padding: 0.375rem 0.75rem;
+    border-radius: var(--bs-border-radius);
+    color: var(--bs-secondary-color);
+    font-size: 0.875rem;
+    text-decoration: none;
+    transition:
+        background-color var(--kj-duration) var(--kj-ease),
+        color var(--kj-duration) var(--kj-ease);
+}
+
+.kj-help-toc a > i {
+    flex: 0 0 auto;
+    color: var(--bs-tertiary-color);
+    font-size: 0.8125rem;
+}
+
+.kj-help-toc a:hover,
+.kj-help-toc a:focus-visible {
+    background: var(--bs-tertiary-bg);
+    color: var(--bs-emphasis-color);
+}
+
+.kj-help-toc a.active {
+    background: var(--bs-primary-bg-subtle);
+    color: var(--kj-badge-color);
+    font-weight: 600;
+}
+
+.kj-help-toc a.active > i {
+    color: inherit;
+}
+
+.kj-help-empty .card-body {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 1rem;
+}
+
+.kj-help-group + .kj-help-group {
+    margin-top: 2.5rem;
+}
+
+.kj-help-group-title {
+    margin: 0 0 1rem;
+    font-size: 1.0625rem;
+    font-weight: 700;
+}
+
+.kj-help-group-title,
+.kj-help-guide {
+    scroll-margin-top: calc(var(--kj-topbar-height) + 1.25rem);
+}
+
+.kj-help-guide + .kj-help-guide {
+    margin-top: 1rem;
+}
+
+.kj-help-guide:focus {
+    outline: none;
+}
+
+/* the guide the help button of a page opened */
+.kj-help-guide.is-focused {
+    animation: kj-help-focus 2.4s var(--kj-ease);
+}
+
+@keyframes kj-help-focus {
+    0%,
+    45% {
+        border-color: var(--kj-coral);
+        box-shadow: 0 0 0 0.25rem rgba(var(--kj-coral-rgb), 0.3);
+    }
+}
+
+.kj-help-guide-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    gap: 0.75rem 1rem;
+}
+
+.kj-help-guide-heading {
+    flex: 1 1 16rem;
+    min-width: 0;
+}
+
+.kj-help-guide-title {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
+    margin: 0.5rem 0 0;
+    font-size: 1.125rem;
+    font-weight: 700;
+}
+
+.kj-help-guide-intro {
+    max-width: 75ch;
+    margin: 0.375rem 0 0;
+    color: var(--bs-secondary-color);
+    line-height: 1.6;
+}
+
+.kj-help-guide-link {
+    flex: 0 0 auto;
+}
+
+/* minmax(0, …) lets a long line of code scroll inside its block instead of widening the page */
+.kj-help-guide-body {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 1.5rem;
+    margin-top: 1.25rem;
+    padding-top: 1.25rem;
+    border-top: 1px solid var(--bs-border-color);
+}
+
+@media (min-width: 1400px) {
+    .kj-help-guide-body.has-aside {
+        grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
+        align-items: start;
+    }
+}
+
+.kj-help-main,
+.kj-help-side {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    align-content: start;
+    gap: 1.5rem;
+    line-height: 1.6;
+}
+
+.kj-help-block-title {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin: 0 0 0.75rem;
+    color: var(--bs-emphasis-color);
+    font-size: 0.9375rem;
+    font-weight: 700;
+}
+
+.kj-help-block-title > i {
+    color: var(--kj-tile-color);
+    font-size: 0.875rem;
+}
+
+.kj-help-list {
+    display: grid;
+    gap: 0.625rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.kj-help-list > li {
+    position: relative;
+    padding-inline-start: 1.25rem;
+}
+
+.kj-help-list > li::before {
+    content: "";
+    position: absolute;
+    top: 0.625em;
+    inset-inline-start: 0.25rem;
+    width: 0.375rem;
+    height: 0.375rem;
+    border-radius: 50%;
+    background: var(--kj-coral);
+}
+
+/* numbered steps joined by a line */
+.kj-help-steps {
+    display: grid;
+    gap: 0.875rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    counter-reset: kj-help-step;
+}
+
+.kj-help-steps > li {
+    position: relative;
+    min-height: 1.75rem;
+    padding-top: 0.125rem;
+    padding-inline-start: 2.625rem;
+    counter-increment: kj-help-step;
+}
+
+.kj-help-steps > li::before {
+    content: counter(kj-help-step);
+    position: absolute;
+    top: 0;
+    inset-inline-start: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.75rem;
+    height: 1.75rem;
+    border-radius: 50%;
+    background: var(--kj-tile-bg);
+    color: var(--kj-tile-color);
+    font-size: 0.8125rem;
+    font-weight: 700;
+}
+
+.kj-help-steps > li:not(:last-child)::after {
+    content: "";
+    position: absolute;
+    top: 2rem;
+    bottom: -0.75rem;
+    inset-inline-start: 0.875rem;
+    width: 1px;
+    background: var(--bs-border-color);
+}
+
+/* tips and warnings are panels, with an icon on each item */
+.kj-help-block.is-tips,
+.kj-help-block.is-warnings {
+    padding: 1rem 1.125rem;
+    border: 1px solid var(--bs-border-color);
+    border-radius: var(--bs-border-radius-lg);
+    background: var(--bs-tertiary-bg);
+}
+
+.kj-help-block.is-warnings {
+    border-color: var(--bs-warning-border-subtle);
+    background: var(--bs-warning-bg-subtle);
+}
+
+.kj-help-block.is-warnings .kj-help-block-title > i {
+    color: var(--bs-warning);
+}
+
+.kj-help-block.is-tips .kj-help-list > li,
+.kj-help-block.is-warnings .kj-help-list > li {
+    padding-inline-start: 1.5rem;
+}
+
+.kj-help-block.is-tips .kj-help-list > li::before,
+.kj-help-block.is-warnings .kj-help-list > li::before {
+    content: "\f00c";
+    top: 0.3em;
+    inset-inline-start: 0;
+    width: auto;
+    height: auto;
+    border-radius: 0;
+    background: none;
+    color: var(--kj-tile-color);
+    font: var(--fa-font-solid);
+    font-size: 0.8125rem;
+}
+
+.kj-help-block.is-warnings .kj-help-list > li::before {
+    content: "\f071";
+    color: var(--bs-warning);
+}
+
+.kj-help-faq {
+    overflow: hidden;
+    border: 1px solid var(--bs-border-color);
+    border-radius: var(--bs-border-radius-lg);
+}
+
+.kj-help-faq details + details {
+    border-top: 1px solid var(--bs-border-color);
+}
+
+.kj-help-faq summary {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.875rem 1rem;
+    font-weight: 600;
+    list-style: none;
+    cursor: pointer;
+    transition: background-color var(--kj-duration) var(--kj-ease);
+}
+
+.kj-help-faq summary::-webkit-details-marker {
+    display: none;
+}
+
+.kj-help-faq summary::after {
+    content: "\f078";
+    flex: 0 0 auto;
+    color: var(--bs-tertiary-color);
+    font: var(--fa-font-solid);
+    font-size: 0.75rem;
+    transition: transform var(--kj-duration) var(--kj-ease);
+}
+
+.kj-help-faq details[open] > summary::after {
+    transform: rotate(180deg);
+}
+
+.kj-help-faq summary:hover {
+    background: var(--bs-tertiary-bg);
+}
+
+.kj-help-answer {
+    padding: 0 1rem 1rem;
+    color: var(--bs-secondary-color);
+}
+
+.kj-help-text {
+    color: var(--bs-secondary-color);
+}
+
+.kj-help-code {
+    margin: 0;
+    padding: 1rem 1.125rem;
+    border-radius: var(--bs-border-radius-lg);
+    background: var(--kj-navy);
+    color: var(--kj-navy-100);
+    font-size: 0.8125rem;
+    line-height: 1.6;
+    text-align: left;
+    white-space: pre;
+    overflow-x: auto;
+}
+
+[data-bs-theme="dark"] .kj-help-code {
+    border: 1px solid var(--kj-navy-700);
+}
+
+.kj-help-code code {
+    color: inherit;
+}
+
 /* --- Sign-in page -------------------------------------------------------------------- */
 
 .kj-auth {
