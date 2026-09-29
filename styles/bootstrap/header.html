@@ -34,7 +34,7 @@
 <body class="d-flex flex-column min-vh-100">
 
 <header class="sticky-top">
-    <nav class="navbar navbar-expand-lg navbar-primary shadow-sm">
+    <nav class="navbar navbar-expand-xl navbar-primary shadow-sm">
         <div class="container">
             <a class="navbar-brand d-flex align-items-center gap-2 fw-semibold" href="{config.siteurl}">
                 <img src="{config.siteurl}images/logo-light.svg" alt="" width="32" height="32" aria-hidden="true">
@@ -47,7 +47,7 @@
 
             <div class="collapse navbar-collapse" id="mainNavbar">
                 <!-- main menu -->
-                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                <ul class="navbar-nav me-auto mb-2 mb-xl-0">
                     <LOOP NAME="top_menu">
                         <IF LOOP="show">
                         <li class="nav-item"><a href="{{url}}" class="nav-link(go_current=={{name}}? active:)">{{title}}</a></li>
@@ -55,12 +55,12 @@
                     </LOOP>
                 </ul>
 
-                <ul class="navbar-nav align-items-lg-center gap-lg-1">
+                <ul class="navbar-nav align-items-xl-center">
                     <!-- color mode -->
                     <li class="nav-item dropdown">
                         <button type="button" class="nav-link dropdown-toggle d-flex align-items-center gap-2" id="colorModeToggle" data-bs-toggle="dropdown" aria-expanded="false" aria-label="{lang.COLOR_MODE}">
                             <i class="fa-solid fa-circle-half-stroke fa-fw" data-color-mode-icon></i>
-                            <span class="d-lg-none">{lang.COLOR_MODE}</span>
+                            <span class="d-xl-none">{lang.COLOR_MODE}</span>
                         </button>
                         <ul class="dropdown-menu dropdown-menu-end shadow-sm" aria-labelledby="colorModeToggle">
                             <li>
@@ -105,7 +105,7 @@
                     <LOOP NAME="side_menu">
                         <IF LOOP="show">
                         <IF LOOP="name==register">
-                        <li class="nav-item ms-lg-2 my-2 my-lg-0"><a href="{{url}}" class="btn btn-light px-3 fw-semibold text-primary">{{title}}</a></li>
+                        <li class="nav-item ms-xl-2 my-2 my-xl-0"><a href="{{url}}" class="btn btn-light px-3 fw-semibold text-primary">{{title}}</a></li>
                         <ELSE>
                         <li class="nav-item"><a href="{{url}}" class="nav-link(go_current=={{name}}? active:)">{{title}}</a></li>
                         </IF>

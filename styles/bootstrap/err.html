@@ -1,13 +1,19 @@
-
 <div class="row justify-content-center">
-    <div class="col-lg-8 col-xl-7">
-        <div class="alert alert-danger d-flex align-items-start gap-3 p-4 shadow-sm" role="alert">
-            <i class="fa-solid fa-circle-exclamation fs-4 flex-shrink-0"></i>
-            <div class="flex-grow-1">
-                <div>{text}</div>
-                <a href="javascript:history.go(-1)" class="alert-link d-inline-block mt-3">
-                    <i class="fa-solid fa-arrow-left icon-dir me-1"></i>{go_back_browser}
-                </a>
+    <div class="col-md-9 col-lg-7 col-xl-6">
+        <div class="card shadow-sm text-center">
+            <div class="card-body p-4 p-md-5">
+                <span class="icon-box icon-box-lg rounded-circle bg-danger-subtle text-danger-emphasis mb-4"><i class="fa-solid fa-triangle-exclamation"></i></span>
+                <h1 class="h4 fw-bold mb-2"><IF NAME="title">{title}<ELSE>{lang.ERROR}</IF></h1>
+                <div class="text-body-secondary mb-4" role="alert">{text}</div>
+
+                <div class="d-flex flex-column flex-sm-row justify-content-center gap-2">
+                    <a href="javascript:history.go(-1)" class="btn btn-outline-secondary px-4">
+                        <i class="fa-solid fa-arrow-left icon-dir me-2"></i>{go_back_browser}
+                    </a>
+                    <a href="{config.siteurl}" class="btn btn-primary px-4">
+                        <i class="fa-solid fa-house me-2"></i>{lang.INDEX}
+                    </a>
+                </div>
             </div>
         </div>
     </div>

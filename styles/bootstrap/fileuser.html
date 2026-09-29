@@ -1,80 +1,27 @@
-
-<div class="mb-4">
-    <IF NAME="user_himself">
-        <h1 class="h3 mb-1">{lang.YOUR_FILEUSER}</h1>
-    <ELSE>
-        <h1 class="h3 mb-1">{title}</h1>
-    </IF>
-
+<div class="d-flex flex-wrap align-items-center gap-3 mb-4">
+    <span class="icon-box rounded-3 bg-primary-subtle text-primary-emphasis"><i class="fa-regular fa-folder-open"></i></span>
+    <div class="me-auto">
+        <IF NAME="user_himself">
+            <h1 class="h3 fw-bold mb-0">{lang.YOUR_FILEUSER}</h1>
+        <ELSE>
+            <h1 class="h3 fw-bold mb-0">{title}</h1>
+        </IF>
+        <IF NAME="user_name">
+            <p class="text-body-secondary mb-0">{lang.PUBLIC_USER_FILES}: {user_name}</p>
+        </IF>
+    </div>
     <IF NAME="user_name">
-        <p class="text-body-secondary mb-0">
-            {lang.PUBLIC_USER_FILES}: {user_name}
-            <span class="badge rounded-pill bg-secondary-subtle text-secondary-emphasis ms-1">{lang.ALL_FILES}: {nums_rows}</span>
-        </p>
+    <span class="badge rounded-pill bg-primary-subtle text-primary-emphasis fs-6 fw-medium px-3 py-2">{lang.ALL_FILES}: {nums_rows}</span>
     </IF>
 </div>
 
 
 <IF NAME="user_himself">
 <form name="c" action="{action}" method="post" data-confirm="{lang.ARE_YOU_SURE_DO_THIS}">
-</IF>
-
-
-<IF NAME="no_results">
-    <!-- no files yet -->
-    <div class="text-center py-5 px-3 border rounded-3 bg-body-tertiary mb-4">
-        <i class="fa-regular fa-folder-open display-5 text-body-secondary mb-3"></i>
-        <p class="lead text-body-secondary mb-0">{lang.NO_FILE_USER}</p>
-    </div>
-<ELSE>
-
-    <div class="row row-cols-2 row-cols-sm-3 row-cols-lg-4 g-3 mb-4">
-        <LOOP NAME="arr">
-        <div class="col">
-            <div class="card file-card h-100 shadow-sm">
-                <IF NAME="user_himself">
-                <input class="form-check-input file-select" type="checkbox" id="del_{{id}}" name="del_{{id}}" value="{{id}}" aria-label="{{name_file}}">
-                </IF>
-
-                <IF LOOP="is_image">
-                <!-- image -->
-                <a href="{{href}}" target="_blank" class="ratio ratio-4x3 d-block bg-body-tertiary rounded-top overflow-hidden">
-                    <img src="{{thumb_link}}" alt="{{name_file}}" class="object-fit-cover" loading="lazy" onerror="this.onerror=null;this.src='images/not_exists.jpg';">
-                </a>
-                <ELSE>
-                <!-- file -->
-                <a href="{{href}}" target="_blank" class="ratio ratio-4x3 d-block bg-body-tertiary rounded-top text-decoration-none">
-                    <span class="d-flex flex-column align-items-center justify-content-center gap-2">
-                        <img src="{{thumb_link}}" alt="" width="40" height="40">
-                        <span class="badge bg-secondary-subtle text-secondary-emphasis text-uppercase">{{file_type}}</span>
-                    </span>
-                </a>
-                </IF>
-
-                <div class="card-body p-2 px-sm-3 small">
-                    <a href="{{href}}" target="_blank" class="d-block text-truncate fw-medium link-body-emphasis text-decoration-none" title="{{name_file}}">{{name_file}}</a>
-                    <div class="d-flex justify-content-between gap-2 text-body-secondary mt-1">
-                        <bdi>{{size}}</bdi>
-                        <span title="{lang.FILEUPS}"><i class="fa-solid fa-download me-1"></i>{{uploads}}</span>
-                    </div>
-                    <div class="text-body-secondary text-truncate" title="{lang.FILEDATE}">{{time}}</div>
-                </div>
-            </div>
-        </div>
-        </LOOP>
-    </div>
-
-</IF>
-
-
-<!-- pagination -->
-<div class="d-flex justify-content-center">{page_nums}</div>
-
-
-<IF NAME="user_himself">
 
     <UNLESS NAME="no_results">
-    <div class="d-flex flex-wrap align-items-center gap-2 p-3 mb-4 border rounded-3 bg-body-tertiary">
+    <!-- selection toolbar -->
+    <div class="d-flex flex-wrap align-items-center gap-2 p-2 mb-4 border rounded-3 bg-body-tertiary">
         <button type="button" class="btn btn-outline-secondary btn-sm" data-check-all>
             <i class="fa-regular fa-square-check me-1"></i>{lang.CHECK_ALL}
         </button>
@@ -86,20 +33,79 @@
         </div>
     </div>
     </UNLESS>
+</IF>
+
+
+<IF NAME="no_results">
+    <!-- no files yet -->
+    <div class="card shadow-sm text-center mb-4">
+        <div class="card-body p-5">
+            <span class="icon-box icon-box-lg rounded-circle bg-body-tertiary text-body-secondary mb-3"><i class="fa-regular fa-folder-open"></i></span>
+            <p class="lead text-body-secondary mb-0">{lang.NO_FILE_USER}</p>
+        </div>
+    </div>
+<ELSE>
+
+    <div class="row row-cols-2 row-cols-sm-3 row-cols-lg-4 g-3 mb-4">
+        <LOOP NAME="arr">
+        <div class="col">
+            <div class="card file-card h-100 shadow-sm">
+                <IF NAME="user_himself">
+                <input class="form-check-input file-select shadow-sm" type="checkbox" id="del_{{id}}" name="del_{{id}}" value="{{id}}" aria-label="{{name_file}}">
+                </IF>
+
+                <IF LOOP="is_image">
+                <!-- image -->
+                <a href="{{href}}" target="_blank" class="ratio ratio-4x3 d-block bg-body-tertiary rounded-top overflow-hidden">
+                    <img src="{{thumb_link}}" alt="{{name_file}}" class="object-fit-cover" loading="lazy" onerror="this.onerror=null;this.src='images/not_exists.jpg';">
+                </a>
+                <ELSE>
+                <!-- file -->
+                <a href="{{href}}" target="_blank" class="ratio ratio-4x3 d-block bg-body-tertiary rounded-top text-decoration-none">
+                    <span class="d-flex flex-column align-items-center justify-content-center gap-2">
+                        <i class="fa-regular fa-file fs-1 text-body-secondary" aria-hidden="true"></i>
+                        <span class="badge bg-secondary-subtle text-secondary-emphasis text-uppercase">{{file_type}}</span>
+                    </span>
+                </a>
+                </IF>
+
+                <div class="card-body p-2 px-sm-3 small">
+                    <a href="{{href}}" target="_blank" class="d-block text-truncate fw-semibold link-body-emphasis text-decoration-none" title="{{name_file}}">{{name_file}}</a>
+                    <div class="d-flex justify-content-between gap-2 text-body-secondary mt-1">
+                        <bdi>{{size}}</bdi>
+                        <span title="{lang.FILEUPS}"><i class="fa-solid fa-download me-1"></i>{{uploads}}</span>
+                    </div>
+                </div>
+                <div class="card-footer bg-body small text-body-secondary text-truncate py-2 px-2 px-sm-3" title="{lang.FILEDATE}">
+                    <i class="fa-regular fa-clock me-1"></i>{{time}}
+                </div>
+            </div>
+        </div>
+        </LOOP>
+    </div>
+
+</IF>
+
+
+<!-- pagination -->
+<nav class="d-flex justify-content-center" aria-label="pagination">{page_nums}</nav>
+
+
+<IF NAME="user_himself">
 
     {H_FORM_KEYS}
 
 </form>
 
     <!-- link to the user folder -->
-    <div class="card shadow-sm">
-        <div class="card-body">
+    <div class="card shadow-sm mt-4">
+        <div class="card-body p-4">
             <label for="fileuser-link" class="form-label fw-semibold">
                 <i class="fa-solid fa-link text-primary me-2"></i>{lang.COPY_AND_GET_DUD}
             </label>
             <div class="input-group">
-                <input type="text" class="form-control" id="fileuser-link" readonly value="{your_fileuser}" onfocus="this.select();">
-                <button type="button" class="btn btn-primary" data-copy>
+                <input type="text" class="form-control" id="fileuser-link" dir="ltr" readonly value="{your_fileuser}" onfocus="this.select();">
+                <button type="button" class="btn btn-primary px-3" data-copy>
                     <i class="fa-regular fa-copy me-1"></i><span>{lang.COPY}</span>
                 </button>
             </div>

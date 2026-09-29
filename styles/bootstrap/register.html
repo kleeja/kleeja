@@ -1,12 +1,11 @@
-
 <div class="row justify-content-center">
     <div class="col-md-8 col-lg-6 col-xl-5">
         <div class="card shadow-sm">
             <div class="card-body p-4 p-md-5">
 
                 <div class="text-center mb-4">
-                    <div class="form-icon bg-primary-subtle text-primary-emphasis mx-auto mb-3"><i class="fa-solid fa-user-plus"></i></div>
-                    <h1 class="h4 mb-0">{title}</h1>
+                    <span class="icon-box icon-box-lg rounded-circle bg-primary-subtle text-primary-emphasis mb-3"><i class="fa-solid fa-user-plus"></i></span>
+                    <h1 class="h3 fw-bold mb-0">{title}</h1>
                 </div>
 
 
@@ -24,36 +23,40 @@
 
                 <form action="{action}" method="post">
 
-                    <div class="mb-3">
-                        <label for="lname" class="form-label">{lang.USERNAME}</label>
-                        <input type="text" class="form-control" id="lname" name="lname" value="{t_lname}" autocomplete="username">
+                    <div class="form-floating mb-3">
+                        <input type="text" class="form-control" id="lname" name="lname" value="{t_lname}" placeholder="{lang.USERNAME}" autocomplete="username">
+                        <label for="lname">{lang.USERNAME}</label>
+                    </div>
+
+                    <div class="form-floating mb-3">
+                        <input type="email" class="form-control" id="lmail" name="lmail" value="{t_lmail}" placeholder="{lang.EMAIL}" dir="ltr" autocomplete="email">
+                        <label for="lmail">{lang.EMAIL}</label>
                     </div>
 
                     <div class="row g-3 mb-3">
                         <div class="col-sm-6">
-                            <label for="lpass" class="form-label">{lang.PASSWORD}</label>
-                            <input type="password" class="form-control" id="lpass" name="lpass" value="{t_lpass}" autocomplete="new-password">
+                            <div class="form-floating">
+                                <input type="password" class="form-control" id="lpass" name="lpass" value="{t_lpass}" placeholder="{lang.PASSWORD}" autocomplete="new-password">
+                                <label for="lpass">{lang.PASSWORD}</label>
+                            </div>
                         </div>
                         <div class="col-sm-6">
-                            <label for="lpass2" class="form-label">{lang.REPEAT_PASS}</label>
-                            <input type="password" class="form-control" id="lpass2" name="lpass2" value="{t_lpass2}" autocomplete="new-password">
+                            <div class="form-floating">
+                                <input type="password" class="form-control" id="lpass2" name="lpass2" value="{t_lpass2}" placeholder="{lang.REPEAT_PASS}" autocomplete="new-password">
+                                <label for="lpass2">{lang.REPEAT_PASS}</label>
+                            </div>
                         </div>
-                    </div>
-
-                    <div class="mb-3">
-                        <label for="lmail" class="form-label">{lang.EMAIL}</label>
-                        <input type="email" class="form-control" id="lmail" name="lmail" value="{t_lmail}" dir="ltr" autocomplete="email">
                     </div>
 
 
                     <!-- verification code -->
                     <IF NAME="config.enable_captcha==1">
-                    <div class="mb-3">
+                    <div class="mb-4">
                         <label for="kleeja_code_answer" class="form-label">{lang.VERTY_CODE}</label>
-                        <div class="d-flex flex-wrap align-items-center gap-2">
-                            <img id="kleeja_img_captcha" class="captcha-img rounded border" src="{captcha_file_path}" alt="{lang.REFRESH_CAPTCHA}" title="{lang.REFRESH_CAPTCHA}" onclick="update_kleeja_captcha('{captcha_file_path}', 'kleeja_code_answer');">
+                        <div class="input-group">
+                            <span class="input-group-text bg-body p-1"><img id="kleeja_img_captcha" class="captcha-img rounded-1" src="{captcha_file_path}" width="150" height="25" alt="{lang.REFRESH_CAPTCHA}" title="{lang.REFRESH_CAPTCHA}" onclick="update_kleeja_captcha('{captcha_file_path}', 'kleeja_code_answer');"></span>
+                            <input type="text" name="kleeja_code_answer" id="kleeja_code_answer" class="form-control" dir="ltr" autocomplete="off" aria-describedby="kleeja_code_answer_help">
                             <button type="button" class="btn btn-outline-secondary" title="{lang.REFRESH_CAPTCHA}" aria-label="{lang.REFRESH_CAPTCHA}" onclick="update_kleeja_captcha('{captcha_file_path}', 'kleeja_code_answer');"><i class="fa-solid fa-arrow-rotate-right"></i></button>
-                            <input type="text" name="kleeja_code_answer" id="kleeja_code_answer" class="form-control captcha-input" autocomplete="off" aria-describedby="kleeja_code_answer_help">
                         </div>
                         <div id="kleeja_code_answer_help" class="form-text">{lang.NOTE_CODE}</div>
                     </div>
@@ -61,7 +64,12 @@
 
                     {H_FORM_KEYS}
 
-                    <button type="submit" name="submit" value="{lang.REGISTER}" class="btn btn-primary btn-lg w-100 mt-2">{lang.REGISTER}</button>
+                    <button type="submit" name="submit" value="{lang.REGISTER}" class="btn btn-primary btn-lg w-100">{lang.REGISTER}</button>
+
+                    <div class="d-flex align-items-center gap-3 my-4 small text-body-secondary">
+                        <hr class="flex-grow-1 my-0"><span>{lang.OR}</span><hr class="flex-grow-1 my-0">
+                    </div>
+                    <a href="{config.siteurl}(config.mod_writer?login.html:ucp.php?go=login)" class="btn btn-outline-secondary btn-lg w-100">{lang.LOGIN}</a>
                 </form>
 
             </div>

@@ -1,14 +1,13 @@
-
 <div class="row justify-content-center">
     <div class="col-lg-8 col-xl-7">
+
+        <div class="d-flex align-items-center gap-3 mb-4">
+            <span class="icon-box rounded-3 bg-danger-subtle text-danger-emphasis"><i class="fa-regular fa-flag"></i></span>
+            <h1 class="h3 fw-bold mb-0">{title}</h1>
+        </div>
+
         <div class="card shadow-sm">
             <div class="card-body p-4 p-md-5">
-
-                <div class="d-flex align-items-center gap-3 mb-4">
-                    <div class="form-icon bg-danger-subtle text-danger-emphasis flex-shrink-0"><i class="fa-solid fa-flag"></i></div>
-                    <h1 class="h4 mb-0">{title}</h1>
-                </div>
-
 
                 <!-- error messages -->
                 <IF NAME="ERRORS">
@@ -40,18 +39,24 @@
                     <IF NAME="id_d">
                     <div class="mb-3">
                         <label for="rurl" class="form-label">{lang.FILENAME}</label>
-                        <input type="text" class="form-control" id="rurl" name="rurl" value="{filename_for_show}" readonly>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="fa-regular fa-file"></i></span>
+                            <input type="text" class="form-control bg-body-tertiary" id="rurl" name="rurl" value="{filename_for_show}" readonly>
+                        </div>
                     </div>
                     <ELSE>
                     <div class="mb-3">
                         <label for="surl" class="form-label">{lang.URL_F_FILE}</label>
-                        <input type="text" class="form-control" id="surl" name="surl" value="{s_url}" dir="ltr">
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="fa-solid fa-link"></i></span>
+                            <input type="text" class="form-control" id="surl" name="surl" value="{s_url}" dir="ltr">
+                        </div>
                     </div>
                     </IF>
 
                     <div class="mb-3">
                         <label for="rtext" class="form-label">{lang.REASON}</label>
-                        <textarea class="form-control" id="rtext" name="rtext" rows="4">{t_rtext}</textarea>
+                        <textarea class="form-control" id="rtext" name="rtext" rows="5">{t_rtext}</textarea>
                     </div>
 
 
@@ -59,10 +64,10 @@
                     <IF NAME="config.enable_captcha==1">
                     <div class="mb-3">
                         <label for="kleeja_code_answer" class="form-label">{lang.VERTY_CODE}</label>
-                        <div class="d-flex flex-wrap align-items-center gap-2">
-                            <img id="kleeja_img_captcha" class="captcha-img rounded border" src="{captcha_file_path}" alt="{lang.REFRESH_CAPTCHA}" title="{lang.REFRESH_CAPTCHA}" onclick="update_kleeja_captcha('{captcha_file_path}', 'kleeja_code_answer');">
+                        <div class="input-group">
+                            <span class="input-group-text bg-body p-1"><img id="kleeja_img_captcha" class="captcha-img rounded-1" src="{captcha_file_path}" width="150" height="25" alt="{lang.REFRESH_CAPTCHA}" title="{lang.REFRESH_CAPTCHA}" onclick="update_kleeja_captcha('{captcha_file_path}', 'kleeja_code_answer');"></span>
+                            <input type="text" name="kleeja_code_answer" id="kleeja_code_answer" class="form-control" dir="ltr" autocomplete="off" aria-describedby="kleeja_code_answer_help">
                             <button type="button" class="btn btn-outline-secondary" title="{lang.REFRESH_CAPTCHA}" aria-label="{lang.REFRESH_CAPTCHA}" onclick="update_kleeja_captcha('{captcha_file_path}', 'kleeja_code_answer');"><i class="fa-solid fa-arrow-rotate-right"></i></button>
-                            <input type="text" name="kleeja_code_answer" id="kleeja_code_answer" class="form-control captcha-input" autocomplete="off" aria-describedby="kleeja_code_answer_help">
                         </div>
                         <div id="kleeja_code_answer_help" class="form-text">{lang.NOTE_CODE}</div>
                     </div>
@@ -74,9 +79,11 @@
 
                     {H_FORM_KEYS}
 
-                    <button type="submit" name="submit" value="{lang.REPORT}" class="btn btn-danger px-4 mt-2">
-                        <i class="fa-solid fa-flag me-2"></i>{lang.REPORT}
-                    </button>
+                    <div class="d-flex justify-content-end border-top pt-4 mt-4">
+                        <button type="submit" name="submit" value="{lang.REPORT}" class="btn btn-danger btn-lg px-4">
+                            <i class="fa-solid fa-flag me-2"></i>{lang.REPORT}
+                        </button>
+                    </div>
                 </form>
 
             </div>

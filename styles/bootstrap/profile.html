@@ -1,10 +1,12 @@
-
 <div class="row justify-content-center">
-    <div class="col-lg-9 col-xl-8">
+    <div class="col-xl-10">
 
-        <div class="mb-4">
-            <h1 class="h3 mb-1">{title}</h1>
-            <p class="text-body-secondary mb-0">{lang.EDIT_U_DATA}</p>
+        <div class="d-flex align-items-center gap-3 mb-4">
+            <span class="icon-box rounded-3 bg-primary-subtle text-primary-emphasis"><i class="fa-solid fa-user-gear"></i></span>
+            <div>
+                <h1 class="h3 fw-bold mb-0">{title}</h1>
+                <p class="text-body-secondary mb-0">{lang.EDIT_U_DATA}</p>
+            </div>
         </div>
 
 
@@ -23,103 +25,112 @@
         <IF NAME="data_forum">
 
         <form action="{action}" method="post">
+            <div class="row g-4">
 
-            <div class="card shadow-sm">
-                <div class="card-header bg-body pt-3">
-                    <ul class="nav nav-tabs card-header-tabs" role="tablist">
-                        <li class="nav-item" role="presentation">
-                            <button type="button" class="nav-link active" id="generalSettings-tab" data-bs-toggle="tab" data-bs-target="#generalSettings" role="tab" aria-controls="generalSettings" aria-selected="true">
-                                <i class="fa-solid fa-user-gear me-1 opacity-75"></i>{lang.EDIT_U_DATA}
-                            </button>
-                        </li>
-                        <li class="nav-item" role="presentation">
-                            <button type="button" class="nav-link" id="emailSettings-tab" data-bs-toggle="tab" data-bs-target="#emailSettings" role="tab" aria-controls="emailSettings" aria-selected="false">
-                                <i class="fa-solid fa-envelope me-1 opacity-75"></i>{lang.EMAIL}
-                            </button>
-                        </li>
-                        <li class="nav-item" role="presentation">
-                            <button type="button" class="nav-link" id="passwordSettings-tab" data-bs-toggle="tab" data-bs-target="#passwordSettings" role="tab" aria-controls="passwordSettings" aria-selected="false">
-                                <i class="fa-solid fa-lock me-1 opacity-75"></i>{lang.PASS_ON_CHANGE}
-                            </button>
-                        </li>
-                        <!--<li class="nav-item" role="presentation">-->
-                            <!--<button type="button" class="nav-link" data-bs-toggle="tab" data-bs-target="#avatarSettings" role="tab">{lang.EDIT_U_AVATER}</button>-->
-                        <!--</li>-->
-                    </ul>
+                <!-- sections -->
+                <div class="col-md-4 col-lg-3">
+                    <div class="nav nav-pills flex-column gap-1" role="tablist" aria-orientation="vertical">
+                        <button type="button" class="nav-link text-start active" id="generalSettings-tab" data-bs-toggle="pill" data-bs-target="#generalSettings" role="tab" aria-controls="generalSettings" aria-selected="true">
+                            <i class="fa-solid fa-user-gear fa-fw me-2"></i>{lang.EDIT_U_DATA}
+                        </button>
+                        <button type="button" class="nav-link text-start" id="emailSettings-tab" data-bs-toggle="pill" data-bs-target="#emailSettings" role="tab" aria-controls="emailSettings" aria-selected="false">
+                            <i class="fa-solid fa-envelope fa-fw me-2"></i>{lang.EMAIL}
+                        </button>
+                        <button type="button" class="nav-link text-start" id="passwordSettings-tab" data-bs-toggle="pill" data-bs-target="#passwordSettings" role="tab" aria-controls="passwordSettings" aria-selected="false">
+                            <i class="fa-solid fa-lock fa-fw me-2"></i>{lang.PASS_ON_CHANGE}
+                        </button>
+                        <!--<button type="button" class="nav-link text-start" data-bs-toggle="pill" data-bs-target="#avatarSettings" role="tab">{lang.EDIT_U_AVATER}</button>-->
+                    </div>
                 </div>
 
-                <div class="card-body p-4 tab-content">
+                <!-- the selected section -->
+                <div class="col-md-8 col-lg-9">
+                    <div class="card shadow-sm">
+                        <div class="card-body p-4 tab-content">
 
-                    <!-- 1st tab -->
-                    <div id="generalSettings" class="tab-pane fade show active" role="tabpanel" aria-labelledby="generalSettings-tab" tabindex="0">
-                        <div class="mb-3">
-                            <label for="uname" class="form-label">{lang.USERNAME}</label>
-                            <input type="text" class="form-control" id="uname" value="{name}" readonly>
-                        </div>
+                            <!-- 1st tab -->
+                            <div id="generalSettings" class="tab-pane fade show active" role="tabpanel" aria-labelledby="generalSettings-tab" tabindex="0">
+                                <h2 class="h5 fw-semibold mb-4">{lang.EDIT_U_DATA}</h2>
 
-                        <div class="mb-3">
-                            <label for="show_my_filecp" class="form-label">{lang.SHOW_MY_FILECP}</label>
-                            <select class="form-select" id="show_my_filecp" name="show_my_filecp">
-                                <option value="1" <IF NAME="show_my_filecp==1">selected="selected"</IF>>{lang.YES}</option>
-                                <option value="0" <IF NAME="show_my_filecp==0">selected="selected"</IF>>{lang.NO}</option>
-                            </select>
-                        </div>
-                    </div>
+                                <div class="mb-3">
+                                    <label for="uname" class="form-label">{lang.USERNAME}</label>
+                                    <input type="text" class="form-control bg-body-tertiary" id="uname" value="{name}" readonly>
+                                </div>
 
-                    <!-- 2nd tab -->
-                    <div id="emailSettings" class="tab-pane fade" role="tabpanel" aria-labelledby="emailSettings-tab" tabindex="0">
-                        <div class="mb-3">
-                            <label for="pppass_old" class="form-label">{lang.PASSWORD}</label>
-                            <input type="password" class="form-control" id="pppass_old" name="pppass_old" value="{t_pppass_old}" aria-describedby="emailChangeHelp" autocomplete="current-password">
-                            <div id="emailChangeHelp" class="form-text">{lang.EMAIL_CHANGE_REQ_PASS}</div>
-                        </div>
-
-                        <div class="mb-3">
-                            <label for="pmail" class="form-label">{lang.EMAIL}</label>
-                            <input type="email" class="form-control" id="pmail" name="pmail" value="{mail}" dir="ltr" autocomplete="email">
-                        </div>
-                    </div>
-
-                    <!-- 3rd tab -->
-                    <div id="passwordSettings" class="tab-pane fade" role="tabpanel" aria-labelledby="passwordSettings-tab" tabindex="0">
-                        <div class="mb-3">
-                            <label for="ppass_old" class="form-label">{lang.OLD}</label>
-                            <input type="password" class="form-control" id="ppass_old" name="ppass_old" value="{t_ppass_old}" autocomplete="current-password">
-                        </div>
-
-                        <div class="row g-3 mb-3">
-                            <div class="col-sm-6">
-                                <label for="ppass_new" class="form-label">{lang.NEW}</label>
-                                <input type="password" class="form-control" id="ppass_new" name="ppass_new" value="{t_ppass_new}" autocomplete="new-password">
+                                <div class="mb-3">
+                                    <label for="show_my_filecp" class="form-label">{lang.SHOW_MY_FILECP}</label>
+                                    <select class="form-select" id="show_my_filecp" name="show_my_filecp">
+                                        <option value="1" <IF NAME="show_my_filecp==1">selected="selected"</IF>>{lang.YES}</option>
+                                        <option value="0" <IF NAME="show_my_filecp==0">selected="selected"</IF>>{lang.NO}</option>
+                                    </select>
+                                </div>
                             </div>
-                            <div class="col-sm-6">
-                                <label for="ppass_new2" class="form-label">{lang.NEW_AGAIN}</label>
-                                <input type="password" class="form-control" id="ppass_new2" name="ppass_new2" value="{t_ppass_new2}" autocomplete="new-password">
+
+                            <!-- 2nd tab -->
+                            <div id="emailSettings" class="tab-pane fade" role="tabpanel" aria-labelledby="emailSettings-tab" tabindex="0">
+                                <h2 class="h5 fw-semibold mb-4">{lang.EMAIL}</h2>
+
+                                <div class="mb-3">
+                                    <label for="pmail" class="form-label">{lang.EMAIL}</label>
+                                    <input type="email" class="form-control" id="pmail" name="pmail" value="{mail}" dir="ltr" autocomplete="email">
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="pppass_old" class="form-label">{lang.PASSWORD}</label>
+                                    <input type="password" class="form-control" id="pppass_old" name="pppass_old" value="{t_pppass_old}" aria-describedby="emailChangeHelp" autocomplete="current-password">
+                                    <div id="emailChangeHelp" class="form-text">{lang.EMAIL_CHANGE_REQ_PASS}</div>
+                                </div>
                             </div>
+
+                            <!-- 3rd tab -->
+                            <div id="passwordSettings" class="tab-pane fade" role="tabpanel" aria-labelledby="passwordSettings-tab" tabindex="0">
+                                <h2 class="h5 fw-semibold mb-4">{lang.PASS_ON_CHANGE}</h2>
+
+                                <div class="mb-3">
+                                    <label for="ppass_old" class="form-label">{lang.OLD}</label>
+                                    <input type="password" class="form-control" id="ppass_old" name="ppass_old" value="{t_ppass_old}" autocomplete="current-password">
+                                </div>
+
+                                <div class="row g-3 mb-3">
+                                    <div class="col-sm-6">
+                                        <label for="ppass_new" class="form-label">{lang.NEW}</label>
+                                        <input type="password" class="form-control" id="ppass_new" name="ppass_new" value="{t_ppass_new}" autocomplete="new-password">
+                                    </div>
+                                    <div class="col-sm-6">
+                                        <label for="ppass_new2" class="form-label">{lang.NEW_AGAIN}</label>
+                                        <input type="password" class="form-control" id="ppass_new2" name="ppass_new2" value="{t_ppass_new2}" autocomplete="new-password">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- 4th tab -->
+                            <div id="avatarSettings" class="tab-pane fade" role="tabpanel" tabindex="0">
+                                {link_avater}
+                            </div>
+
+                        </div>
+
+                        <div class="card-footer bg-body-tertiary py-3 px-4 d-flex justify-content-end">
+                            {H_FORM_KEYS}
+                            <button type="submit" name="submit_data" value="{lang.EDIT_U_DATA}" class="btn btn-primary px-4">
+                                <i class="fa-solid fa-floppy-disk me-2"></i>{lang.EDIT_U_DATA}
+                            </button>
                         </div>
                     </div>
-
-                    <!-- 4th tab -->
-                    <div id="avatarSettings" class="tab-pane fade" role="tabpanel" tabindex="0">
-                        {link_avater}
-                    </div>
-
                 </div>
 
-                <div class="card-footer bg-body-tertiary py-3 d-flex justify-content-end">
-                    {H_FORM_KEYS}
-                    <button type="submit" name="submit_data" value="{lang.EDIT_U_DATA}" class="btn btn-primary px-4">{lang.EDIT_U_DATA}</button>
-                </div>
             </div>
-
         </form>
 
         <ELSE>
 
         <!-- in case of user system integration like phpBB or VB -->
-        <div class="card shadow-sm">
-            <div class="card-body p-4 text-center">
-                <a href="{goto_forum_link}" class="btn btn-primary">{lang.PFILE_4_FORUM}</a>
+        <div class="card shadow-sm text-center">
+            <div class="card-body p-5">
+                <span class="icon-box icon-box-lg rounded-circle bg-primary-subtle text-primary-emphasis mb-4"><i class="fa-solid fa-arrow-up-right-from-square"></i></span>
+                <div>
+                    <a href="{goto_forum_link}" class="btn btn-primary px-4">{lang.PFILE_4_FORUM}</a>
+                </div>
             </div>
         </div>
 

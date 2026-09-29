@@ -1,11 +1,10 @@
-<!-- Powered by kleeja -->
 <div id="content_index" class="row justify-content-center">
     <div class="col-lg-9 col-xl-8">
 
         <!-- welcome -->
         <div class="text-center mb-4 mb-lg-5">
-            <h1 class="display-6 fw-bold mb-3">{lang.WELCOME}<IF NAME="user_is"> <span class="text-primary">{username}</span></IF></h1>
-            <div class="lead text-body-secondary welcome-msg">{welcome_msg}</div>
+            <h1 class="display-5 fw-bold mb-3">{lang.WELCOME}<IF NAME="user_is"> <span class="text-primary">{username}</span></IF></h1>
+            <div class="lead text-body-secondary welcome-msg col-lg-10 mx-auto">{welcome_msg}</div>
         </div>
 
 
@@ -14,7 +13,7 @@
         <div class="upload-messages mb-4">
             <LOOP NAME="info">
                 <IF LOOP="message_type == info">
-                <div class="card upload-result shadow-sm mb-3">
+                <div class="card upload-result border-success-subtle shadow-sm mb-3">
                     <div class="card-body p-4">{{message_content}}</div>
                 </div>
                 <ELSE>
@@ -31,10 +30,14 @@
         <!-- upload form -->
         <form id="uploader" action="{action}" method="post" enctype="multipart/form-data">
             <div class="card shadow-sm">
-                <div class="card-header bg-body py-3">
-                    <h2 class="h5 mb-0 d-flex align-items-center gap-2">
-                        <i class="fa-solid fa-cloud-arrow-up text-primary"></i>{lang.DOWNLOAD_F}
-                    </h2>
+                <div class="card-header bg-body d-flex align-items-center justify-content-between gap-3 py-3 px-4">
+                    <div class="d-flex align-items-center gap-3">
+                        <span class="icon-box rounded-3 bg-primary-subtle text-primary-emphasis"><i class="fa-solid fa-cloud-arrow-up"></i></span>
+                        <h2 class="h5 fw-semibold mb-0">{lang.DOWNLOAD_F}</h2>
+                    </div>
+                    <a href="{config.siteurl}(config.mod_writer?guide.html:go.php?go=guide)" class="small link-secondary text-decoration-none text-nowrap">
+                        <i class="fa-regular fa-circle-question me-1"></i>{lang.GUIDE}
+                    </a>
                 </div>
 
                 <div class="card-body p-4">
@@ -42,10 +45,10 @@
                     <div id="upload-errors" class="alert alert-danger small d-none" role="alert"></div>
 
                     <!-- files upload, the next field shows up once a file is chosen -->
-                    <div id="upload-fields">
+                    <div id="upload-fields" class="vstack gap-2">
                         <LOOP NAME="FILES_NUM_LOOP">
-                        <div class="upload-field input-group mb-2" style="{{show}}" id="file-block-{{i}}">
-                            <label class="input-group-text" for="file{{i}}"><i class="fa-regular fa-folder-open text-primary"></i></label>
+                        <div class="upload-field input-group" style="{{show}}" id="file-block-{{i}}">
+                            <label class="input-group-text bg-body-tertiary" for="file{{i}}"><i class="fa-regular fa-file text-primary fa-fw"></i></label>
                             <input type="file" class="form-control" name="file_{{i}}_" id="file{{i}}" data-number="{{i}}" aria-label="{lang.OPEN} {{i}}">
                         </div>
                         </LOOP>
@@ -55,21 +58,21 @@
                     <!-- verification code -->
                     <div class="mt-4">
                         <label for="kleeja_code_answer" class="form-label">{lang.VERTY_CODE}</label>
-                        <div class="d-flex flex-wrap align-items-center gap-2">
-                            <img id="kleeja_img_captcha" class="captcha-img rounded border" src="{captcha_file_path}" alt="{lang.REFRESH_CAPTCHA}" title="{lang.REFRESH_CAPTCHA}" onclick="update_kleeja_captcha('{captcha_file_path}', 'kleeja_code_answer');">
+                        <div class="input-group">
+                            <span class="input-group-text bg-body p-1"><img id="kleeja_img_captcha" class="captcha-img rounded-1" src="{captcha_file_path}" width="150" height="25" alt="{lang.REFRESH_CAPTCHA}" title="{lang.REFRESH_CAPTCHA}" onclick="update_kleeja_captcha('{captcha_file_path}', 'kleeja_code_answer');"></span>
+                            <input type="text" name="kleeja_code_answer" id="kleeja_code_answer" class="form-control" dir="ltr" autocomplete="off" aria-describedby="kleeja_code_answer_help">
                             <button type="button" class="btn btn-outline-secondary" title="{lang.REFRESH_CAPTCHA}" aria-label="{lang.REFRESH_CAPTCHA}" onclick="update_kleeja_captcha('{captcha_file_path}', 'kleeja_code_answer');"><i class="fa-solid fa-arrow-rotate-right"></i></button>
-                            <input type="text" name="kleeja_code_answer" id="kleeja_code_answer" class="form-control captcha-input" autocomplete="off" aria-describedby="kleeja_code_answer_help">
                         </div>
                         <div id="kleeja_code_answer_help" class="form-text">{lang.NOTE_CODE}</div>
                     </div>
                     </IF>
+                </div>
 
-                    <div class="d-flex flex-column flex-sm-row align-items-sm-center justify-content-between gap-3 mt-4">
-                        <small class="agree text-body-secondary">{terms_msg}</small>
-                        <button type="submit" id="submitr" name="submitr" value="{lang.DOWNLOAD_F}" class="btn btn-primary btn-lg px-4 flex-shrink-0">
-                            <i class="fa-solid fa-arrow-up-from-bracket me-2"></i>{lang.DOWNLOAD_F}
-                        </button>
-                    </div>
+                <div class="card-footer bg-body-tertiary d-flex flex-column flex-sm-row align-items-sm-center justify-content-between gap-3 py-3 px-4">
+                    <small class="agree text-body-secondary">{terms_msg}</small>
+                    <button type="submit" id="submitr" name="submitr" value="{lang.DOWNLOAD_F}" class="btn btn-primary btn-lg px-4 flex-shrink-0">
+                        <i class="fa-solid fa-arrow-up-from-bracket me-2"></i>{lang.DOWNLOAD_F}
+                    </button>
                 </div>
             </div>
         </form>
@@ -84,7 +87,7 @@
         <div id="loadbox" class="card shadow-sm d-none">
             <div class="card-body text-center p-5">
                 <div class="spinner-border text-primary mb-3" aria-hidden="true"></div>
-                <p class="mb-4" role="status">{lang.WAIT_LOADING}</p>
+                <p class="fw-semibold mb-4" role="status">{lang.WAIT_LOADING}</p>
                 <div class="progress" style="height: .5rem" aria-hidden="true">
                     <div class="progress-bar progress-bar-striped progress-bar-animated w-100"></div>
                 </div>
@@ -97,7 +100,7 @@
         <div class="card who-online shadow-sm mt-4">
             <div class="card-body d-flex flex-wrap align-items-center gap-2">
                 <span class="small text-body-secondary me-1">
-                    <i class="fa-solid fa-users me-1"></i>{lang.NUMBER_ONLINE}: <strong class="text-body">{current_online_users}</strong>
+                    <span class="d-inline-block bg-success rounded-circle p-1 me-1" aria-hidden="true"></span>{lang.NUMBER_ONLINE}: <strong class="text-body">{current_online_users}</strong>
                 </span>
                 <IF NAME="show_names">
                     <LOOP NAME="show_names">

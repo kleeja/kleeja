@@ -1,13 +1,12 @@
-
 <div class="row justify-content-center">
     <div class="col-md-8 col-lg-6 col-xl-5">
         <div class="card shadow-sm">
             <div class="card-body p-4 p-md-5">
 
                 <div class="text-center mb-4">
-                    <div class="form-icon bg-primary-subtle text-primary-emphasis mx-auto mb-3"><i class="fa-solid fa-right-to-bracket"></i></div>
-                    <h1 class="h4 mb-1">{title}</h1>
-                    <p class="small text-body-secondary mb-0">{lang.USER_LOGIN}</p>
+                    <span class="icon-box icon-box-lg rounded-circle bg-primary-subtle text-primary-emphasis mb-3"><i class="fa-solid fa-right-to-bracket icon-dir"></i></span>
+                    <h1 class="h3 fw-bold mb-1">{title}</h1>
+                    <p class="text-body-secondary mb-0">{lang.USER_LOGIN}</p>
                 </div>
 
 
@@ -25,34 +24,34 @@
 
                 <form action="{action}" method="post" name="login_form">
 
-                    <div class="mb-3">
-                        <label for="lname" class="form-label">{lang.USERNAME}</label>
-                        <input type="text" class="form-control" id="lname" name="lname" value="{t_lname}" autocomplete="username">
+                    <div class="form-floating mb-3">
+                        <input type="text" class="form-control" id="lname" name="lname" value="{t_lname}" placeholder="{lang.USERNAME}" autocomplete="username">
+                        <label for="lname">{lang.USERNAME}</label>
                     </div>
 
-                    <div class="mb-3">
-                        <div class="d-flex justify-content-between align-items-baseline gap-2">
-                            <label for="lpass" class="form-label">{lang.PASSWORD}</label>
-                            <a href="{forget_pass_link}" class="small text-decoration-none">{lang.LOSS_PASSWORD}</a>
+                    <div class="form-floating mb-3">
+                        <input type="password" class="form-control" id="lpass" name="lpass" value="{t_lpass}" placeholder="{lang.PASSWORD}" autocomplete="current-password">
+                        <label for="lpass">{lang.PASSWORD}</label>
+                    </div>
+
+                    <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-4">
+                        <div class="form-check mb-0">
+                            <input type="checkbox" class="form-check-input" id="remme" name="remme" value="31536000" checked aria-describedby="remme_help">
+                            <label class="form-check-label" for="remme">{lang.REMME}</label>
+                            <span id="remme_help" class="text-body-secondary ms-1" tabindex="0" data-bs-toggle="tooltip" data-bs-title="{lang.REMME_EXP}" aria-label="{lang.REMME_EXP}"><i class="fa-regular fa-circle-question"></i></span>
                         </div>
-                        <input type="password" class="form-control" id="lpass" name="lpass" value="{t_lpass}" autocomplete="current-password">
-                    </div>
-
-                    <div class="form-check mb-3">
-                        <input type="checkbox" class="form-check-input" id="remme" name="remme" value="31536000" checked>
-                        <label class="form-check-label" for="remme">{lang.REMME}</label>
-                        <div class="form-text mt-0">{lang.REMME_EXP}</div>
+                        <a href="{forget_pass_link}" class="small text-decoration-none">{lang.LOSS_PASSWORD}</a>
                     </div>
 
 
                     <!-- verification code -->
                     <IF NAME="config.enable_captcha==1">
-                    <div class="mb-3">
+                    <div class="mb-4">
                         <label for="kleeja_code_answer" class="form-label">{lang.VERTY_CODE}</label>
-                        <div class="d-flex flex-wrap align-items-center gap-2">
-                            <img id="kleeja_img_captcha" class="captcha-img rounded border" src="{captcha_file_path}" alt="{lang.REFRESH_CAPTCHA}" title="{lang.REFRESH_CAPTCHA}" onclick="update_kleeja_captcha('{captcha_file_path}', 'kleeja_code_answer');">
+                        <div class="input-group">
+                            <span class="input-group-text bg-body p-1"><img id="kleeja_img_captcha" class="captcha-img rounded-1" src="{captcha_file_path}" width="150" height="25" alt="{lang.REFRESH_CAPTCHA}" title="{lang.REFRESH_CAPTCHA}" onclick="update_kleeja_captcha('{captcha_file_path}', 'kleeja_code_answer');"></span>
+                            <input type="text" name="kleeja_code_answer" id="kleeja_code_answer" class="form-control" dir="ltr" autocomplete="off" aria-describedby="kleeja_code_answer_help">
                             <button type="button" class="btn btn-outline-secondary" title="{lang.REFRESH_CAPTCHA}" aria-label="{lang.REFRESH_CAPTCHA}" onclick="update_kleeja_captcha('{captcha_file_path}', 'kleeja_code_answer');"><i class="fa-solid fa-arrow-rotate-right"></i></button>
-                            <input type="text" name="kleeja_code_answer" id="kleeja_code_answer" class="form-control captcha-input" autocomplete="off" aria-describedby="kleeja_code_answer_help">
                         </div>
                         <div id="kleeja_code_answer_help" class="form-text">{lang.NOTE_CODE}</div>
                     </div>
@@ -60,13 +59,13 @@
 
                     {H_FORM_KEYS}
 
-                    <button type="submit" name="submit" value="{lang.LOGIN}" class="btn btn-primary btn-lg w-100 mt-2">{lang.LOGIN}</button>
+                    <button type="submit" name="submit" value="{lang.LOGIN}" class="btn btn-primary btn-lg w-100">{lang.LOGIN}</button>
 
                     <IF NAME="config.register">
-                    <div class="d-flex align-items-center gap-3 my-3 small text-body-secondary">
+                    <div class="d-flex align-items-center gap-3 my-4 small text-body-secondary">
                         <hr class="flex-grow-1 my-0"><span>{lang.OR}</span><hr class="flex-grow-1 my-0">
                     </div>
-                    <a href="{config.siteurl}(config.mod_writer?register.html:ucp.php?go=register)" class="btn btn-outline-secondary w-100">{lang.REGISTER}</a>
+                    <a href="{config.siteurl}(config.mod_writer?register.html:ucp.php?go=register)" class="btn btn-outline-secondary btn-lg w-100">{lang.REGISTER}</a>
                     </IF>
                 </form>
 
