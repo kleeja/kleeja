@@ -200,6 +200,16 @@ switch ($case):
                 continue;
             }
 
+            $not_compatible = !(
+                version_compare(strtolower($plugin_info['kleeja_version']['min']), KLEEJA_VERSION, '<=') &&
+                version_compare(strtolower($plugin_info['kleeja_version']['max']), KLEEJA_VERSION, '>=')
+            );
+
+            // hide plugins that are not compatible with this version of kleeja
+            if ($not_compatible && !(defined('IGNORE_STORE_COMPATIBILITY') && IGNORE_STORE_COMPATIBILITY)) {
+                continue;
+            }
+
             $store_plugins[$plugin_info['name']] = [
                 'name' => $plugin_info['name'],
                 'developer' => $plugin_info['developer'],
@@ -222,11 +232,7 @@ switch ($case):
                     $plugin_info['kleeja_version']['max'],
                 ),
                 'icon' => $plugin_info['icon'],
-                'NotCompatible' =>
-                    version_compare(strtolower($plugin_info['kleeja_version']['min']), KLEEJA_VERSION, '<=') &&
-                    version_compare(strtolower($plugin_info['kleeja_version']['max']), KLEEJA_VERSION, '>=')
-                        ? false
-                        : true,
+                'NotCompatible' => $not_compatible,
             ];
         }
 
