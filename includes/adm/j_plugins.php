@@ -150,7 +150,7 @@ switch ($case):
 
         // plugins avilable in kleeja remote catalog
         if (!($store_catalog = $cache->get('store_catalog'))) {
-            $store_link = 'https://raw.githubusercontent.com/kleeja/store-catalog/master/catalog.json';
+            $store_link = 'https://raw.githubusercontent.com/kleeja/store-catalog/master/kleeja-4-catalog.json';
 
             $store_catalog = FetchFile::make($store_link)->get();
             $store_catalog = json_decode($store_catalog, true);
