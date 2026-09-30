@@ -18,7 +18,7 @@
 <nav class="nav nav-underline mb-4" aria-label="{lang.R_PLUGINS}">
     <a class="nav-link<IF NAME="case == installed"> active</IF>" href="{action}"<IF NAME="case == installed"> aria-current="page"</IF>>{lang.INSTALLED_PLUGINS}</a>
     <a class="nav-link<IF NAME="case == local"> active</IF>" href="{action}&amp;case=local"<IF NAME="case == local"> aria-current="page"</IF>>{lang.LOCAL_PLUGINS}</a>
-    <a class="nav-link<IF NAME="case == store"> active</IF>" href="{action}&amp;case=store"<IF NAME="case == store"> aria-current="page"</IF>>{lang.KLEEJA_STORE}</a>
+    <a class="nav-link<IF NAME="case == store"> active</IF>" href="{action}&amp;case=store"<IF NAME="case == store"> aria-current="page"</IF>>{lang.KLEEJA_STORE}<IF NAME="case == store" AND="store_plugins_count"> <span class="badge rounded-pill bg-body-secondary text-body-emphasis ms-1">{store_plugins_count}</span></IF></a>
     <a class="nav-link<IF NAME="case == check"> active</IF>" href="{action}&amp;case=check"<IF NAME="case == check"> aria-current="page"</IF>>{lang.R_CHECK_UPDATE}</a>
 </nav>
 
@@ -148,6 +148,40 @@
     </IF>
 
     <IF NAME="store_plugins_count">
+
+    <IF NAME="case == store">
+    <div class="row row-cols-1 row-cols-md-2 row-cols-xxl-3 g-3">
+        <LOOP NAME="store_plugins">
+        <div class="col">
+            <article class="card h-100">
+                <div class="card-body">
+                    <div class="d-flex align-items-center gap-3 mb-3">
+                        <img class="flex-shrink-0 rounded-3 border bg-body-tertiary object-fit-cover" src="{{icon}}" alt="" width="48" height="48" loading="lazy" onerror="this.onerror=null;this.src='{STYLE_PATH_ADMIN}images/plugin.png';">
+                        <div class="flex-grow-1 overflow-hidden">
+                            <h2 class="card-title h6 fw-semibold mb-1 text-truncate">{{title}}</h2>
+                            <div class="small text-body-secondary text-truncate">{{developer}}</div>
+                        </div>
+                    </div>
+                    <p class="card-text small text-body-secondary mb-0">{{description}}</p>
+                    <IF LOOP="NotCompatible">
+                    <div class="alert alert-danger small py-2 px-3 mt-3 mb-0">{lang.PACKAGE_N_CMPT_KLJ}</div>
+                    </IF>
+                    <div class="d-none" data-kj-download-status="{{name}}" data-kj-download-alert role="status" aria-live="polite"></div>
+                </div>
+                <div class="card-footer d-flex flex-wrap align-items-center gap-2">
+                    <span class="small text-body-secondary me-auto">{lang.VERSION} <span class="fw-semibold text-body-emphasis" dir="ltr">{{version}}</span></span>
+                    <button type="button" class="btn btn-sm btn-outline-secondary text-nowrap" data-bs-toggle="modal" data-bs-target="#Modal_{{name}}">
+                        <i class="fa-solid fa-circle-info" aria-hidden="true"></i><span>{lang.VIEW}</span>
+                    </button>
+                    <button type="button" class="btn btn-sm btn-outline-primary text-nowrap" data-kj-download="{{name}}" data-kj-download-url="{plugin_download_link}" data-kj-loading="{lang.LOADING}…">
+                        <i class="fa-solid fa-download" aria-hidden="true"></i><span>{lang.INSTALL}</span>
+                    </button>
+                </div>
+            </article>
+        </div>
+        </LOOP>
+    </div>
+    <ELSE>
     <div class="card">
         <ul class="list-group list-group-flush">
             <LOOP NAME="store_plugins">
@@ -176,24 +210,33 @@
             </LOOP>
         </ul>
     </div>
+    </IF>
 
     <LOOP NAME="store_plugins">
     <div class="modal fade" id="Modal_{{name}}" tabindex="-1" aria-labelledby="Plugin_View_{{name}}" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
-                <div class="modal-header">
-                    <h2 class="modal-title" id="Plugin_View_{{name}}">{{title}}</h2>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="{lang.CLOSE}"></button>
+                <div class="modal-header align-items-center gap-3">
+                    <img class="flex-shrink-0 rounded-3 border bg-body-tertiary object-fit-cover" src="{{icon}}" alt="" width="48" height="48" loading="lazy" onerror="this.onerror=null;this.src='{STYLE_PATH_ADMIN}images/plugin.png';">
+                    <div class="flex-grow-1 overflow-hidden">
+                        <h2 class="modal-title text-truncate" id="Plugin_View_{{name}}">{{title}}</h2>
+                        <div class="small text-body-secondary text-truncate"><span dir="ltr">{{name}}</span></div>
+                    </div>
+                    <button type="button" class="btn-close align-self-start" data-bs-dismiss="modal" aria-label="{lang.CLOSE}"></button>
                 </div>
                 <div class="modal-body">
                     <p class="text-body-secondary">{{description}}</p>
-                    <dl class="kj-meta">
-                        <dt>{lang.DEVELOPER}</dt>
-                        <dd>{{developer}} <IF LOOP="website"><a href="{{website}}" target="_blank" rel="noopener" aria-label="{{website}}"><i class="fa-solid fa-arrow-up-right-from-square" aria-hidden="true"></i></a></IF></dd>
-                        <dt>{lang.VERSION}</dt>
-                        <dd dir="ltr" style="text-align: start">{{version}}</dd>
-                    </dl>
-                    <div class="small text-body-secondary mt-3">{{kj_version_cmtp}}</div>
+                    <ul class="list-group small">
+                        <li class="list-group-item d-flex justify-content-between align-items-center gap-3">
+                            <span class="text-body-secondary">{lang.DEVELOPER}</span>
+                            <span class="fw-semibold text-end">{{developer}} <IF LOOP="website"><a class="ms-1" href="{{website}}" target="_blank" rel="noopener" aria-label="{{website}}"><i class="fa-solid fa-arrow-up-right-from-square" aria-hidden="true"></i></a></IF></span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center gap-3">
+                            <span class="text-body-secondary">{lang.VERSION}</span>
+                            <span class="fw-semibold" dir="ltr">{{version}}</span>
+                        </li>
+                    </ul>
+                    <p class="small text-body-secondary mt-3 mb-0">{{kj_version_cmtp}}</p>
                     <IF LOOP="NotCompatible">
                     <div class="alert alert-danger small mt-3 mb-0">{lang.PACKAGE_N_CMPT_KLJ}</div>
                     </IF>

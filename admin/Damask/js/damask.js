@@ -1174,9 +1174,17 @@
         function download(button) {
             var name = button.dataset.kjDownload;
             var status = $('[data-kj-download-status="' + name + '"]');
+            // a list row shows the answer as a badge; a store card is narrow, so it asks for an alert
+            var asAlert = status.hasAttribute("data-kj-download-alert");
+
+            function look(tone) {
+                return asAlert ? "alert alert-" + tone + " small py-2 px-3 mt-3 mb-0" : "kj-status kj-badge is-" + tone;
+            }
 
             button.disabled = true;
-            status.className = "kj-status text-body-secondary d-inline-flex align-items-center gap-2";
+            status.className = asAlert
+                ? look("secondary") + " d-flex align-items-center gap-2"
+                : "kj-status text-body-secondary d-inline-flex align-items-center gap-2";
             status.innerHTML = "";
             status.appendChild(spinner());
             status.appendChild(document.createTextNode(" " + (button.dataset.kjLoading || "")));
@@ -1184,12 +1192,12 @@
             return fetchJSON(button.dataset.kjDownloadUrl + encodeURIComponent(name) + "&_ajax_=1")
                 .then(function (data) {
                     var parts = splitOnce(data.content, ":::");
-                    status.className = "kj-status kj-badge " + (parts[0] === "1" ? "is-success" : "is-warning");
+                    status.className = look(parts[0] === "1" ? "success" : "warning");
                     status.innerHTML = parts[1];
                 })
                 .catch(function (error) {
                     button.disabled = false;
-                    status.className = "kj-status kj-badge is-danger";
+                    status.className = look("danger");
                     status.innerHTML = errorText(error);
                 });
         }
