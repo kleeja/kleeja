@@ -303,6 +303,10 @@ return [
     'UPDATE_PROCESS_STEP1' => 'Fetching the package of latest version of Kleeja ...',
     'UPDATE_PROCESS_STEP2' => 'Create a backup container and extract the new package ...',
     'UPDATE_PROCESS_STEP3' => 'Updating to new version (files & database upgrade) ...',
+    'UPDATE_PLUGINS_STYLES_NEXT' =>
+        'Plugins and styles may have new versions for this version of Kleeja, check them and update them too.',
+    'UPDATE_PLUGINS' => 'Update plugins',
+    'UPDATE_STYLES' => 'Update styles',
     'RELEASE_NOTE' => 'Release Notes',
     'UPDATE_ALL' => 'Update All',
     'CANT_DEL_DEFAULT_STYLE' =>

@@ -1070,6 +1070,7 @@
         var start = $("[data-kj-update-start]", root);
         var notesWrap = $("[data-kj-update-notes-wrap]", root);
         var steps = $("[data-kj-update-steps]");
+        var next = $("[data-kj-update-next]");
 
         function setTile(state, iconClass) {
             tile.className = "kj-icon-tile is-" + state;
@@ -1112,7 +1113,12 @@
         function runStep(step) {
             var item = $('[data-kj-step="' + step + '"]', steps);
 
+            // every step passed, now the plugins and styles may have versions for the new Kleeja
             if (!item) {
+                if (next) {
+                    next.classList.remove("d-none");
+                }
+
                 return;
             }
 
