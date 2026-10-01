@@ -122,6 +122,8 @@ return [
     'NO_STYLES' => 'No available styles found...',
     'NEW_PLUGIN_ADDED' => 'Plugin added ... ',
     'PLUGIN_EXISTS_BEFORE' => 'This plugin exists before with same version or above, so no need to update it!.',
+    'PLUGIN_NOT_FOUND' => 'There is no plugin "%s" in the plugins folder.',
+    'PLUGIN_NOT_INSTALLED' => 'The plugin "%s" is not installed.',
     'R_CHECK_UPDATE' => 'Check for updates',
     'R_HELP' => 'Help',
     'ERROR_CHECK_VER' => 'Error: cannot get any update information at this moment , try again later !',
