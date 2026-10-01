@@ -236,6 +236,10 @@ elseif ($current_smt == 'update3') {
     // so a file with wrong permissions can't leave kleeja half updated
     //
     $changed_files = $new_files = $new_folders = $not_writable = [];
+    $checked_folders = $removed_paths = $removed_files = $removed_folders = [];
+
+    //the old files in these folders are not deleted, they have the site data, or things that are not part of kleeja
+    $kept_folders = ['cache', 'plugins', 'uploads', 'install', 'styles', 'images'];
 
     $files = new RecursiveIteratorIterator(
         new RecursiveDirectoryIterator($package_folder, RecursiveDirectoryIterator::SKIP_DOTS),
@@ -257,6 +261,8 @@ elseif ($current_smt == 'update3') {
                 if ($parent_not_writable) {
                     $not_writable[] = dirname($relative_path) . '/';
                 }
+            } elseif ($relative_path !== 'lang' && !in_array(strtok($relative_path, '/\\'), $kept_folders)) {
+                $checked_folders[] = $relative_path;
             }
 
             continue;
@@ -281,6 +287,57 @@ elseif ($current_smt == 'update3') {
     }
 
     //
+    // the files and folders of the old version that are not in the new one, like an admin style that was replaced.
+    // the root folder is not checked, config.php, .htaccess, the sqlite database and the uploads folder (it can be
+    // renamed) are there, and neither is lang/, the languages that don't come with kleeja are added by the site owner
+    //
+    foreach ($checked_folders as $relative_folder) {
+        foreach (array_diff(scandir(PATH . $relative_folder) ?: [], ['.', '..']) as $name) {
+            $relative_path = "{$relative_folder}/{$name}";
+
+            //a link can point to anything outside kleeja
+            if (file_exists("{$package_folder}/{$relative_path}") || is_link(PATH . $relative_path)) {
+                continue;
+            }
+
+            $removed_paths[] = $relative_path;
+
+            if (!is_dir(PATH . $relative_path)) {
+                $removed_files[] = $relative_path;
+
+                continue;
+            }
+
+            $removed_folders[] = $relative_path;
+
+            $old_files = new RecursiveIteratorIterator(
+                new RecursiveDirectoryIterator(PATH . $relative_path, RecursiveDirectoryIterator::SKIP_DOTS),
+                RecursiveIteratorIterator::SELF_FIRST,
+            );
+
+            try {
+                foreach ($old_files as $old_file) {
+                    if ($old_file->isDir()) {
+                        $removed_folders[] = substr($old_file->getPathname(), strlen(PATH));
+                    } else {
+                        $removed_files[] = substr($old_file->getPathname(), strlen(PATH));
+                    }
+                }
+            } catch (UnexpectedValueException $e) {
+                //a folder inside it can't be read, so it can't be deleted
+                $not_writable[] = $relative_path . '/';
+            }
+        }
+    }
+
+    //a file or a folder is deleted from the folder it is in
+    foreach (array_merge($removed_files, $removed_folders) as $relative_path) {
+        if (!is_writable(dirname(PATH . $relative_path))) {
+            $not_writable[] = dirname($relative_path) . '/';
+        }
+    }
+
+    //
     // 2) back up the files that will be replaced, the archive is written to the disk on close(),
     // so it is closed before any file is touched
     //
@@ -298,7 +355,7 @@ elseif ($current_smt == 'update3') {
         if ($backup->open($backup_archive_path, ZipArchive::CREATE) === true) {
             $backup_done = true;
 
-            foreach (array_keys($changed_files) as $relative_path) {
+            foreach (array_merge(array_keys($changed_files), $removed_files) as $relative_path) {
                 if (file_exists(PATH . $relative_path)) {
                     $backup_done = $backup->addFile(PATH . $relative_path, $relative_path) && $backup_done;
                     $backed_up_files++;
@@ -347,13 +404,28 @@ elseif ($current_smt == 'update3') {
             }
         }
 
+        if (!$update_failed) {
+            foreach ($removed_paths as $relative_path) {
+                if (!kleeja_unlink(PATH . $relative_path)) {
+                    $update_failed = true;
+                    $failed_files[] = $relative_path;
+
+                    break;
+                }
+            }
+        }
+
         if ($update_failed) {
             //rollback to backup
             if ($backed_up_files) {
                 $zip = new ZipArchive();
 
                 if ($zip->open($backup_archive_path) === true) {
-                    $zip->extractTo(PATH);
+                    //one by one, extractTo() stops at the first file it can't write, like the one that failed
+                    for ($i = 0; $i < $zip->numFiles; $i++) {
+                        $zip->extractTo(PATH, $zip->getNameIndex($i));
+                    }
+
                     $zip->close();
                 }
             }
