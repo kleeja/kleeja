@@ -201,9 +201,19 @@ elseif ($current_smt == 'update2') {
         }
 
         // skip some folders
-        foreach (['cache', 'plugins', 'uploads', 'styles', 'install'] as $folder_name) {
+        foreach (['cache', 'plugins', 'uploads', 'install'] as $folder_name) {
             if (file_exists("{$package_folder}/{$folder_name}")) {
                 kleeja_unlink("{$package_folder}/{$folder_name}");
+            }
+        }
+
+        // the styles that come with kleeja are updated with it, any other style is updated from the store
+        if (is_dir("{$package_folder}/styles")) {
+            foreach (
+                array_diff(scandir("{$package_folder}/styles"), ['.', '..', 'bootstrap', 'default'])
+                as $style_name
+            ) {
+                kleeja_unlink("{$package_folder}/styles/{$style_name}");
             }
         }
 
