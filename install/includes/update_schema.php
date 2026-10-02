@@ -41,9 +41,11 @@ $update_schema[10]['sql'] = [
     'plugins_drop_plg_files' => "ALTER TABLE `{$dbprefix}plugins` DROP COLUMN `plg_files`;",
 ];
 
-// $update_schema[10]['functions'] = [
-//     function () {
-//     },
-//     function () {
-//     },
-// ];
+$update_schema[10]['functions'] = [
+    //Damask replaced the Masmak admin theme, and an update over the old files leaves its folder behind
+    function () {
+        if (is_dir(PATH . 'admin/Masmak')) {
+            kleeja_unlink(PATH . 'admin/Masmak');
+        }
+    },
+];
