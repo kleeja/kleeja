@@ -241,9 +241,9 @@ elseif (ip('newuser')) {
         $group = (int) p('lgroup');
 
         $insert_query = [
-            'INSERT' => 'name ,password, password_salt ,group_id, mail,founder, session_id, clean_name',
+            'INSERT' => 'name ,password, password_salt ,group_id, mail,founder, clean_name',
             'INTO' => "{$dbprefix}users",
-            'VALUES' => ":name, :password, :salt, :group_id, :mail, 0, '', :clean_name",
+            'VALUES' => ':name, :password, :salt, :group_id, :mail, 0, :clean_name',
             'BIND' => [
                 'name' => $name,
                 'password' => $pass,

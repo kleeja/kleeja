@@ -905,17 +905,20 @@ function kleeja_run_db_updates(array $update_schema, int $current_db_version): a
     sort($available_db_updates);
 
     //an update that was applied before, but its version was not saved, is not an error
-    $done_before = function (array $error): bool {
-        //MySQL: 1060 duplicate column, 1061 duplicate key, 1062 duplicate entry
-        return in_array((int) ($error[0] ?? 0), [1060, 1061, 1062], true) ||
-            preg_match('/duplicate|already exists|UNIQUE constraint failed/i', (string) ($error[1] ?? '')) === 1;
+    $done_before = function (array $error, string $sql_content): bool {
+        //MySQL: 1060 duplicate column, 1061 duplicate key, 1062 duplicate entry, 1091 dropped column or key
+        return in_array((int) ($error[0] ?? 0), [1060, 1061, 1062, 1091], true) ||
+            preg_match('/duplicate|already exists|UNIQUE constraint failed/i', (string) ($error[1] ?? '')) === 1 ||
+            //SQLite: the column of a DROP COLUMN is gone already
+            (preg_match('/\bDROP\s+COLUMN\b/i', $sql_content) === 1 &&
+                str_contains((string) ($error[1] ?? ''), 'no such column'));
     };
 
     $errors = [];
 
     foreach ($available_db_updates as $db_update_version) {
         foreach ($update_schema[$db_update_version]['sql'] ?? [] as $name => $sql_content) {
-            if (!$SQL->query($sql_content) && !$done_before($SQL->get_error())) {
+            if (!$SQL->query($sql_content) && !$done_before($SQL->get_error(), $sql_content)) {
                 $errors[] = $db_update_version . ' - ' . $name . ' : ' . implode(':', $SQL->get_error());
             }
         }

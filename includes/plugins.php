@@ -428,10 +428,9 @@ class Plugins
         }
 
         $insert_query = [
-            'INSERT' =>
-                '`plg_name` ,`plg_ver`, `plg_author`, `plg_dsc`, `plg_icon`, `plg_uninstall`, `plg_instructions`, `plg_store`, `plg_files`',
+            'INSERT' => '`plg_name` ,`plg_ver`, `plg_author`, `plg_dsc`',
             'INTO' => "{$dbprefix}plugins",
-            'VALUES' => ":name, :version, :author, :description, '', '', '', '', ''",
+            'VALUES' => ':name, :version, :author, :description',
             'BIND' => [
                 'name' => kleeja_html_encode($plugin_name),
                 'version' => kleeja_html_encode($plugin_info['plugin_version']),
