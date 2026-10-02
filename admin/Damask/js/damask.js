@@ -555,13 +555,20 @@
         });
     }
 
-    // brand chart palette (kleeja.net/branding): coral first, then navy, lighter navy on dark surfaces
+    // brand chart palette (kleeja.net/branding): coral first, then navy, lighter navy on dark surfaces.
+    // team: the four contributor slots, the last one for everyone else; any two of them can meet
+    // in a stacked column, so every pair stays apart for colour-blind readers too.
+    // heat: commits from a few to the most.
     function chartColors() {
         var dark = document.documentElement.getAttribute("data-bs-theme") === "dark";
 
         return dark
             ? {
                   series: ["#F45B69", "#BBC0C8"],
+                  team: ["#F45B69", "#FFFFFF", "#A63E47", "#BBC0C8"],
+                  heat: ["#A63E47", "#F45B69", "#FCD4D8"],
+                  empty: "#3C4C61",
+                  stripe: "rgba(35, 53, 78, 0.6)",
                   grid: "#3C4C61",
                   axis: "#BBC0C8",
                   text: "#FFFFFF",
@@ -571,6 +578,10 @@
               }
             : {
                   series: ["#F45B69", "#0B1F3A"],
+                  team: ["#F45B69", "#0B1F3A", "#7F2F37", "#949CA8"],
+                  heat: ["#FAB7BD", "#F45B69", "#7F2F37"],
+                  empty: "#EDEEF0",
+                  stripe: "rgba(255, 255, 255, 0.6)",
                   grid: "#EDEEF0",
                   axis: "#546275",
                   text: "#0B1F3A",
@@ -578,6 +589,57 @@
                   pointer: "rgba(11, 31, 58, 0.05)",
                   shadow: "box-shadow: 0 8px 24px rgba(11, 31, 58, 0.12); border-radius: 8px;",
               };
+    }
+
+    function chartTooltip(colors, options) {
+        return Object.assign(
+            {
+                backgroundColor: colors.surface,
+                borderColor: colors.grid,
+                borderWidth: 1,
+                padding: [8, 12],
+                textStyle: { color: colors.text, fontSize: 13 },
+                extraCssText: colors.shadow,
+            },
+            options,
+        );
+    }
+
+    // an SVG chart that options(colors, rtl) draws again whenever the colour mode changes
+    function mountChart(element, options) {
+        var chart = window.echarts.init(element, null, { renderer: "svg" });
+
+        function render() {
+            var colors = chartColors();
+            var base = {
+                aria: { enabled: true },
+                animationDuration: 400,
+                textStyle: { fontFamily: window.getComputedStyle(body).fontFamily },
+            };
+
+            chart.setOption(
+                Object.assign(base, options(colors, document.documentElement.getAttribute("dir") === "rtl")),
+                true,
+            );
+        }
+
+        render();
+        document.addEventListener("kj:colormode", render);
+        document.addEventListener("kj:layout", function () {
+            chart.resize();
+        });
+
+        if (window.ResizeObserver) {
+            new ResizeObserver(function () {
+                chart.resize();
+            }).observe(element);
+        } else {
+            window.addEventListener("resize", function () {
+                chart.resize();
+            });
+        }
+
+        return chart;
     }
 
     function initStatsChart() {
@@ -600,11 +662,7 @@
             return Number(row[0][1]) || 0;
         });
 
-        var chart = window.echarts.init(element, null, { renderer: "svg" });
-
-        function render() {
-            var colors = chartColors();
-            var rtl = document.documentElement.getAttribute("dir") === "rtl";
+        mountChart(element, function (colors, rtl) {
             var bar = function (name, data, color) {
                 return {
                     name: name,
@@ -617,62 +675,34 @@
                 };
             };
 
-            chart.setOption(
-                {
-                    aria: { enabled: true },
-                    color: colors.series,
-                    animationDuration: 400,
-                    textStyle: { fontFamily: window.getComputedStyle(body).fontFamily },
-                    grid: { left: 8, right: 8, top: 12, bottom: 4, containLabel: true },
-                    tooltip: {
-                        trigger: "axis",
-                        axisPointer: { type: "shadow", shadowStyle: { color: colors.pointer } },
-                        backgroundColor: colors.surface,
-                        borderColor: colors.grid,
-                        borderWidth: 1,
-                        padding: [8, 12],
-                        textStyle: { color: colors.text, fontSize: 13 },
-                        extraCssText: colors.shadow,
-                    },
-                    xAxis: {
-                        type: "category",
-                        data: labels,
-                        inverse: rtl,
-                        axisTick: { show: false },
-                        axisLine: { lineStyle: { color: colors.grid } },
-                        axisLabel: { color: colors.axis, fontSize: 12, hideOverlap: true },
-                    },
-                    yAxis: {
-                        type: "value",
-                        minInterval: 1,
-                        position: rtl ? "right" : "left",
-                        splitLine: { lineStyle: { color: colors.grid } },
-                        axisLabel: { color: colors.axis, fontSize: 12 },
-                    },
-                    series: [
-                        bar(element.dataset.kjLabelFiles, files, colors.series[0]),
-                        bar(element.dataset.kjLabelImages, images, colors.series[1]),
-                    ],
+            return {
+                color: colors.series,
+                grid: { left: 8, right: 8, top: 12, bottom: 4, containLabel: true },
+                tooltip: chartTooltip(colors, {
+                    trigger: "axis",
+                    axisPointer: { type: "shadow", shadowStyle: { color: colors.pointer } },
+                }),
+                xAxis: {
+                    type: "category",
+                    data: labels,
+                    inverse: rtl,
+                    axisTick: { show: false },
+                    axisLine: { lineStyle: { color: colors.grid } },
+                    axisLabel: { color: colors.axis, fontSize: 12, hideOverlap: true },
                 },
-                true,
-            );
-        }
-
-        render();
-        document.addEventListener("kj:colormode", render);
-        document.addEventListener("kj:layout", function () {
-            chart.resize();
+                yAxis: {
+                    type: "value",
+                    minInterval: 1,
+                    position: rtl ? "right" : "left",
+                    splitLine: { lineStyle: { color: colors.grid } },
+                    axisLabel: { color: colors.axis, fontSize: 12 },
+                },
+                series: [
+                    bar(element.dataset.kjLabelFiles, files, colors.series[0]),
+                    bar(element.dataset.kjLabelImages, images, colors.series[1]),
+                ],
+            };
         });
-
-        if (window.ResizeObserver) {
-            new ResizeObserver(function () {
-                chart.resize();
-            }).observe(element);
-        } else {
-            window.addEventListener("resize", function () {
-                chart.resize();
-            });
-        }
     }
 
     /* --- Kleeja team ------------------------------------------------------------------------ */
@@ -732,33 +762,49 @@
         return item;
     }
 
+    // GitHub answers 202 while it prepares a repository's statistics, so those are asked for again
+    // a few times; the retries skip the browser cache, which may hold an earlier 202
+    function githubJSON(url, attempt) {
+        attempt = attempt || 0;
+
+        return fetch(url, {
+            cache: attempt ? "reload" : "force-cache",
+            credentials: "omit",
+            referrerPolicy: "no-referrer",
+            headers: { Accept: "application/vnd.github+json" },
+        }).then(function (response) {
+            if (response.status === 202 && attempt < 4) {
+                return new Promise(function (resolve) {
+                    window.setTimeout(resolve, 2000 * (attempt + 1));
+                }).then(function () {
+                    return githubJSON(url, attempt + 1);
+                });
+            }
+
+            if (response.status !== 200) {
+                throw new Error("GitHub");
+            }
+
+            return response.json();
+        });
+    }
+
     // contributors are read from GitHub and written with textContent only; the three with the
-    // most commits lead the page, everyone else follows in a compact grid
+    // most commits lead the page, everyone else follows in a compact grid. Resolves to the logins
+    // in that order, or to none when GitHub could not be reached.
     function initTeam() {
         var root = $("[data-kj-team]");
         var leadTemplate = $("#kjTeamLead");
         var itemTemplate = $("#kjTeamItem");
 
         if (!root || !leadTemplate || !itemTemplate || !window.fetch) {
-            return;
+            return Promise.resolve([]);
         }
 
         var leads = $("[data-kj-team-leads]", root);
         var list = $("[data-kj-team-list]", root);
 
-        fetch(root.dataset.kjTeam, {
-            cache: "force-cache",
-            credentials: "omit",
-            referrerPolicy: "no-referrer",
-            headers: { Accept: "application/vnd.github+json" },
-        })
-            .then(function (response) {
-                if (!response.ok) {
-                    throw new Error("GitHub");
-                }
-
-                return response.json();
-            })
+        return githubJSON(root.dataset.kjTeam)
             .then(function (people) {
                 // automated accounts such as dependabot are not part of the team
                 people = (Array.isArray(people) ? people : [])
@@ -815,17 +861,684 @@
 
                 $("[data-kj-team-community-count]", root).textContent = format.count(others.length);
                 $("[data-kj-team-community]", root).classList.toggle("d-none", !others.length);
+
+                return people.map(function (person) {
+                    return person.login;
+                });
             })
             .catch(function () {
                 $$("[data-kj-team-section]", root).forEach(function (section) {
                     section.remove();
                 });
                 $("[data-kj-team-error]", root).classList.remove("d-none");
+
+                return [];
             })
-            .then(function () {
+            .then(function (logins) {
                 $("[data-kj-team-loading]", root).remove();
                 root.setAttribute("aria-busy", "false");
+
+                return logins;
             });
+    }
+
+    /* --- Kleeja team: commit activity -------------------------------------------------------- */
+
+    function dateFormat(options) {
+        try {
+            var format = new Intl.DateTimeFormat(
+                (document.documentElement.lang || "en") + "-u-nu-latn",
+                Object.assign({ timeZone: "UTC" }, options),
+            );
+
+            return function (seconds) {
+                return format.format(new Date(seconds * 1000));
+            };
+        } catch (error) {
+            return function (seconds) {
+                return new Date(seconds * 1000).toISOString().slice(0, 10);
+            };
+        }
+    }
+
+    // the three who lead the contributors list keep a colour of their own in every chart, in the
+    // same order as their cards; everyone after them shares the last slot
+    function teamGroups(stats, logins, othersLabel) {
+        var authors = (Array.isArray(stats) ? stats : []).filter(function (entry) {
+            return (
+                entry && entry.author && entry.author.login && entry.author.type !== "Bot" && Array.isArray(entry.weeks)
+            );
+        });
+        var place = function (entry) {
+            var index = logins.indexOf(String(entry.author.login));
+
+            return index === -1 ? logins.length : index;
+        };
+
+        authors.sort(function (a, b) {
+            return place(a) - place(b) || (b.total || 0) - (a.total || 0);
+        });
+
+        var groups = authors.slice(0, 3).map(function (entry, index) {
+            return { name: String(entry.author.login), slot: index, authors: [entry] };
+        });
+
+        if (authors.length > 3) {
+            groups.push({ name: othersLabel, slot: 3, authors: authors.slice(3) });
+        }
+
+        return groups;
+    }
+
+    // per group: commits, added and removed lines for each week, keyed by the week's start
+    // (a Sunday, in UNIX seconds), plus every week the repository has existed, oldest first
+    function teamHistory(groups) {
+        var all = {};
+
+        groups.forEach(function (group) {
+            group.weeks = {};
+
+            group.authors.forEach(function (entry) {
+                entry.weeks.forEach(function (week) {
+                    var start = parseInt(week.w, 10);
+
+                    if (!start) {
+                        return;
+                    }
+
+                    var row = group.weeks[start] || (group.weeks[start] = { c: 0, a: 0, d: 0 });
+
+                    row.c += Math.max(0, parseInt(week.c, 10) || 0);
+                    row.a += Math.max(0, parseInt(week.a, 10) || 0);
+                    row.d += Math.max(0, parseInt(week.d, 10) || 0);
+                    all[start] = true;
+                });
+            });
+        });
+
+        return Object.keys(all)
+            .map(Number)
+            .sort(function (a, b) {
+                return a - b;
+            });
+    }
+
+    function teamCommits(group, start) {
+        return group.weeks[start] ? group.weeks[start].c : 0;
+    }
+
+    function teamLegend(root, groups) {
+        $$("[data-kj-team-legend]", root).forEach(function (list) {
+            list.innerHTML = "";
+
+            groups.forEach(function (group) {
+                var item = document.createElement("li");
+                var name = document.createElement("bdi");
+
+                name.textContent = group.name;
+                item.appendChild(icon("kj-swatch-team-" + (group.slot + 1)));
+                item.appendChild(name);
+                list.appendChild(item);
+            });
+        });
+    }
+
+    // a chart box without a chart: the reason is shown in its place, and the card's legend goes
+    function chartNotice(element, text) {
+        var note = document.createElement("p");
+        var card = element.closest(".card");
+
+        if (card) {
+            $$(".kj-chart-legend, .kj-heat-legend", card).forEach(function (legend) {
+                legend.classList.add("d-none");
+            });
+        }
+
+        note.className = "kj-chart-note";
+        note.textContent = text;
+        element.innerHTML = "";
+        element.className = "kj-chart is-empty";
+        element.appendChild(note);
+    }
+
+    function chartReady(element) {
+        element.innerHTML = "";
+        element.classList.remove("placeholder-glow");
+    }
+
+    // stacked columns with a 2px gap of card colour between the parts; only the part on top of
+    // each column gets the rounded end. Empty parts are left out, or their outline would cut
+    // through the baseline.
+    function stackedColumns(groups, values, colors, gap) {
+        var series = groups.map(function (group, index) {
+            return {
+                name: group.name,
+                type: "bar",
+                stack: "commits",
+                data: values[index].map(function (value) {
+                    return value > 0 ? value : null;
+                }),
+                barMaxWidth: 28,
+                itemStyle: { color: colors.team[group.slot], borderColor: colors.surface, borderWidth: gap ? 1 : 0 },
+                emphasis: { focus: "series" },
+            };
+        });
+
+        (values[0] || []).forEach(function (value, point) {
+            for (var index = series.length - 1; index >= 0; index--) {
+                if (values[index][point] > 0) {
+                    series[index].data[point] = {
+                        value: values[index][point],
+                        itemStyle: { borderRadius: [4, 4, 0, 0] },
+                    };
+                    break;
+                }
+            }
+        });
+
+        return series;
+    }
+
+    // who committed in the hovered column, then the column's total
+    function stackTooltip(title, totalLabel, count) {
+        var encode = window.echarts.format.encodeHTML;
+
+        return function (params) {
+            var bars = params.filter(function (param) {
+                return param.seriesType === "bar";
+            });
+
+            if (!bars.length) {
+                return "";
+            }
+
+            var total = 0;
+            var rows = bars
+                .filter(function (param) {
+                    return +param.value > 0;
+                })
+                .map(function (param) {
+                    total += +param.value;
+
+                    return (
+                        '<div class="kj-tip-row">' +
+                        param.marker +
+                        "<bdi>" +
+                        encode(param.seriesName) +
+                        "</bdi><b>" +
+                        count(param.value) +
+                        "</b></div>"
+                    );
+                });
+
+            return (
+                '<div class="kj-tip-title">' +
+                encode(title(bars[0].dataIndex)) +
+                "</div>" +
+                rows.join("") +
+                '<div class="kj-tip-row is-total"><span>' +
+                encode(totalLabel) +
+                "</span><b>" +
+                count(total) +
+                "</b></div>"
+            );
+        };
+    }
+
+    // the chart SVG is laid out left to right (see .kj-chart svg in damask.css), so a label that
+    // mixes Arabic words and digits, like "100 ألف", starts with an RLM to keep its reading order
+    function chartText(rtl, text) {
+        return (rtl ? "\u200F" : "") + text;
+    }
+
+    function categoryAxis(colors, data, rtl, label) {
+        return {
+            type: "category",
+            data: data,
+            inverse: rtl,
+            axisTick: { show: false },
+            axisLine: { lineStyle: { color: colors.grid } },
+            axisLabel: Object.assign({ color: colors.axis, fontSize: 12, hideOverlap: true }, label),
+        };
+    }
+
+    function countAxis(colors, rtl) {
+        return {
+            type: "value",
+            minInterval: 1,
+            position: rtl ? "right" : "left",
+            splitLine: { lineStyle: { color: colors.grid } },
+            axisLabel: { color: colors.axis, fontSize: 12 },
+        };
+    }
+
+    // all-time commits per calendar year, with each year's total above its column
+    function teamYearsChart(element, groups, weeks, labels, count) {
+        var first = weeks.filter(function (start) {
+            return groups.some(function (group) {
+                return teamCommits(group, start) > 0;
+            });
+        })[0];
+
+        if (!first) {
+            chartNotice(element, labels.kjLabelError);
+            return;
+        }
+
+        var firstYear = new Date(first * 1000).getUTCFullYear();
+        var years = [];
+
+        for (var year = firstYear; year <= new Date(weeks[weeks.length - 1] * 1000).getUTCFullYear(); year++) {
+            years.push(String(year));
+        }
+
+        var values = groups.map(function (group) {
+            var perYear = years.map(function () {
+                return 0;
+            });
+
+            weeks.forEach(function (start) {
+                var index = new Date(start * 1000).getUTCFullYear() - firstYear;
+
+                if (index >= 0) {
+                    perYear[index] += teamCommits(group, start);
+                }
+            });
+
+            return perYear;
+        });
+        var totals = years.map(function (year, index) {
+            return values.reduce(function (sum, perYear) {
+                return sum + perYear[index];
+            }, 0);
+        });
+
+        chartReady(element);
+        mountChart(element, function (colors, rtl) {
+            return {
+                grid: { left: 8, right: 8, top: 24, bottom: 4, containLabel: true },
+                tooltip: chartTooltip(colors, {
+                    trigger: "axis",
+                    axisPointer: { type: "shadow", shadowStyle: { color: colors.pointer } },
+                    formatter: stackTooltip(
+                        function (index) {
+                            return years[index];
+                        },
+                        labels.kjLabelTotal,
+                        count,
+                    ),
+                }),
+                xAxis: categoryAxis(colors, years, rtl),
+                yAxis: countAxis(colors, rtl),
+                series: stackedColumns(groups, values, colors, true).concat({
+                    // the totals ride on an invisible point at the top of each column
+                    name: labels.kjLabelTotal,
+                    type: "scatter",
+                    data: totals,
+                    symbolSize: 0,
+                    silent: true,
+                    label: {
+                        show: true,
+                        position: "top",
+                        color: colors.axis,
+                        fontSize: 12,
+                        fontWeight: 600,
+                        formatter: function (param) {
+                            return param.value ? count(param.value) : "";
+                        },
+                    },
+                }),
+            };
+        });
+    }
+
+    // the last 52 weeks; a month's name marks the first week that starts in it
+    function teamWeeksChart(element, groups, weeks, labels, count) {
+        var recent = weeks.slice(-52);
+        var month = dateFormat({ month: "short" });
+        var monthYear = dateFormat({ month: "short", year: "numeric" });
+        var day = dateFormat({ day: "numeric", month: "short", year: "numeric" });
+        var monthOf = function (index) {
+            return new Date(recent[index] * 1000).getUTCMonth();
+        };
+        var values = groups.map(function (group) {
+            return recent.map(function (start) {
+                return teamCommits(group, start);
+            });
+        });
+
+        chartReady(element);
+        mountChart(element, function (colors, rtl) {
+            return {
+                grid: { left: 8, right: 8, top: 12, bottom: 4, containLabel: true },
+                tooltip: chartTooltip(colors, {
+                    trigger: "axis",
+                    axisPointer: { type: "shadow", shadowStyle: { color: colors.pointer } },
+                    formatter: stackTooltip(
+                        function (index) {
+                            return String(labels.kjLabelWeek).replace("%s", day(recent[index]));
+                        },
+                        labels.kjLabelTotal,
+                        count,
+                    ),
+                }),
+                xAxis: categoryAxis(colors, recent.map(String), rtl, {
+                    interval: function (index) {
+                        return index > 0 && monthOf(index) !== monthOf(index - 1);
+                    },
+                    formatter: function (value, index) {
+                        return chartText(rtl, monthOf(index) === 0 ? monthYear(+value) : month(+value));
+                    },
+                }),
+                yAxis: countAxis(colors, rtl),
+                // on a phone a week is a few pixels wide, too thin to give two of them to the gap
+                series: stackedColumns(groups, values, colors, element.clientWidth / recent.length >= 12),
+            };
+        });
+    }
+
+    // lines added grow toward the end of the line, lines removed toward its start, both from
+    // zero; both wear the contributor's colour and the removed side is striped, as a lighter
+    // tint could pass for another contributor's colour
+    function teamLinesChart(element, groups, labels, count) {
+        var compact = numberFormat({ notation: "compact", maximumFractionDigits: 1 });
+        var encode = window.echarts.format.encodeHTML;
+        var sums = groups.map(function (group) {
+            var sum = { a: 0, d: 0 };
+
+            Object.keys(group.weeks).forEach(function (start) {
+                sum.a += group.weeks[start].a;
+                sum.d += group.weeks[start].d;
+            });
+
+            return sum;
+        });
+
+        chartReady(element);
+        mountChart(element, function (colors, rtl) {
+            var outer = rtl ? [4, 0, 0, 4] : [0, 4, 4, 0];
+            var inner = rtl ? [0, 4, 4, 0] : [4, 0, 0, 4];
+            // names the two halves above the plot
+            var side = function (text, edge) {
+                var item = {
+                    type: "text",
+                    top: 0,
+                    style: { text: text, fill: colors.axis, fontSize: 12, fontWeight: 600 },
+                };
+
+                item[edge] = 8;
+
+                return item;
+            };
+            var bars = function (name, key, sign, radius, striped) {
+                return {
+                    name: name,
+                    type: "bar",
+                    stack: "lines",
+                    barMaxWidth: 22,
+                    data: groups.map(function (group, index) {
+                        var style = { color: colors.team[group.slot], borderRadius: radius };
+
+                        if (striped) {
+                            style.decal = {
+                                symbol: "rect",
+                                dashArrayX: [1, 0],
+                                dashArrayY: [2, 3],
+                                rotation: -Math.PI / 4,
+                                color: colors.stripe,
+                            };
+                        }
+
+                        return { value: sign * sums[index][key], itemStyle: style };
+                    }),
+                };
+            };
+
+            // the side padding leaves room for half of the outermost axis labels
+            return {
+                grid: { left: 20, right: 20, top: 28, bottom: 4, containLabel: true },
+                graphic: [
+                    side(rtl ? labels.kjLabelAdded : labels.kjLabelRemoved, "left"),
+                    side(rtl ? labels.kjLabelRemoved : labels.kjLabelAdded, "right"),
+                ],
+                tooltip: chartTooltip(colors, {
+                    trigger: "axis",
+                    axisPointer: { type: "shadow", shadowStyle: { color: colors.pointer } },
+                    formatter: function (params) {
+                        var index = params[0].dataIndex;
+
+                        return (
+                            '<div class="kj-tip-title"><bdi>' +
+                            encode(groups[index].name) +
+                            "</bdi></div>" +
+                            '<div class="kj-tip-row"><span>' +
+                            encode(labels.kjLabelAdded) +
+                            "</span><b>" +
+                            count(sums[index].a) +
+                            "</b></div>" +
+                            '<div class="kj-tip-row"><span>' +
+                            encode(labels.kjLabelRemoved) +
+                            "</span><b>" +
+                            count(sums[index].d) +
+                            "</b></div>"
+                        );
+                    },
+                }),
+                xAxis: {
+                    type: "value",
+                    inverse: rtl,
+                    splitLine: { lineStyle: { color: colors.grid } },
+                    axisLabel: {
+                        color: colors.axis,
+                        fontSize: 12,
+                        hideOverlap: true,
+                        formatter: function (value) {
+                            return chartText(rtl, compact(Math.abs(value)));
+                        },
+                    },
+                },
+                yAxis: {
+                    type: "category",
+                    data: groups.map(function (group) {
+                        return group.name;
+                    }),
+                    inverse: true,
+                    position: rtl ? "right" : "left",
+                    axisTick: { show: false },
+                    axisLine: { show: false },
+                    axisLabel: { color: colors.text, fontSize: 12 },
+                },
+                series: [
+                    bars(labels.kjLabelAdded, "a", 1, outer, false),
+                    bars(labels.kjLabelRemoved, "d", -1, inner, true),
+                ],
+            };
+        });
+    }
+
+    // GitHub's punch card: [day 0-6 from Sunday, hour 0-23, commits], in each commit's own time
+    // zone; an hour without commits keeps a quiet empty cell
+    function teamHoursChart(element, rows, labels, count) {
+        var cells = (Array.isArray(rows) ? rows : [])
+            .filter(function (row) {
+                return Array.isArray(row) && row[0] >= 0 && row[0] < 7 && row[1] >= 0 && row[1] < 24;
+            })
+            .map(function (row) {
+                return [+row[1], +row[0], Math.max(0, parseInt(row[2], 10) || 0)];
+            });
+        var most = cells.reduce(function (max, cell) {
+            return Math.max(max, cell[2]);
+        }, 0);
+
+        if (!most) {
+            chartNotice(element, labels.kjLabelError);
+            return;
+        }
+
+        var encode = window.echarts.format.encodeHTML;
+        var sunday = Date.UTC(2023, 0, 1) / 1000;
+        var dayName = dateFormat({ weekday: "short" });
+        var dayLong = dateFormat({ weekday: "long" });
+        var days = [0, 1, 2, 3, 4, 5, 6].map(function (day) {
+            return dayName(sunday + day * 86400);
+        });
+        var hours = [];
+
+        for (var hour = 0; hour < 24; hour++) {
+            hours.push((hour < 10 ? "0" : "") + hour + ":00");
+        }
+
+        chartReady(element);
+        mountChart(element, function (colors, rtl) {
+            var heat = function (data, color) {
+                var style = { borderColor: colors.surface, borderWidth: 2, borderRadius: 4 };
+
+                if (color) {
+                    style.color = color;
+                }
+
+                return {
+                    name: labels.kjLabelCommits,
+                    type: "heatmap",
+                    data: data,
+                    itemStyle: style,
+                    emphasis: { itemStyle: { borderColor: colors.text, borderWidth: 1 } },
+                };
+            };
+
+            return {
+                grid: { left: 8, right: 8, top: 4, bottom: 4, containLabel: true },
+                tooltip: chartTooltip(colors, {
+                    trigger: "item",
+                    formatter: function (param) {
+                        var cell = param.value;
+
+                        return (
+                            '<div class="kj-tip-title">' +
+                            encode(dayLong(sunday + cell[1] * 86400)) +
+                            ' · <span dir="ltr">' +
+                            hours[cell[0]] +
+                            "–" +
+                            hours[(cell[0] + 1) % 24] +
+                            "</span></div>" +
+                            '<div class="kj-tip-row"><span>' +
+                            encode(labels.kjLabelCommits) +
+                            "</span><b>" +
+                            count(cell[2]) +
+                            "</b></div>"
+                        );
+                    },
+                }),
+                xAxis: {
+                    type: "category",
+                    data: hours,
+                    inverse: rtl,
+                    axisTick: { show: false },
+                    axisLine: { show: false },
+                    axisLabel: {
+                        color: colors.axis,
+                        fontSize: 12,
+                        interval: 2,
+                        formatter: function (value) {
+                            return value.slice(0, 2);
+                        },
+                    },
+                },
+                yAxis: {
+                    type: "category",
+                    data: days,
+                    inverse: true,
+                    position: rtl ? "right" : "left",
+                    axisTick: { show: false },
+                    axisLine: { show: false },
+                    axisLabel: { color: colors.axis, fontSize: 12 },
+                },
+                // only the first series follows the scale; the hours without commits are a
+                // second one in the empty colour
+                visualMap: {
+                    show: false,
+                    type: "continuous",
+                    min: 1,
+                    max: Math.max(2, most),
+                    dimension: 2,
+                    seriesIndex: 0,
+                    inRange: { color: colors.heat },
+                },
+                series: [
+                    heat(
+                        cells.filter(function (cell) {
+                            return cell[2] > 0;
+                        }),
+                    ),
+                    heat(
+                        cells.filter(function (cell) {
+                            return !cell[2];
+                        }),
+                        colors.empty,
+                    ),
+                ],
+            };
+        });
+    }
+
+    // repository statistics from GitHub; ranking resolves to the logins in the order the
+    // contributors list shows them, so each person keeps one colour across the page
+    function initTeamActivity(ranking) {
+        var root = $("[data-kj-team-activity]");
+
+        if (!root) {
+            return;
+        }
+
+        var labels = root.dataset;
+        var charts = {};
+
+        $$("[data-kj-team-chart]", root).forEach(function (element) {
+            charts[element.dataset.kjTeamChart] = element;
+        });
+
+        var fail = function (names) {
+            return function () {
+                names.forEach(function (name) {
+                    if (charts[name]) {
+                        chartNotice(charts[name], labels.kjLabelError);
+                    }
+                });
+            };
+        };
+
+        if (!window.fetch || !window.echarts) {
+            fail(Object.keys(charts))();
+            root.setAttribute("aria-busy", "false");
+            return;
+        }
+
+        var count = numberFormat();
+        var commits = Promise.all([githubJSON(labels.kjTeamActivity + "contributors"), ranking])
+            .then(function (results) {
+                var groups = teamGroups(results[0], results[1] || [], labels.kjLabelOthers);
+
+                if (!groups.length) {
+                    throw new Error("GitHub");
+                }
+
+                var weeks = teamHistory(groups);
+
+                teamLegend(root, groups);
+                teamYearsChart(charts.years, groups, weeks, labels, count);
+                teamWeeksChart(charts.weeks, groups, weeks, labels, count);
+                teamLinesChart(charts.lines, groups, labels, count);
+            })
+            .catch(fail(["years", "weeks", "lines"]));
+        var hours = githubJSON(labels.kjTeamActivity + "punch_card")
+            .then(function (rows) {
+                teamHoursChart(charts.hours, rows, labels, count);
+            })
+            .catch(fail(["hours"]));
+
+        Promise.all([commits, hours]).then(function () {
+            root.setAttribute("aria-busy", "false");
+        });
     }
 
     /* --- Kleeja blog ------------------------------------------------------------------------ */
@@ -1451,7 +2164,7 @@
     initStartBoxes();
     initQuickLanguage();
     initStatsChart();
-    initTeam();
+    initTeamActivity(initTeam());
     initBlog();
     initImagePreview();
     initSearchOne();

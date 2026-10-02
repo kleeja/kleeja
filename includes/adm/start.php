@@ -406,3 +406,6 @@ if ($cf_num > 3) {
         $SQL->build($query_del);
     }
 }
+
+// ECharts draws the uploads chart on the dashboard and the commit charts on the team page
+$start_charts = $current_smt == 'team' || ($current_smt == 'general' && $stats_chart);

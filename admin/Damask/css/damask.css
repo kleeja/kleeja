@@ -1050,6 +1050,130 @@ h6 {
     background: var(--kj-navy-300);
 }
 
+/* the contributor slots of the team charts, matching chartColors() in damask.js */
+.kj-swatch-team-1 {
+    background: var(--kj-coral);
+}
+
+.kj-swatch-team-2 {
+    background: var(--kj-navy);
+}
+
+.kj-swatch-team-3 {
+    background: var(--kj-coral-800);
+}
+
+.kj-swatch-team-4 {
+    background: var(--kj-navy-400);
+}
+
+[data-bs-theme="dark"] .kj-swatch-team-2 {
+    background: #fff;
+}
+
+[data-bs-theme="dark"] .kj-swatch-team-3 {
+    background: var(--kj-coral-700);
+}
+
+[data-bs-theme="dark"] .kj-swatch-team-4 {
+    background: var(--kj-navy-300);
+}
+
+/* ECharts anchors its SVG labels for left-to-right text; under dir="rtl" every anchor flips and
+   the labels slide into the plot. Mixed Arabic and digit labels get an RLM from damask.js. */
+.kj-chart svg {
+    direction: ltr;
+}
+
+.kj-chart > .placeholder {
+    display: block;
+    width: 100%;
+    height: 100%;
+    border-radius: var(--bs-border-radius);
+}
+
+.kj-chart.is-heatmap {
+    height: 260px;
+}
+
+.kj-chart.is-empty {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: auto;
+    min-height: 8rem;
+}
+
+.kj-chart-note {
+    max-width: 28rem;
+    margin: 0;
+    color: var(--bs-secondary-color);
+    font-size: 0.875rem;
+    text-align: center;
+}
+
+.kj-card-hint {
+    margin: 0.125rem 0 0;
+    color: var(--bs-secondary-color);
+    font-size: 0.8125rem;
+    font-weight: 400;
+}
+
+/* the heatmap's scale, from few commits to the most */
+.kj-heat-legend {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--bs-secondary-color);
+    font-size: 0.8125rem;
+    font-weight: 500;
+}
+
+.kj-heat-legend i {
+    width: 4rem;
+    height: 0.625rem;
+    border-radius: 2px;
+    background: linear-gradient(to right, var(--kj-coral-300), var(--kj-coral), var(--kj-coral-800));
+}
+
+[dir="rtl"] .kj-heat-legend i {
+    background: linear-gradient(to left, var(--kj-coral-300), var(--kj-coral), var(--kj-coral-800));
+}
+
+[data-bs-theme="dark"] .kj-heat-legend i {
+    background: linear-gradient(to right, var(--kj-coral-700), var(--kj-coral), var(--kj-coral-200));
+}
+
+[dir="rtl"][data-bs-theme="dark"] .kj-heat-legend i {
+    background: linear-gradient(to left, var(--kj-coral-700), var(--kj-coral), var(--kj-coral-200));
+}
+
+/* chart tooltips built by damask.js */
+.kj-tip-title {
+    margin-bottom: 0.25rem;
+    font-weight: 600;
+}
+
+.kj-tip-row {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    min-width: 9rem;
+}
+
+.kj-tip-row b {
+    margin-inline-start: auto;
+    padding-inline-start: 1rem;
+    font-variant-numeric: tabular-nums;
+}
+
+.kj-tip-row.is-total {
+    margin-top: 0.25rem;
+    padding-top: 0.25rem;
+    border-top: 1px solid var(--bs-border-color);
+    color: var(--bs-secondary-color);
+}
+
 /* key / value rows */
 .kj-kv {
     display: flex;
