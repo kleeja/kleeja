@@ -11,12 +11,19 @@
     </div>
 </div>
 
-<nav class="nav nav-underline mb-4" aria-label="{lang.R_EXTRA}">
-    <a class="nav-link<IF NAME="current_smt == he"> active</IF>" href="./?cp=n_extra&amp;smt=he"<IF NAME="current_smt == he"> aria-current="page"</IF>>{lang.ADD_HEADER_EXTRA}</a>
-    <a class="nav-link<IF NAME="current_smt == fe"> active</IF>" href="./?cp=n_extra&amp;smt=fe"<IF NAME="current_smt == fe"> aria-current="page"</IF>>{lang.ADD_FOOTER_EXTRA}</a>
-</nav>
-
+<!-- the header and the footer are the tabs of the card that holds the form -->
 <form method="post" action="{action}" id="extra_form" class="card">
+    <div class="card-header">
+        <ul class="nav nav-tabs card-header-tabs">
+            <li class="nav-item">
+                <a class="nav-link<IF NAME="current_smt == he"> active</IF>" href="./?cp=n_extra&amp;smt=he"<IF NAME="current_smt == he"> aria-current="page"</IF>>{lang.ADD_HEADER_EXTRA}</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link<IF NAME="current_smt == fe"> active</IF>" href="./?cp=n_extra&amp;smt=fe"<IF NAME="current_smt == fe"> aria-current="page"</IF>>{lang.ADD_FOOTER_EXTRA}</a>
+            </li>
+        </ul>
+    </div>
+
     <div class="card-body">
         <IF NAME="current_smt == he">
         <label class="form-label" for="ex_header">{lang.ADD_HEADER_EXTRA}</label>

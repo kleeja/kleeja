@@ -15,48 +15,59 @@
     </div>
 </div>
 
-<nav class="nav nav-underline mb-4" aria-label="{lang.R_STYLES}">
-    <a class="nav-link<IF NAME="case == local"> active</IF>" href="{action}&amp;case=local"<IF NAME="case == local"> aria-current="page"</IF>>{lang.R_STYLES}</a>
-    <a class="nav-link<IF NAME="case == store"> active</IF>" href="{action}&amp;case=store"<IF NAME="case == store"> aria-current="page"</IF>>{lang.KLEEJA_STORE}</a>
-    <a class="nav-link<IF NAME="case == check"> active</IF>" href="{action}&amp;case=check"<IF NAME="case == check"> aria-current="page"</IF>>{lang.R_CHECK_UPDATE}</a>
-</nav>
-
-<IF NAME="case == local">
-
-<div class="row row-cols-1 row-cols-md-2 row-cols-xxl-3 g-3">
-    <LOOP NAME="available_styles">
-    <div class="col">
-        <article class="card h-100 overflow-hidden<IF LOOP="is_default"> border-primary</IF>">
-            <img class="card-img-top kj-style-preview" src="{{icon}}" alt="{{info.name}}" loading="lazy" onerror="this.onerror=null;this.src='{STYLE_PATH_ADMIN}images/image-not-found.png';">
-            <div class="card-body">
-                <div class="d-flex flex-wrap align-items-center gap-2 mb-2">
-                    <h2 class="h6 fw-semibold mb-0">{{info.name}}</h2>
-                    <span class="kj-badge is-neutral" dir="ltr">{{info.version}}</span>
-                </div>
-                <p class="kj-desc mb-2">{{info.desc}}</p>
-                <div class="small text-body-secondary">{{info.copyright}}</div>
-            </div>
-            <div class="card-footer d-flex flex-wrap align-items-center gap-2">
-                <IF LOOP="is_default">
-                <span class="kj-badge"><i class="fa-solid fa-circle-check" aria-hidden="true"></i> {lang.STYLE_IS_DEFAULT}</span>
-                <ELSE>
-                <a href="{style_select_link}{{name}}" class="btn btn-sm btn-outline-primary">
-                    <i class="fa-solid fa-check" aria-hidden="true"></i><span>{lang.MAKE_AS_DEFAULT}</span>
-                </a>
-                <a href="{style_delete_link}{{name}}" class="btn btn-sm btn-outline-danger ms-auto" data-kj-confirm title="{lang.DELETE}">
-                    <i class="fa-solid fa-trash-can" aria-hidden="true"></i><span class="visually-hidden">{lang.DELETE}</span>
-                </a>
-                </IF>
-            </div>
-        </article>
+<!-- the sections of the page are the tabs of the card that holds them -->
+<div class="card">
+    <div class="card-header">
+        <ul class="nav nav-tabs card-header-tabs">
+            <li class="nav-item">
+                <a class="nav-link<IF NAME="case == local"> active</IF>" href="{action}&amp;case=local"<IF NAME="case == local"> aria-current="page"</IF>>{lang.R_STYLES}</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link<IF NAME="case == store"> active</IF>" href="{action}&amp;case=store"<IF NAME="case == store"> aria-current="page"</IF>>{lang.KLEEJA_STORE}</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link<IF NAME="case == check"> active</IF>" href="{action}&amp;case=check"<IF NAME="case == check"> aria-current="page"</IF>>{lang.R_CHECK_UPDATE}</a>
+            </li>
+        </ul>
     </div>
-    </LOOP>
-</div>
 
-<ELSEIF NAME="case == store" OR="case == check">
+    <IF NAME="case == local">
 
-    <UNLESS NAME="store_styles_count">
-    <div class="card">
+        <div class="card-body">
+            <div class="row row-cols-1 row-cols-md-2 row-cols-xxl-3 g-3">
+                <LOOP NAME="available_styles">
+                <div class="col">
+                    <article class="card h-100 overflow-hidden<IF LOOP="is_default"> border-primary</IF>">
+                        <img class="card-img-top kj-style-preview" src="{{icon}}" alt="{{info.name}}" loading="lazy" onerror="this.onerror=null;this.src='{STYLE_PATH_ADMIN}images/image-not-found.png';">
+                        <div class="card-body">
+                            <div class="d-flex flex-wrap align-items-center gap-2 mb-2">
+                                <h2 class="h6 fw-semibold mb-0">{{info.name}}</h2>
+                                <span class="kj-badge is-neutral" dir="ltr">{{info.version}}</span>
+                            </div>
+                            <p class="kj-desc mb-2">{{info.desc}}</p>
+                            <div class="small text-body-secondary">{{info.copyright}}</div>
+                        </div>
+                        <div class="card-footer d-flex flex-wrap align-items-center gap-2">
+                            <IF LOOP="is_default">
+                            <span class="kj-badge"><i class="fa-solid fa-circle-check" aria-hidden="true"></i> {lang.STYLE_IS_DEFAULT}</span>
+                            <ELSE>
+                            <a href="{style_select_link}{{name}}" class="btn btn-sm btn-outline-primary">
+                                <i class="fa-solid fa-check" aria-hidden="true"></i><span>{lang.MAKE_AS_DEFAULT}</span>
+                            </a>
+                            <a href="{style_delete_link}{{name}}" class="btn btn-sm btn-outline-danger ms-auto" data-kj-confirm title="{lang.DELETE}">
+                                <i class="fa-solid fa-trash-can" aria-hidden="true"></i><span class="visually-hidden">{lang.DELETE}</span>
+                            </a>
+                            </IF>
+                        </div>
+                    </article>
+                </div>
+                </LOOP>
+            </div>
+        </div>
+
+    <ELSEIF NAME="case == store" OR="case == check">
+
+        <UNLESS NAME="store_styles_count">
         <div class="card-body text-center py-5">
             <IF NAME="case == check">
             <span class="kj-icon-tile is-lg is-success mb-3"><i class="fa-solid fa-circle-check" aria-hidden="true"></i></span>
@@ -66,19 +77,17 @@
             <p class="text-body-secondary mb-0">{lang.NO_STYLES}</p>
             </IF>
         </div>
-    </div>
-    </UNLESS>
+        </UNLESS>
 
-    <IF NAME="store_styles_count gt 1" AND="case == check">
-    <div class="d-flex justify-content-end mb-3">
-        <button type="button" class="btn btn-primary btn-sm" data-kj-download-all>
-            <i class="fa-solid fa-bolt" aria-hidden="true"></i><span>{lang.UPDATE_ALL}</span>
-        </button>
-    </div>
-    </IF>
+        <IF NAME="store_styles_count gt 1" AND="case == check">
+        <div class="card-body d-flex justify-content-end py-2 border-bottom">
+            <button type="button" class="btn btn-primary btn-sm" data-kj-download-all>
+                <i class="fa-solid fa-bolt" aria-hidden="true"></i><span>{lang.UPDATE_ALL}</span>
+            </button>
+        </div>
+        </IF>
 
-    <IF NAME="store_styles_count">
-    <div class="card">
+        <IF NAME="store_styles_count">
         <ul class="list-group list-group-flush">
             <LOOP NAME="store_styles">
             <li class="list-group-item py-3">
@@ -104,8 +113,14 @@
             </li>
             </LOOP>
         </ul>
-    </div>
+        </IF>
 
+    </IF>
+</div>
+
+<!-- the details of each store style, outside the card so the list stays its last child -->
+<IF NAME="case == store" OR="case == check">
+    <IF NAME="store_styles_count">
     <LOOP NAME="store_styles">
     <div class="modal fade" id="Modal_{{name}}" tabindex="-1" aria-labelledby="Style_View_{{name}}" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
@@ -134,7 +149,6 @@
     </div>
     </LOOP>
     </IF>
-
 </IF>
 
 <!-- upload a style package -->
