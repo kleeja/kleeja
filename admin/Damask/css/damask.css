@@ -1092,10 +1092,6 @@ h6 {
     border-radius: var(--bs-border-radius);
 }
 
-.kj-chart.is-heatmap {
-    height: 260px;
-}
-
 .kj-chart.is-empty {
     display: flex;
     align-items: center;
@@ -1110,42 +1106,6 @@ h6 {
     color: var(--bs-secondary-color);
     font-size: 0.875rem;
     text-align: center;
-}
-
-.kj-card-hint {
-    margin: 0.125rem 0 0;
-    color: var(--bs-secondary-color);
-    font-size: 0.8125rem;
-    font-weight: 400;
-}
-
-/* the heatmap's scale, from few commits to the most */
-.kj-heat-legend {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
-    color: var(--bs-secondary-color);
-    font-size: 0.8125rem;
-    font-weight: 500;
-}
-
-.kj-heat-legend i {
-    width: 4rem;
-    height: 0.625rem;
-    border-radius: 2px;
-    background: linear-gradient(to right, var(--kj-coral-300), var(--kj-coral), var(--kj-coral-800));
-}
-
-[dir="rtl"] .kj-heat-legend i {
-    background: linear-gradient(to left, var(--kj-coral-300), var(--kj-coral), var(--kj-coral-800));
-}
-
-[data-bs-theme="dark"] .kj-heat-legend i {
-    background: linear-gradient(to right, var(--kj-coral-700), var(--kj-coral), var(--kj-coral-200));
-}
-
-[dir="rtl"][data-bs-theme="dark"] .kj-heat-legend i {
-    background: linear-gradient(to left, var(--kj-coral-700), var(--kj-coral), var(--kj-coral-200));
 }
 
 /* chart tooltips built by damask.js */

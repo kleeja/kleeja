@@ -558,7 +558,6 @@
     // brand chart palette (kleeja.net/branding): coral first, then navy, lighter navy on dark surfaces.
     // team: the four contributor slots, the last one for everyone else; any two of them can meet
     // in a stacked column, so every pair stays apart for colour-blind readers too.
-    // heat: commits from a few to the most.
     function chartColors() {
         var dark = document.documentElement.getAttribute("data-bs-theme") === "dark";
 
@@ -566,8 +565,6 @@
             ? {
                   series: ["#F45B69", "#BBC0C8"],
                   team: ["#F45B69", "#FFFFFF", "#A63E47", "#BBC0C8"],
-                  heat: ["#A63E47", "#F45B69", "#FCD4D8"],
-                  empty: "#3C4C61",
                   stripe: "rgba(35, 53, 78, 0.6)",
                   grid: "#3C4C61",
                   axis: "#BBC0C8",
@@ -579,8 +576,6 @@
             : {
                   series: ["#F45B69", "#0B1F3A"],
                   team: ["#F45B69", "#0B1F3A", "#7F2F37", "#949CA8"],
-                  heat: ["#FAB7BD", "#F45B69", "#7F2F37"],
-                  empty: "#EDEEF0",
                   stripe: "rgba(255, 255, 255, 0.6)",
                   grid: "#EDEEF0",
                   axis: "#546275",
@@ -989,7 +984,7 @@
         var card = element.closest(".card");
 
         if (card) {
-            $$(".kj-chart-legend, .kj-heat-legend", card).forEach(function (legend) {
+            $$(".kj-chart-legend", card).forEach(function (legend) {
                 legend.classList.add("d-none");
             });
         }
@@ -1356,131 +1351,6 @@
         });
     }
 
-    // GitHub's punch card: [day 0-6 from Sunday, hour 0-23, commits], in each commit's own time
-    // zone; an hour without commits keeps a quiet empty cell
-    function teamHoursChart(element, rows, labels, count) {
-        var cells = (Array.isArray(rows) ? rows : [])
-            .filter(function (row) {
-                return Array.isArray(row) && row[0] >= 0 && row[0] < 7 && row[1] >= 0 && row[1] < 24;
-            })
-            .map(function (row) {
-                return [+row[1], +row[0], Math.max(0, parseInt(row[2], 10) || 0)];
-            });
-        var most = cells.reduce(function (max, cell) {
-            return Math.max(max, cell[2]);
-        }, 0);
-
-        if (!most) {
-            chartNotice(element, labels.kjLabelError);
-            return;
-        }
-
-        var encode = window.echarts.format.encodeHTML;
-        var sunday = Date.UTC(2023, 0, 1) / 1000;
-        var dayName = dateFormat({ weekday: "short" });
-        var dayLong = dateFormat({ weekday: "long" });
-        var days = [0, 1, 2, 3, 4, 5, 6].map(function (day) {
-            return dayName(sunday + day * 86400);
-        });
-        var hours = [];
-
-        for (var hour = 0; hour < 24; hour++) {
-            hours.push((hour < 10 ? "0" : "") + hour + ":00");
-        }
-
-        chartReady(element);
-        mountChart(element, function (colors, rtl) {
-            var heat = function (data, color) {
-                var style = { borderColor: colors.surface, borderWidth: 2, borderRadius: 4 };
-
-                if (color) {
-                    style.color = color;
-                }
-
-                return {
-                    name: labels.kjLabelCommits,
-                    type: "heatmap",
-                    data: data,
-                    itemStyle: style,
-                    emphasis: { itemStyle: { borderColor: colors.text, borderWidth: 1 } },
-                };
-            };
-
-            return {
-                grid: { left: 8, right: 8, top: 4, bottom: 4, containLabel: true },
-                tooltip: chartTooltip(colors, {
-                    trigger: "item",
-                    formatter: function (param) {
-                        var cell = param.value;
-
-                        return (
-                            '<div class="kj-tip-title">' +
-                            encode(dayLong(sunday + cell[1] * 86400)) +
-                            ' · <span dir="ltr">' +
-                            hours[cell[0]] +
-                            "–" +
-                            hours[(cell[0] + 1) % 24] +
-                            "</span></div>" +
-                            '<div class="kj-tip-row"><span>' +
-                            encode(labels.kjLabelCommits) +
-                            "</span><b>" +
-                            count(cell[2]) +
-                            "</b></div>"
-                        );
-                    },
-                }),
-                xAxis: {
-                    type: "category",
-                    data: hours,
-                    inverse: rtl,
-                    axisTick: { show: false },
-                    axisLine: { show: false },
-                    axisLabel: {
-                        color: colors.axis,
-                        fontSize: 12,
-                        interval: 2,
-                        formatter: function (value) {
-                            return value.slice(0, 2);
-                        },
-                    },
-                },
-                yAxis: {
-                    type: "category",
-                    data: days,
-                    inverse: true,
-                    position: rtl ? "right" : "left",
-                    axisTick: { show: false },
-                    axisLine: { show: false },
-                    axisLabel: { color: colors.axis, fontSize: 12 },
-                },
-                // only the first series follows the scale; the hours without commits are a
-                // second one in the empty colour
-                visualMap: {
-                    show: false,
-                    type: "continuous",
-                    min: 1,
-                    max: Math.max(2, most),
-                    dimension: 2,
-                    seriesIndex: 0,
-                    inRange: { color: colors.heat },
-                },
-                series: [
-                    heat(
-                        cells.filter(function (cell) {
-                            return cell[2] > 0;
-                        }),
-                    ),
-                    heat(
-                        cells.filter(function (cell) {
-                            return !cell[2];
-                        }),
-                        colors.empty,
-                    ),
-                ],
-            };
-        });
-    }
-
     // repository statistics from GitHub; ranking resolves to the logins in the order the
     // contributors list shows them, so each person keeps one colour across the page
     function initTeamActivity(ranking) {
@@ -1514,7 +1384,8 @@
         }
 
         var count = numberFormat();
-        var commits = Promise.all([githubJSON(labels.kjTeamActivity + "contributors"), ranking])
+
+        Promise.all([githubJSON(labels.kjTeamActivity + "contributors"), ranking])
             .then(function (results) {
                 var groups = teamGroups(results[0], results[1] || [], labels.kjLabelOthers);
 
@@ -1529,16 +1400,10 @@
                 teamWeeksChart(charts.weeks, groups, weeks, labels, count);
                 teamLinesChart(charts.lines, groups, labels, count);
             })
-            .catch(fail(["years", "weeks", "lines"]));
-        var hours = githubJSON(labels.kjTeamActivity + "punch_card")
-            .then(function (rows) {
-                teamHoursChart(charts.hours, rows, labels, count);
-            })
-            .catch(fail(["hours"]));
-
-        Promise.all([commits, hours]).then(function () {
-            root.setAttribute("aria-busy", "false");
-        });
+            .catch(fail(["years", "weeks", "lines"]))
+            .then(function () {
+                root.setAttribute("aria-busy", "false");
+            });
     }
 
     /* --- Kleeja blog ------------------------------------------------------------------------ */
