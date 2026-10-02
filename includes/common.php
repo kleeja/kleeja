@@ -47,7 +47,7 @@ define('ADM_FILES_PATH', PATH . 'includes/adm');
 error_reporting(defined('DEV_STAGE') ? E_ALL : E_ALL ^ E_NOTICE);
 if (defined('DEV_STAGE')) {
     ini_set('display_errors', 1);
-    include PATH . 'includes/dev_tools.php';
+    include_once PATH . 'includes/dev_tools.php';
 }
 
 //the error handler, it shows the Kleeja error page
@@ -55,7 +55,7 @@ require_once PATH . 'includes/functions_error.php';
 
 set_error_handler('kleeja_show_error');
 
-include PATH . 'includes/version.php';
+require_once PATH . 'includes/version.php';
 
 //the error handler is called directly, E_USER_ERROR is deprecated for trigger_error() since PHP 8.4
 if (version_compare(PHP_VERSION, MIN_PHP_VERSION, '<')) {
@@ -133,21 +133,21 @@ if ((empty($dbname) || empty($dbuser)) && $dbtype !== 'sqlite') {
 define('K_FILE_CHMOD', defined('HAS_SUEXEC') ? 0644 & ~umask() : 0644);
 define('K_DIR_CHMOD', defined('HAS_SUEXEC') ? 0755 & ~umask() : 0755);
 
-include PATH . 'includes/functions_alternative.php';
+require_once PATH . 'includes/functions_alternative.php';
 
-include_once PATH . 'includes/pdo.php';
+require_once PATH . 'includes/pdo.php';
 
-include PATH . 'includes/style.php';
-include PATH . 'includes/usr.php';
-include PATH . 'includes/pager.php';
-include PATH . 'includes/functions.php';
-include PATH . 'includes/functions_display.php';
-include PATH . 'includes/plugins.php';
-include PATH . 'includes/FetchFile.php';
-include PATH . 'includes/cookie.php';
+require_once PATH . 'includes/style.php';
+require_once PATH . 'includes/usr.php';
+require_once PATH . 'includes/pager.php';
+require_once PATH . 'includes/functions.php';
+require_once PATH . 'includes/functions_display.php';
+require_once PATH . 'includes/plugins.php';
+require_once PATH . 'includes/FetchFile.php';
+require_once PATH . 'includes/cookie.php';
 
 if (defined('IN_ADMIN')) {
-    include PATH . 'includes/functions_adm.php';
+    require_once PATH . 'includes/functions_adm.php';
 }
 
 //fix integration problems
@@ -164,7 +164,7 @@ $tpl = new kleeja_style();
 $usrcp = new usrcp();
 
 //then get caches
-include PATH . 'includes/cache.php';
+require_once PATH . 'includes/cache.php';
 
 //getting dynamic configs
 $query = [
