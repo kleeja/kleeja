@@ -1663,6 +1663,14 @@
             tile.appendChild(icon("fa-solid " + iconClass));
         }
 
+        // the plugins and styles may have versions for this Kleeja, so the note is shown once Kleeja
+        // is up to date: on the latest or a prerelease version, or after an upgrade that passed
+        function showNext() {
+            if (next) {
+                next.classList.remove("d-none");
+            }
+        }
+
         fetchJSON("./?cp=p_check_update&smt=check&_ajax_=1")
             .then(function (data) {
                 var parts = splitOnce(data.content, ":::");
@@ -1680,6 +1688,7 @@
                 } else if (code === "0") {
                     setTile("success", "fa-circle-check");
                     title.innerHTML = parts[1];
+                    showNext();
                 } else {
                     setTile("warning", "fa-triangle-exclamation");
                     title.innerHTML = parts[1];
@@ -1698,11 +1707,9 @@
         function runStep(step) {
             var item = $('[data-kj-step="' + step + '"]', steps);
 
-            // every step passed, now the plugins and styles may have versions for the new Kleeja
+            // every step passed
             if (!item) {
-                if (next) {
-                    next.classList.remove("d-none");
-                }
+                showNext();
 
                 return;
             }
