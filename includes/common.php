@@ -187,6 +187,25 @@ $usrcp->kleeja_check_user();
 //+ configs of the current group
 $config = array_merge($config, (array) $d_groups[$usrcp->group_id()]['configs']);
 
+//Kleeja was installed on http:// and HTTPS was enabled later, so move the site link to https://
+//only $_SERVER['HTTPS'] is trusted, it comes from the web server, X-Forwarded-Proto can be sent by any client
+if (
+    !empty($_SERVER['HTTPS']) &&
+    strtolower($_SERVER['HTTPS']) !== 'off' &&
+    stripos($config['siteurl'], 'http://') === 0
+) {
+    $site_link = parse_url($config['siteurl']);
+    $site_host = strtolower(($site_link['host'] ?? '') . (isset($site_link['port']) ? ':' . $site_link['port'] : ''));
+
+    //the same host and port only, another domain or port of the server may not have a certificate
+    if ($site_host !== '' && $site_host === strtolower($_SERVER['HTTP_HOST'] ?? '')) {
+        $config['siteurl'] = 'https://' . substr($config['siteurl'], 7);
+        update_config('siteurl', $config['siteurl'], false);
+    }
+
+    unset($site_link, $site_host);
+}
+
 //admin path
 define('ADMIN_PATH', rtrim($config['siteurl'], '/') . '/admin/index.php');
 
