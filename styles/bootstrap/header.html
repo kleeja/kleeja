@@ -94,7 +94,7 @@
                                 <IF LOOP="name==logout"><li><hr class="dropdown-divider"></li></IF>
                                 <li>
                                     <a href="{{url}}" class="dropdown-item d-flex align-items-center(go_current=={{name}}? active:)">
-                                        <IF LOOP="name==profile"><i class="fa-solid fa-user-gear fa-fw me-2 opacity-50"></i><ELSEIF LOOP="name==fileuser"><i class="fa-solid fa-folder-open fa-fw me-2 opacity-50"></i><ELSEIF LOOP="name==logout"><i class="fa-solid fa-right-from-bracket fa-fw me-2 opacity-50"></i></IF>{{title}}
+                                        <i class="fa-solid fa-{{icon}} fa-fw me-2 opacity-50" aria-hidden="true"></i>{{title}}
                                     </a>
                                 </li>
                                 </IF>

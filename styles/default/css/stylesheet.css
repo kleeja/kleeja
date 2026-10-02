@@ -473,8 +473,8 @@ bdi {
     padding: 6px 6px 6px 12px;
 }
 
-/* the white icons of the old menu, on a darker badge */
-.side-menu a img {
+/* white Font Awesome icons on a darker badge, the core and the plugins give their names */
+.side-menu .side-icon {
     flex: none;
     box-sizing: content-box;
     width: 16px;
@@ -483,6 +483,11 @@ bdi {
     background: rgba(31, 92, 130, 0.38);
     border-radius: var(--radius-sm);
     box-shadow: 0 1px 0 rgba(255, 255, 255, 0.35);
+    color: #ffffff;
+    font-size: 0.8125rem;
+    line-height: 16px;
+    text-align: center;
+    text-shadow: 0 1px 1px rgba(18, 52, 74, 0.35);
 }
 
 .side-menu a:hover,
@@ -494,10 +499,11 @@ bdi {
     text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.3);
 }
 
-.side-menu a:hover img,
-.side-menu a.current img {
+.side-menu a:hover .side-icon,
+.side-menu a.current .side-icon {
     background: rgba(255, 255, 255, 0.14);
     box-shadow: none;
+    text-shadow: none;
 }
 
 .sidebar-dots {

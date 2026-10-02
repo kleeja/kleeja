@@ -35,12 +35,14 @@ function Saaheader(string $title = '', string $extra = ''): void
             'name' => 'profile',
             'title' => $lang['PROFILE'],
             'url' => $config['siteurl'] . ($config['mod_writer'] ? 'profile.html' : 'ucp.php?go=profile'),
+            'icon' => 'user-gear',
             'show' => $user_is,
         ],
         2 => [
             'name' => 'fileuser',
             'title' => $lang['YOUR_FILEUSER'],
             'url' => $config['siteurl'] . ($config['mod_writer'] ? 'fileuser.html' : 'ucp.php?go=fileuser'),
+            'icon' => 'folder-open',
             'show' => $config['enable_userfile'] && user_can('access_fileuser'),
         ],
         3 => $user_is
@@ -48,18 +50,21 @@ function Saaheader(string $title = '', string $extra = ''): void
                 'name' => 'logout',
                 'title' => $lang['LOGOUT'],
                 'url' => $config['siteurl'] . ($config['mod_writer'] ? 'logout.html' : 'ucp.php?go=logout'),
+                'icon' => 'right-from-bracket',
                 'show' => true,
             ]
             : [
                 'name' => 'login',
                 'title' => $lang['LOGIN'],
                 'url' => $config['siteurl'] . ($config['mod_writer'] ? 'login.html' : 'ucp.php?go=login'),
+                'icon' => 'right-to-bracket',
                 'show' => true,
             ],
         4 => [
             'name' => 'register',
             'title' => $lang['REGISTER'],
             'url' => $config['siteurl'] . ($config['mod_writer'] ? 'register.html' : 'ucp.php?go=register'),
+            'icon' => 'user-plus',
             'show' => !$user_is && $config['register'],
         ],
     ];
@@ -102,6 +107,14 @@ function Saaheader(string $title = '', string $extra = ''): void
     $extras['header'] = empty($extras['header']) ? false : $extras['header'];
 
     extract(runHook('Saaheader_links_func', get_defined_vars()));
+
+    //the icon of a side menu item is a Font Awesome name without "fa-", like the admin menu,
+    //and the items that plugins add without one get the default icon
+    foreach ($side_menu as $key => $item) {
+        if (empty($item['icon'])) {
+            $side_menu[$key]['icon'] = 'puzzle-piece';
+        }
+    }
 
     //assign some variables
     $tpl->assign('dir', $lang['DIR']);
