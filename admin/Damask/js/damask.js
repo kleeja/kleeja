@@ -193,6 +193,13 @@
         });
     }
 
+    // a narrow screen scrolls the tabs of a card header, bring the active one into view
+    function initCardTabs() {
+        $$(".card-header-tabs .nav-link.active").forEach(function (tab) {
+            tab.scrollIntoView({ block: "nearest", inline: "center" });
+        });
+    }
+
     /* --- Colour mode switcher -------------------------------------------------------------- */
 
     function initColorMode() {
@@ -1435,6 +1442,7 @@
 
     upgradeLegacyDataApi();
     initBootstrapParts();
+    initCardTabs();
     initColorMode();
     initConfirm();
     initCounters();

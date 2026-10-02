@@ -1729,6 +1729,30 @@ input.form-control[type="checkbox"] {
     --bs-nav-tabs-link-active-bg: var(--bs-body-bg);
 }
 
+/* the tabs of a card header stay on one row, a narrow screen scrolls them sideways */
+.card-header-tabs {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    overflow-y: hidden;
+    scrollbar-width: none;
+    /* the row reaches over the line under it, so the active tab stays joined to the card body */
+    margin-bottom: calc(-1 * (var(--bs-card-cap-padding-y) + var(--bs-nav-tabs-border-width)));
+    padding-bottom: var(--bs-nav-tabs-border-width);
+}
+
+.card-header-tabs::-webkit-scrollbar {
+    display: none;
+}
+
+.card-header-tabs .nav-link {
+    white-space: nowrap;
+}
+
+/* the ring is drawn inside the tab, outside of it the scrolling row would cut it */
+.card-header-tabs .nav-link:focus-visible {
+    box-shadow: inset 0 0 0 0.2rem var(--bs-focus-ring-color);
+}
+
 .nav-pills {
     --bs-nav-pills-link-active-color: var(--kj-on-accent);
     --bs-nav-pills-link-active-bg: var(--kj-accent-bg);

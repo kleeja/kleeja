@@ -15,18 +15,29 @@
     </div>
 </div>
 
-<nav class="nav nav-underline mb-4" aria-label="{lang.R_PLUGINS}">
-    <a class="nav-link<IF NAME="case == installed"> active</IF>" href="{action}"<IF NAME="case == installed"> aria-current="page"</IF>>{lang.INSTALLED_PLUGINS}</a>
-    <a class="nav-link<IF NAME="case == local"> active</IF>" href="{action}&amp;case=local"<IF NAME="case == local"> aria-current="page"</IF>>{lang.LOCAL_PLUGINS}</a>
-    <a class="nav-link<IF NAME="case == store"> active</IF>" href="{action}&amp;case=store"<IF NAME="case == store"> aria-current="page"</IF>>{lang.KLEEJA_STORE}<IF NAME="case == store" AND="store_plugins_count"> <span class="badge rounded-pill bg-body-secondary text-body-emphasis ms-1">{store_plugins_count}</span></IF></a>
-    <a class="nav-link<IF NAME="case == check"> active</IF>" href="{action}&amp;case=check"<IF NAME="case == check"> aria-current="page"</IF>>{lang.R_CHECK_UPDATE}</a>
-</nav>
+<!-- the sections of the page are the tabs of the card that holds them -->
+<div class="card">
+    <div class="card-header">
+        <ul class="nav nav-tabs card-header-tabs">
+            <li class="nav-item">
+                <a class="nav-link<IF NAME="case == installed"> active</IF>" href="{action}"<IF NAME="case == installed"> aria-current="page"</IF>>{lang.INSTALLED_PLUGINS}</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link<IF NAME="case == local"> active</IF>" href="{action}&amp;case=local"<IF NAME="case == local"> aria-current="page"</IF>>{lang.LOCAL_PLUGINS}</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link<IF NAME="case == store"> active</IF>" href="{action}&amp;case=store"<IF NAME="case == store"> aria-current="page"</IF>>{lang.KLEEJA_STORE}<IF NAME="case == store" AND="store_plugins_count"> <span class="badge rounded-pill bg-body-secondary text-body-emphasis ms-1">{store_plugins_count}</span></IF></a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link<IF NAME="case == check"> active</IF>" href="{action}&amp;case=check"<IF NAME="case == check"> aria-current="page"</IF>>{lang.R_CHECK_UPDATE}</a>
+            </li>
+        </ul>
+    </div>
 
-<!-- installed plugins -->
-<IF NAME="case == installed">
+    <!-- installed plugins -->
+    <IF NAME="case == installed">
 
-    <IF NAME="no_installed_plugins">
-    <div class="card">
+        <IF NAME="no_installed_plugins">
         <div class="card-body text-center py-5">
             <span class="kj-icon-tile is-lg is-secondary mb-3"><i class="fa-solid fa-plug" aria-hidden="true"></i></span>
             <p class="text-body-secondary">{lang.NO_PLUGINS}</p>
@@ -34,65 +45,65 @@
                 <i class="fa-solid fa-store" aria-hidden="true"></i><span>{lang.KLEEJA_STORE}</span>
             </a>
         </div>
-    </div>
-    </IF>
+        </IF>
 
-    <IF NAME="installed_plugins">
-    <div class="row row-cols-1 row-cols-md-2 row-cols-xxl-3 g-3">
-        <LOOP NAME="installed_plugins">
-        <div class="col">
-            <article class="card h-100">
-                <div class="card-body">
-                    <div class="d-flex align-items-start gap-3 mb-3">
-                        <img class="kj-item-icon" src="{{icon}}" alt="" width="48" height="48" loading="lazy">
-                        <div class="flex-grow-1" style="min-width: 0">
+        <IF NAME="installed_plugins">
+        <div class="card-body">
+            <div class="row row-cols-1 row-cols-md-2 row-cols-xxl-3 g-3">
+                <LOOP NAME="installed_plugins">
+                <div class="col">
+                    <article class="card h-100">
+                        <div class="card-body">
+                            <div class="d-flex align-items-start gap-3 mb-3">
+                                <img class="kj-item-icon" src="{{icon}}" alt="" width="48" height="48" loading="lazy">
+                                <div class="flex-grow-1" style="min-width: 0">
+                                    <IF LOOP="plg_disabled">
+                                    <h2 class="h6 fw-semibold mb-1 text-truncate" dir="ltr" style="text-align: start">{{plg_name}}</h2>
+                                    <span class="kj-badge is-neutral"><i class="fa-solid fa-toggle-off" aria-hidden="true"></i> {lang.ADM_DISABLED}</span>
+                                    <ELSE>
+                                    <h2 class="h6 fw-semibold mb-1 text-truncate">{{extra_info.plugin_title}}</h2>
+                                    <span class="kj-badge is-success"><i class="fa-solid fa-circle-check" aria-hidden="true"></i> {lang.ADM_ENABLED}</span>
+                                    <span class="small text-body-secondary ms-1" dir="ltr">{{extra_info.plugin_version}}</span>
+                                    </IF>
+                                </div>
+                            </div>
                             <IF LOOP="plg_disabled">
-                            <h2 class="h6 fw-semibold mb-1 text-truncate" dir="ltr" style="text-align: start">{{plg_name}}</h2>
-                            <span class="kj-badge is-neutral"><i class="fa-solid fa-toggle-off" aria-hidden="true"></i> {lang.ADM_DISABLED}</span>
+                            <p class="kj-desc mb-0">{{plg_dsc}}</p>
                             <ELSE>
-                            <h2 class="h6 fw-semibold mb-1 text-truncate">{{extra_info.plugin_title}}</h2>
-                            <span class="kj-badge is-success"><i class="fa-solid fa-circle-check" aria-hidden="true"></i> {lang.ADM_ENABLED}</span>
-                            <span class="small text-body-secondary ms-1" dir="ltr">{{extra_info.plugin_version}}</span>
+                            <p class="kj-desc mb-2">{{extra_info.plugin_description}}</p>
+                            <div class="small text-body-secondary"><i class="fa-solid fa-user-pen" aria-hidden="true"></i> {{extra_info.plugin_developer}}</div>
                             </IF>
                         </div>
-                    </div>
-                    <IF LOOP="plg_disabled">
-                    <p class="kj-desc mb-0">{{plg_dsc}}</p>
-                    <ELSE>
-                    <p class="kj-desc mb-2">{{extra_info.plugin_description}}</p>
-                    <div class="small text-body-secondary"><i class="fa-solid fa-user-pen" aria-hidden="true"></i> {{extra_info.plugin_developer}}</div>
-                    </IF>
+                        <div class="card-footer d-flex flex-wrap gap-2">
+                            <IF LOOP="plg_disabled">
+                            <a class="btn btn-sm btn-outline-primary" href="{plugin_enable_link}{{plg_name}}">
+                                <i class="fa-solid fa-toggle-on" aria-hidden="true"></i><span>{lang.ENABLE}</span>
+                            </a>
+                            <ELSE>
+                            <IF LOOP="has_settings_page">
+                            <a class="btn btn-sm btn-outline-secondary" href="./?{{extra_info.settings_page}}">
+                                <i class="fa-solid fa-gear" aria-hidden="true"></i><span>{lang.R_CONFIGS}</span>
+                            </a>
+                            </IF>
+                            <a class="btn btn-sm btn-outline-secondary" href="{plugin_disable_link}{{plg_name}}">
+                                <i class="fa-solid fa-toggle-off" aria-hidden="true"></i><span>{lang.DISABLE}</span>
+                            </a>
+                            </IF>
+                            <a class="btn btn-sm btn-outline-danger ms-auto" href="{plugin_uninstall_link}{{plg_name}}" data-kj-confirm title="{lang.DELETE}">
+                                <i class="fa-solid fa-trash-can" aria-hidden="true"></i><span class="visually-hidden">{lang.DELETE}</span>
+                            </a>
+                        </div>
+                    </article>
                 </div>
-                <div class="card-footer d-flex flex-wrap gap-2">
-                    <IF LOOP="plg_disabled">
-                    <a class="btn btn-sm btn-outline-primary" href="{plugin_enable_link}{{plg_name}}">
-                        <i class="fa-solid fa-toggle-on" aria-hidden="true"></i><span>{lang.ENABLE}</span>
-                    </a>
-                    <ELSE>
-                    <IF LOOP="has_settings_page">
-                    <a class="btn btn-sm btn-outline-secondary" href="./?{{extra_info.settings_page}}">
-                        <i class="fa-solid fa-gear" aria-hidden="true"></i><span>{lang.R_CONFIGS}</span>
-                    </a>
-                    </IF>
-                    <a class="btn btn-sm btn-outline-secondary" href="{plugin_disable_link}{{plg_name}}">
-                        <i class="fa-solid fa-toggle-off" aria-hidden="true"></i><span>{lang.DISABLE}</span>
-                    </a>
-                    </IF>
-                    <a class="btn btn-sm btn-outline-danger ms-auto" href="{plugin_uninstall_link}{{plg_name}}" data-kj-confirm title="{lang.DELETE}">
-                        <i class="fa-solid fa-trash-can" aria-hidden="true"></i><span class="visually-hidden">{lang.DELETE}</span>
-                    </a>
-                </div>
-            </article>
+                </LOOP>
+            </div>
         </div>
-        </LOOP>
-    </div>
-    </IF>
+        </IF>
 
-<!-- local plugins, on disk but not installed -->
-<ELSEIF NAME="case == local">
+    <!-- local plugins, on disk but not installed -->
+    <ELSEIF NAME="case == local">
 
-    <IF NAME="available_plugins">
-    <div class="card">
+        <IF NAME="available_plugins">
         <ul class="list-group list-group-flush">
             <LOOP NAME="available_plugins">
             <li class="list-group-item d-flex align-items-center gap-3 py-3">
@@ -109,9 +120,7 @@
             </li>
             </LOOP>
         </ul>
-    </div>
-    <ELSE>
-    <div class="card">
+        <ELSE>
         <div class="card-body text-center py-5">
             <span class="kj-icon-tile is-lg is-secondary mb-3"><i class="fa-solid fa-folder-open" aria-hidden="true"></i></span>
             <p class="text-body-secondary">{lang.NO_PLUGINS}</p>
@@ -119,14 +128,12 @@
                 <i class="fa-solid fa-store" aria-hidden="true"></i><span>{lang.KLEEJA_STORE}</span>
             </a>
         </div>
-    </div>
-    </IF>
+        </IF>
 
-<!-- store and updates -->
-<ELSEIF NAME="case == store" OR="case == check">
+    <!-- store and updates -->
+    <ELSEIF NAME="case == store" OR="case == check">
 
-    <UNLESS NAME="store_plugins_count">
-    <div class="card">
+        <UNLESS NAME="store_plugins_count">
         <div class="card-body text-center py-5">
             <IF NAME="case == check">
             <span class="kj-icon-tile is-lg is-success mb-3"><i class="fa-solid fa-circle-check" aria-hidden="true"></i></span>
@@ -136,53 +143,53 @@
             <p class="text-body-secondary mb-0">{lang.NO_PLUGINS}</p>
             </IF>
         </div>
-    </div>
-    </UNLESS>
+        </UNLESS>
 
-    <IF NAME="store_plugins_count gt 1" AND="case == check">
-    <div class="d-flex justify-content-end mb-3">
-        <button type="button" class="btn btn-primary btn-sm" data-kj-download-all>
-            <i class="fa-solid fa-bolt" aria-hidden="true"></i><span>{lang.UPDATE_ALL}</span>
-        </button>
-    </div>
-    </IF>
-
-    <IF NAME="store_plugins_count">
-
-    <IF NAME="case == store">
-    <div class="row row-cols-1 row-cols-md-2 row-cols-xxl-3 g-3">
-        <LOOP NAME="store_plugins">
-        <div class="col">
-            <article class="card h-100">
-                <div class="card-body">
-                    <div class="d-flex align-items-center gap-3 mb-3">
-                        <img class="flex-shrink-0 rounded-3 border bg-body-tertiary object-fit-cover" src="{{icon}}" alt="" width="48" height="48" loading="lazy" onerror="this.onerror=null;this.src='{STYLE_PATH_ADMIN}images/plugin.png';">
-                        <div class="flex-grow-1 overflow-hidden">
-                            <h2 class="card-title h6 fw-semibold mb-1 text-truncate">{{title}}</h2>
-                            <div class="small text-body-secondary text-truncate">{{developer}}</div>
-                        </div>
-                    </div>
-                    <p class="card-text small text-body-secondary mb-0">{{description}}</p>
-                    <IF LOOP="NotCompatible">
-                    <div class="alert alert-danger small py-2 px-3 mt-3 mb-0">{lang.PACKAGE_N_CMPT_KLJ}</div>
-                    </IF>
-                    <div class="d-none" data-kj-download-status="{{name}}" data-kj-download-alert role="status" aria-live="polite"></div>
-                </div>
-                <div class="card-footer d-flex flex-wrap align-items-center gap-2">
-                    <span class="small text-body-secondary me-auto">{lang.VERSION} <span class="fw-semibold text-body-emphasis" dir="ltr">{{version}}</span></span>
-                    <button type="button" class="btn btn-sm btn-outline-secondary text-nowrap" data-bs-toggle="modal" data-bs-target="#Modal_{{name}}">
-                        <i class="fa-solid fa-circle-info" aria-hidden="true"></i><span>{lang.VIEW}</span>
-                    </button>
-                    <button type="button" class="btn btn-sm btn-outline-primary text-nowrap" data-kj-download="{{name}}" data-kj-download-url="{plugin_download_link}" data-kj-loading="{lang.LOADING}…">
-                        <i class="fa-solid fa-download" aria-hidden="true"></i><span>{lang.INSTALL}</span>
-                    </button>
-                </div>
-            </article>
+        <IF NAME="store_plugins_count gt 1" AND="case == check">
+        <div class="card-body d-flex justify-content-end py-2 border-bottom">
+            <button type="button" class="btn btn-primary btn-sm" data-kj-download-all>
+                <i class="fa-solid fa-bolt" aria-hidden="true"></i><span>{lang.UPDATE_ALL}</span>
+            </button>
         </div>
-        </LOOP>
-    </div>
-    <ELSE>
-    <div class="card">
+        </IF>
+
+        <IF NAME="store_plugins_count">
+
+        <IF NAME="case == store">
+        <div class="card-body">
+            <div class="row row-cols-1 row-cols-md-2 row-cols-xxl-3 g-3">
+                <LOOP NAME="store_plugins">
+                <div class="col">
+                    <article class="card h-100">
+                        <div class="card-body">
+                            <div class="d-flex align-items-center gap-3 mb-3">
+                                <img class="flex-shrink-0 rounded-3 border bg-body-tertiary object-fit-cover" src="{{icon}}" alt="" width="48" height="48" loading="lazy" onerror="this.onerror=null;this.src='{STYLE_PATH_ADMIN}images/plugin.png';">
+                                <div class="flex-grow-1 overflow-hidden">
+                                    <h2 class="card-title h6 fw-semibold mb-1 text-truncate">{{title}}</h2>
+                                    <div class="small text-body-secondary text-truncate">{{developer}}</div>
+                                </div>
+                            </div>
+                            <p class="card-text small text-body-secondary mb-0">{{description}}</p>
+                            <IF LOOP="NotCompatible">
+                            <div class="alert alert-danger small py-2 px-3 mt-3 mb-0">{lang.PACKAGE_N_CMPT_KLJ}</div>
+                            </IF>
+                            <div class="d-none" data-kj-download-status="{{name}}" data-kj-download-alert role="status" aria-live="polite"></div>
+                        </div>
+                        <div class="card-footer d-flex flex-wrap align-items-center gap-2">
+                            <span class="small text-body-secondary me-auto">{lang.VERSION} <span class="fw-semibold text-body-emphasis" dir="ltr">{{version}}</span></span>
+                            <button type="button" class="btn btn-sm btn-outline-secondary text-nowrap" data-bs-toggle="modal" data-bs-target="#Modal_{{name}}">
+                                <i class="fa-solid fa-circle-info" aria-hidden="true"></i><span>{lang.VIEW}</span>
+                            </button>
+                            <button type="button" class="btn btn-sm btn-outline-primary text-nowrap" data-kj-download="{{name}}" data-kj-download-url="{plugin_download_link}" data-kj-loading="{lang.LOADING}…">
+                                <i class="fa-solid fa-download" aria-hidden="true"></i><span>{lang.INSTALL}</span>
+                            </button>
+                        </div>
+                    </article>
+                </div>
+                </LOOP>
+            </div>
+        </div>
+        <ELSE>
         <ul class="list-group list-group-flush">
             <LOOP NAME="store_plugins">
             <li class="list-group-item py-3">
@@ -209,9 +216,16 @@
             </li>
             </LOOP>
         </ul>
-    </div>
-    </IF>
+        </IF>
 
+        </IF>
+
+    </IF>
+</div>
+
+<!-- the details of each store plugin, outside the card so a list stays its last child -->
+<IF NAME="case == store" OR="case == check">
+    <IF NAME="store_plugins_count">
     <LOOP NAME="store_plugins">
     <div class="modal fade" id="Modal_{{name}}" tabindex="-1" aria-labelledby="Plugin_View_{{name}}" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
@@ -249,7 +263,6 @@
     </div>
     </LOOP>
     </IF>
-
 </IF>
 
 <!-- upload a plugin package -->
