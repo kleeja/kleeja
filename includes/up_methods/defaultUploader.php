@@ -343,12 +343,7 @@ class defaultUploader implements KleejaUploader
 
         // to prevent flooding, user must wait, waiting-time is grapped from Kleeja settings, admin is exceptional
         if (!user_can('enter_acp') && user_is_flooding($current_user_id)) {
-            $this->addErrorMessage(
-                sprintf(
-                    $lang['YOU_HAVE_TO_WAIT'],
-                    $current_user_id == '-1' ? $config['guestsectoupload'] : $config['usersectoupload'],
-                ),
-            );
+            $this->addErrorMessage(sprintf($lang['YOU_HAVE_TO_WAIT'], $config['usersectoupload']));
 
             return;
         }
