@@ -1,63 +1,59 @@
 <!-- Password Recovery Template -->
-<div id="content" class="border_radius">
+<div id="content">
 
     <!-- title -->
-    <h1 class="title">&#9679; {title}</h1>
+    <h1 class="title">{title}</h1>
     <!-- @end-title -->
 
-    <!-- line top -->
-    <div class="line"></div>
-    <!-- @end-line -->
-
     <IF NAME="ERRORS">
-    <!-- msg, Infos & Alerts & Errors -->
-    <dl id="system-message">
-        <dd class="error">
-            <ul><LOOP NAME="ERRORS">
-            <li>{%value%}</li></LOOP>
-            </ul>
-        </dd>
-    </dl>
+    <!-- msg, Alerts & Errors -->
+    <div class="notice notice-error" role="alert">
+        <img src="{STYLE_PATH}images/err.gif" width="29" height="29" alt="">
+        <ul class="notice-body">
+            <LOOP NAME="ERRORS">
+            <li>{%value%}</li>
+            </LOOP>
+        </ul>
+    </div>
     <!-- @end-msg -->
     </IF>
 
-    <!-- form -->
-    <form action="{action}" method="post">
-        <div class="get_password">
-            <p>{lang.E_GET_LOSTPASS}</p>
-            <div class="clr"></div>
-            <label>{lang.EMAIL} :</label>
-            <input type="text" name="rmail" value="{t_rmail}" size="50" style="direction:ltr;" tabindex="1" />
-            <div class="clr"></div>
-        </div>
+    <div class="form-layout">
+        <!-- form -->
+        <form class="form-main" action="{action}" method="post">
 
-        <div class="clr"></div>
+            <p class="intro">{lang.E_GET_LOSTPASS}</p>
 
-        <!-- verification code -->
-        <IF NAME="config.enable_captcha==1">
-        <div class="safe_code">
-            <p>{lang.VERTY_CODE}</p>
-            <div class="clr"></div>
-            <div>
-                <img style="vertical-align:middle;" id="kleeja_img_captcha" src="{captcha_file_path}" alt="{lang.REFRESH_CAPTCHA}" title="{lang.REFRESH_CAPTCHA}" onclick="javascript:update_kleeja_captcha('{captcha_file_path}', 'kleeja_code_answer');" />
-                <input type="text" name="kleeja_code_answer" id="kleeja_code_answer" tabindex="4" />
+            <div class="field">
+                <label for="rmail">{lang.EMAIL}</label>
+                <input type="email" id="rmail" name="rmail" value="{t_rmail}" dir="ltr" autocomplete="email" autofocus>
             </div>
-            <div class="clr"></div>
-            <p class="explain">{lang.NOTE_CODE}</p>
-        </div>
-        </IF>
-        <!-- @end-verification-code -->
-    
-        <div class="clr"></div>
 
-        {H_FORM_KEYS}
+            <IF NAME="config.enable_captcha==1">
+            <!-- verification code -->
+            <div class="safe_code">
+                <label class="label" for="kleeja_code_answer">{lang.VERTY_CODE}</label>
+                <div class="captcha">
+                    <img id="kleeja_img_captcha" src="{captcha_file_path}" alt="{lang.REFRESH_CAPTCHA}" title="{lang.REFRESH_CAPTCHA}" data-captcha-refresh="{captcha_file_path}">
+                    <button type="button" class="btn btn-icon" title="{lang.REFRESH_CAPTCHA}" aria-label="{lang.REFRESH_CAPTCHA}" data-captcha-refresh="{captcha_file_path}"><svg class="icon" aria-hidden="true"><use href="#i-refresh"/></svg></button>
+                    <input type="text" name="kleeja_code_answer" id="kleeja_code_answer" autocomplete="off" autocapitalize="off" spellcheck="false">
+                </div>
+                <p class="explain">{lang.NOTE_CODE}</p>
+            </div>
+            <!-- @end-verification-code -->
+            </IF>
 
-        <input type="submit" name="submit" value="{lang.GET_LOSTPASS}" tabindex="3" />
+            {H_FORM_KEYS}
 
-    </form>
-    <!-- @end-form -->
+            <div class="form-actions">
+                <button type="submit" name="submit" value="{lang.GET_LOSTPASS}" class="btn btn-primary btn-lg">{lang.GET_LOSTPASS}</button>
+                <a href="{config.siteurl}(config.mod_writer?login.html:ucp.php?go=login)">{lang.LOGIN}</a>
+            </div>
+        </form>
+        <!-- @end-form -->
 
-    <div class="clr"></div>
-   
+        <img class="page-art" src="{STYLE_PATH}images/get_password.gif" width="100" height="100" alt="">
+    </div>
+
 </div>
 <!-- @end-Password-Recovery-Template -->

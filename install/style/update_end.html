@@ -1,6 +1,6 @@
             {{if(!empty($GLOBALS['update_errors'])):}}
             <div class="kj-page-head">
-                <span class="kj-icon-tile is-danger">{{echo inst_icon('exclamation-triangle-fill')}}</span>
+                <span class="kj-icon-tile is-danger">{{echo inst_icon('triangle-exclamation')}}</span>
                 <div>
                     <h1>{{echo $lang['INST_UPDATE_FAILED']}}</h1>
                 </div>
@@ -11,12 +11,12 @@
 
             <div class="kj-actions">
                 <a class="btn btn-primary" href="./update.php?{{echo getlang(1)}}">
-                    {{echo inst_icon('arrow-repeat')}} {{echo $lang['INST_TRY_AGAIN']}}
+                    {{echo inst_icon('arrows-rotate')}} {{echo $lang['INST_TRY_AGAIN']}}
                 </a>
             </div>
             {{else:}}
             <div class="kj-state">
-                <span class="kj-state-icon is-success">{{echo inst_icon('check-circle-fill')}}</span>
+                <span class="kj-state-icon is-success">{{echo inst_icon('circle-check')}}</span>
                 <h1>{{echo $lang['INST_UPDATE_IS_FINISH']}}</h1>
                 <p>{{echo $lang['INST_KLEEJADEVELOPERS']}}</p>
             </div>
@@ -25,7 +25,7 @@
             <ul class="list-group kj-checks mt-3">
                 {{foreach($GLOBALS['update_msgs_arr'] as $message):}}
                 <li class="list-group-item">
-                    <span class="text-success">{{echo inst_icon('check-circle-fill')}}</span>
+                    <span class="text-success">{{echo inst_icon('circle-check')}}</span>
                     <span>{{echo $message}}</span>
                 </li>
                 {{endforeach;}}
@@ -34,13 +34,13 @@
 
             <div class="kj-actions is-centered">
                 <a class="btn btn-outline-secondary" href="../index.php">
-                    {{echo inst_icon('house-door')}} {{echo $lang['INDEX']}}
+                    {{echo inst_icon('house')}} {{echo $lang['INDEX']}}
                 </a>
                 <a class="btn btn-primary" href="../admin/">
-                    {{echo inst_icon('speedometer2')}} {{echo $lang['ADMINCP']}}
+                    {{echo inst_icon('gauge-high')}} {{echo $lang['ADMINCP']}}
                 </a>
                 <a class="btn btn-outline-secondary" href="https://kleeja.net" target="_blank" rel="noopener">
-                    kleeja.net {{echo inst_icon('box-arrow-up-right')}}
+                    kleeja.net {{echo inst_icon('arrow-up-right-from-square')}}
                 </a>
             </div>
             {{endif;}}

@@ -56,7 +56,7 @@
 
                 {{if(!$GLOBALS['writeable_path']):}}
                 <div class="alert alert-info d-flex gap-3 mt-4 mb-0" role="alert">
-                    {{echo inst_icon('info-circle-fill')}}
+                    {{echo inst_icon('circle-info')}}
                     <div>{{echo $lang['DB_INFO_NW']}}</div>
                 </div>
                 {{endif;}}
@@ -89,7 +89,7 @@
 
             {{else:}}
             <div class="kj-state">
-                <span class="kj-state-icon is-success">{{echo inst_icon('check-circle-fill')}}</span>
+                <span class="kj-state-icon is-success">{{echo inst_icon('circle-check')}}</span>
                 <h1>{{echo $lang['CONFIG_EXISTS']}}</h1>
             </div>
 

@@ -158,8 +158,9 @@ $last_visit = defined('LAST_VISIT') && preg_match('/[0-9]{10}/', LAST_VISIT) ? k
 //
 //exceptional
 //it won't be included in the menu list
+//help is added to the end of the menu, after the pages of plugins
 //
-$ext_expt = ['start', 'b_lgoutcp', 'i_exts'];
+$ext_expt = ['start', 'b_lgoutcp', 'i_exts', 's_help'];
 
 //confirm message
 $ext_confirm = [];
@@ -171,11 +172,11 @@ $ext_formkey = [];
 //default icons
 $ext_icons = [
     'configs' => 'sliders',
-    'files' => 'folder-open-o',
+    'files' => 'folder-open',
     'img_ctrl' => 'image',
     'calls' => 'envelope',
     'reports' => 'bell',
-    'users' => 'user-o',
+    'users' => 'user',
     'search' => 'search',
     'plugins' => 'plug',
     'ban' => 'minus-circle',
@@ -184,6 +185,7 @@ $ext_icons = [
     'extra' => 'window-restore',
     'check_update' => 'download',
     'repair' => 'wrench',
+    'help' => 'circle-question',
 ];
 
 //
@@ -316,6 +318,26 @@ foreach ($adm_extensions as $m) {
 
     extract(runHook('endforeach_ext_admin_page', get_defined_vars()));
 }
+
+//help is always the last item of the menu
+++$i;
+$adm_extensions_menu[$i] = [
+    'm' => 'help',
+    'i' => $i + 1,
+    'i2' => $i + 2,
+    'icon' => $ext_icons['help'],
+    'lang' => $lang['R_HELP'] ?? 'HELP',
+    'title' => $lang['R_HELP'] ?? 'HELP',
+    'link' => './' . basename(ADMIN_PATH) . '?cp=s_help',
+    'confirm' => false,
+    'current' => $go_to == 's_help',
+    'goto' => 's_help',
+    'bubble' => '',
+    'counter' => '',
+];
+
+//the help button of the top bar opens the guide of the current page
+$help_link = './' . basename(ADMIN_PATH) . '?cp=s_help' . ($go_to != 's_help' ? '&amp;page=' . urlencode($go_to) : '');
 
 //to attach kleeja version in the menu start item
 $assigned_klj_ver = preg_replace('!#([a-z0-9]+)!', '', KLEEJA_VERSION);

@@ -12,8 +12,8 @@ if (!defined('IN_COMMON')) {
     exit();
 }
 
-define('KLEEJA_VERSION', '3.2.7');
-define('KLEEJA_DB_VERSION', '9');
+define('KLEEJA_VERSION', '4.0.0');
+define('KLEEJA_DB_VERSION', '10');
 
 // Kleeja min requirements
 define('MIN_PHP_VERSION', '8.0');

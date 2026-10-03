@@ -112,7 +112,7 @@ if (!($config = $cache->get('data_config'))) {
 if (!($stats = $cache->get('data_stats'))) {
     $query = [
         'SELECT' =>
-            's.files, s.imgs, s.sizes, s.users, s.last_file, s.last_f_del, s.last_google' .
+            's.files, s.imgs, s.sizes, s.users, s.last_f_del, s.last_google' .
             ', s.last_bing, s.google_num, s.bing_num, s.lastuser',
         'FROM' => "{$dbprefix}stats s",
     ];
@@ -127,7 +127,6 @@ if (!($stats = $cache->get('data_stats'))) {
             'stat_imgs' => $row['imgs'],
             'stat_sizes' => $row['sizes'],
             'stat_users' => $row['users'],
-            'stat_last_file' => $row['last_file'],
             'stat_last_f_del' => $row['last_f_del'],
             'stat_last_google' => $row['last_google'],
             'stat_last_bing' => $row['last_bing'],

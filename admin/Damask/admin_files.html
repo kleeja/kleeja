@@ -1,0 +1,124 @@
+<div class="kj-page-header">
+    <div>
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="./">{lang.R_CPINDEX}</a></li>
+                <li class="breadcrumb-item active" aria-current="page">{lang.R_FILES}</li>
+            </ol>
+        </nav>
+        <h1 class="kj-page-title">{lang.R_FILES}</h1>
+    </div>
+    <div class="kj-page-actions">
+        <IF NAME="no_results"><ELSE><span class="kj-badge is-neutral" dir="ltr">{current_page} / {total_pages}</span></IF>
+        <a class="btn btn-outline-secondary btn-sm" href="./?cp=h_search">
+            <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i><span>{lang.SEARCH_FILES}</span>
+        </a>
+    </div>
+</div>
+
+<IF NAME="is_search">
+<div class="alert alert-info d-flex flex-wrap align-items-center gap-2" role="status">
+    <i class="fa-solid fa-magnifying-glass kj-alert-icon" aria-hidden="true"></i>
+    <span class="flex-grow-1">{lang.FIND_IP_FILES} <strong>{nums_rows}</strong> {lang.FILE}</span>
+    <IF NAME="nums_rows">
+    <a class="btn btn-sm btn-outline-danger" href="{deletelink}" data-kj-confirm>
+        <i class="fa-solid fa-trash-can" aria-hidden="true"></i><span>{lang.DELETEALLRES}</span>
+    </a>
+    </IF>
+</div>
+</IF>
+
+<form method="post" name="filesform" action="{action}" id="files_form">
+
+<IF NAME="no_results">
+
+<div class="card">
+    <div class="card-body text-center py-5">
+        <span class="kj-icon-tile is-lg is-secondary mb-3"><i class="fa-solid fa-folder-open" aria-hidden="true"></i></span>
+        <p class="text-body-secondary mb-0">{lang.NO_RESULT_USE_SYNC}</p>
+    </div>
+</div>
+
+<ELSE>
+
+<div class="card">
+    <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+            <thead>
+                <tr>
+                    <th scope="col" class="kj-col-check">
+                        <input class="form-check-input" type="checkbox" data-kj-check-all="del" aria-label="{lang.CHECK_ALL}">
+                    </th>
+                    <th scope="col">
+                        <a href="{ord_action}&amp;order_by=real_filename" title="{lang.ALPHABETICAL_ORDER_FILES}">{lang.FILENAME}</a>
+                        <span class="kj-sort">
+                            <a href="{page2_action}&amp;order_way=1" aria-label="&uarr;"><i class="fa-solid fa-caret-up" aria-hidden="true"></i></a>
+                            <a href="{page2_action}&amp;order_way=2" aria-label="&darr;"><i class="fa-solid fa-caret-down" aria-hidden="true"></i></a>
+                        </span>
+                    </th>
+                    <th scope="col"><a href="{ord_action}&amp;order_by=size" title="{lang.ORDER_SIZE}">{lang.SIZE}</a></th>
+                    <th scope="col" class="d-none d-lg-table-cell"><a href="{ord_action}&amp;order_by=folder">{lang.FILDER}</a></th>
+                    <th scope="col"><a href="{ord_action}&amp;order_by=user">{lang.BY}</a></th>
+                    <th scope="col"><a href="{ord_action}&amp;order_by=user_ip">{lang.IP}</a></th>
+                    <th scope="col" class="text-center">
+                        <a href="{ord_action}&amp;order_by=uploads" title="{lang.ORDER_TOTAL_DOWNLOADS}" data-bs-toggle="tooltip">
+                            <i class="fa-solid fa-download" aria-hidden="true"></i><span class="visually-hidden">{lang.FILEUPS}</span>
+                        </a>
+                    </th>
+                    <th scope="col" class="text-center d-none d-lg-table-cell">
+                        <a href="{ord_action}&amp;order_by=report" title="{lang.NUMPER_REPORT}" data-bs-toggle="tooltip">
+                            <i class="fa-solid fa-flag" aria-hidden="true"></i><span class="visually-hidden">{lang.NUMPER_REPORT}</span>
+                        </a>
+                    </th>
+                    <th scope="col"><a href="{ord_action}&amp;order_by=time">{lang.FILEDATE}</a></th>
+                </tr>
+            </thead>
+            <tbody>
+                <LOOP NAME="arr">
+                <tr id="su[{{id}}]" data-kj-row>
+                    <td class="kj-col-check">
+                        <input class="form-check-input" type="checkbox" name="del_{{id}}" value="{{id}}" rel="_del" data-kj-check="del" aria-label="{{fullname}}">
+                    </td>
+                    <td>
+                        <div class="d-flex align-items-center gap-2 kj-truncate">
+                            <img src="{{typeicon}}" alt="{{type}}" width="20" height="20" loading="lazy">
+                            <span class="text-truncate">{{name}}</span>
+                        </div>
+                    </td>
+                    <td class="text-nowrap"><span dir="ltr">{{size}}</span></td>
+                    <td class="d-none d-lg-table-cell text-body-secondary">{{folder}}</td>
+                    <td class="text-nowrap">{{user}}</td>
+                    <td class="text-nowrap" dir="ltr" style="text-align: start">
+                        {{ip}}
+                        <a class="ms-1 text-body-secondary" href="{{showfilesbyip}}" title="{lang.SHOWFILESBYIP}" data-bs-toggle="tooltip">
+                            <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i><span class="visually-hidden">{lang.SHOWFILESBYIP}</span>
+                        </a>
+                    </td>
+                    <td class="text-center">
+                        <IF LOOP="direct">
+                        <i class="fa-solid fa-bell-slash text-body-secondary" title="{lang.DIRECT_FILE_NOTE}" data-bs-toggle="tooltip" aria-hidden="true"></i><span class="visually-hidden">{lang.DIRECT_FILE_NOTE}</span>
+                        <ELSE>
+                        {{ups}}
+                        </IF>
+                    </td>
+                    <td class="text-center d-none d-lg-table-cell kj-report-cell">{{report}}</td>
+                    <td class="text-nowrap"><span title="{{time}}" data-bs-toggle="tooltip">{{time_human}}</span></td>
+                    <!-- admin files data td2 extra -->
+                </tr>
+                </LOOP>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="card-footer kj-bulkbar">
+        <div class="kj-pager">{page_nums}</div>
+        <button type="submit" class="btn btn-sm btn-outline-danger ms-auto" name="submit" value="1" data-kj-bulk="del" data-kj-confirm disabled>
+            <i class="fa-solid fa-trash-can" aria-hidden="true"></i><span>{lang.DEL_SELECTED} <span data-kj-count></span></span>
+        </button>
+    </div>
+</div>
+
+</IF>
+
+{H_FORM_KEYS}
+</form>

@@ -35,12 +35,14 @@ function Saaheader(string $title = '', string $extra = ''): void
             'name' => 'profile',
             'title' => $lang['PROFILE'],
             'url' => $config['siteurl'] . ($config['mod_writer'] ? 'profile.html' : 'ucp.php?go=profile'),
+            'icon' => 'user-gear',
             'show' => $user_is,
         ],
         2 => [
             'name' => 'fileuser',
             'title' => $lang['YOUR_FILEUSER'],
             'url' => $config['siteurl'] . ($config['mod_writer'] ? 'fileuser.html' : 'ucp.php?go=fileuser'),
+            'icon' => 'folder-open',
             'show' => $config['enable_userfile'] && user_can('access_fileuser'),
         ],
         3 => $user_is
@@ -48,18 +50,21 @@ function Saaheader(string $title = '', string $extra = ''): void
                 'name' => 'logout',
                 'title' => $lang['LOGOUT'],
                 'url' => $config['siteurl'] . ($config['mod_writer'] ? 'logout.html' : 'ucp.php?go=logout'),
+                'icon' => 'right-from-bracket',
                 'show' => true,
             ]
             : [
                 'name' => 'login',
                 'title' => $lang['LOGIN'],
                 'url' => $config['siteurl'] . ($config['mod_writer'] ? 'login.html' : 'ucp.php?go=login'),
+                'icon' => 'right-to-bracket',
                 'show' => true,
             ],
         4 => [
             'name' => 'register',
             'title' => $lang['REGISTER'],
             'url' => $config['siteurl'] . ($config['mod_writer'] ? 'register.html' : 'ucp.php?go=register'),
+            'icon' => 'user-plus',
             'show' => !$user_is && $config['register'],
         ],
     ];
@@ -102,6 +107,14 @@ function Saaheader(string $title = '', string $extra = ''): void
     $extras['header'] = empty($extras['header']) ? false : $extras['header'];
 
     extract(runHook('Saaheader_links_func', get_defined_vars()));
+
+    //the icon of a side menu item is a Font Awesome name without "fa-", like the admin menu,
+    //and the items that plugins add without one get the default icon
+    foreach ($side_menu as $key => $item) {
+        if (empty($item['icon'])) {
+            $side_menu[$key]['icon'] = 'puzzle-piece';
+        }
+    }
 
     //assign some variables
     $tpl->assign('dir', $lang['DIR']);
@@ -663,6 +676,7 @@ function big_error(string $error_title, string $msg_text, bool $error = true): v
         $error_template = preg_replace('/<!-- BEGIN DETAILS -->.*?<!-- END DETAILS -->/s', '', $error_template);
 
         echo strtr($error_template, [
+            '{ROOT}' => htmlspecialchars(kleeja_web_root(), ENT_QUOTES, 'UTF-8'),
             '{TITLE}' => $error_title,
             '{BADGE}' => $error ? 'Kleeja Error' : 'Kleeja Information',
             '{TYPE}' => $error ? 'error' : 'info',
@@ -747,12 +761,18 @@ function kleeja_check_form_key_get(string $request_id): bool
 {
     global $config;
 
-    $token = substr(sha1($config['h_key'] . date('H-d-m') . $request_id), 0, 20);
-
     $return = false;
 
-    if ($token == g('formkey')) {
-        $return = true;
+    //the key changes every hour, the one of the last hour is still good,
+    //so a page opened at 10:59 and used at 11:00 (or a long update between its steps) is not refused
+    foreach ([time(), time() - 3600] as $key_time) {
+        $token = substr(sha1($config['h_key'] . date('H-d-m', $key_time) . $request_id), 0, 20);
+
+        if ($token == g('formkey')) {
+            $return = true;
+
+            break;
+        }
     }
 
     extract(runHook('kleeja_check_form_key_get_func', get_defined_vars()));
@@ -1250,15 +1270,6 @@ function time_zones(): array
 function configField(string $name, string $type = 'text', array $select_options = []): string
 {
     switch ($type) {
-        default:
-        case 'text':
-            return '<input type="text" id="kj_meta_seo_home_meta_keywords" name="' .
-                $name .
-                '"' .
-                ' value="{con.' .
-                $name .
-                '}" size="50" />';
-
         case 'yesno':
             return '<label>{lang.YES}<input type="radio" id="' .
                 $name .
@@ -1295,6 +1306,13 @@ function configField(string $name, string $type = 'text', array $select_options 
             }
 
             return $return_value . '</select>' . "\n";
+        default:
+            return '<input type="text" id="kj_meta_seo_home_meta_keywords" name="' .
+                $name .
+                '"' .
+                ' value="{con.' .
+                $name .
+                '}" size="50" />';
     }
 }
 

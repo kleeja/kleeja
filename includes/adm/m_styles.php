@@ -140,6 +140,16 @@ switch ($case):
                 continue;
             }
 
+            $not_compatible = !(
+                version_compare(strtolower($style_info['kleeja_version']['min']), KLEEJA_VERSION, '<=') &&
+                version_compare(strtolower($style_info['kleeja_version']['max']), KLEEJA_VERSION, '>=')
+            );
+
+            // hide styles that are not compatible with this version of kleeja
+            if ($not_compatible && !(defined('IGNORE_STORE_COMPATIBILITY') && IGNORE_STORE_COMPATIBILITY)) {
+                continue;
+            }
+
             $store_styles[$style_info['name']] = [
                 'name' => $style_info['name'],
                 'developer' => $style_info['developer'],
@@ -159,11 +169,7 @@ switch ($case):
                     $style_info['kleeja_version']['max'],
                 ),
                 'icon' => $style_info['icon'],
-                'NotCompatible' =>
-                    version_compare(strtolower($style_info['kleeja_version']['min']), KLEEJA_VERSION, '<=') &&
-                    version_compare(strtolower($style_info['kleeja_version']['max']), KLEEJA_VERSION, '>=')
-                        ? false
-                        : true,
+                'NotCompatible' => $not_compatible,
             ];
         }
 

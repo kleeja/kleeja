@@ -76,6 +76,7 @@ function kleeja_show_error(
                     nl2br($escape($error_string));
             } else {
                 echo strtr($error_template, [
+                    '{ROOT}' => $escape(kleeja_web_root()),
                     '{TITLE}' => 'Kleeja Error',
                     '{BADGE}' => 'HTTP 503 · Service Temporarily Unavailable',
                     '{TYPE}' => 'error',
@@ -97,4 +98,28 @@ function kleeja_show_error(
 
             break;
     }
+}
+
+/**
+ * The web path of the Kleeja folder, like /kleeja/, for the files that error.html loads.
+ * It does not use the config, the error page can show up before it is loaded, and it
+ * works for the scripts in sub folders like admin/index.php and for the serve.php urls
+ * @return string
+ */
+function kleeja_web_root(): string
+{
+    $root = str_replace('\\', '/', dirname(__DIR__));
+    $script = str_replace('\\', '/', realpath($_SERVER['SCRIPT_FILENAME'] ?? '') ?: '');
+    $path = str_replace('\\', '/', dirname($_SERVER['SCRIPT_NAME'] ?? '/'));
+
+    //go up a folder for every folder between Kleeja and the script, admin/index.php has one
+    if (str_starts_with($script, $root . '/')) {
+        $depth = substr_count(substr($script, strlen($root) + 1), '/');
+
+        for ($i = 0; $i < $depth; $i++) {
+            $path = str_replace('\\', '/', dirname($path));
+        }
+    }
+
+    return rtrim($path, '/') . '/';
 }

@@ -243,7 +243,6 @@ if (ip('submit')) {
             basename(__FILE__, '.php') .
             (ig('last_visit') ? '&last_vists=' . g('last_visit', 'int') : '') .
             (ig('smt') ? '&smt=' . g('smt') : ''),
-        'onclick="javascript:get_kleeja_link($(this).attr(\'href\'), \'#content\'); return false;"',
     );
     $current_page = $Pager->getCurrentPage();
 }

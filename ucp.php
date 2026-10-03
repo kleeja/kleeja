@@ -216,20 +216,18 @@ switch (g('go')) {
                 //hash the same password text that the login checks
                 $pass = (string) $usrcp->kleeja_hash_password(trim(p('lpass')) . $user_salt);
                 $mail = strtolower(trim(kleeja_html_encode(p('lmail'))));
-                $session_id = (string) constant('KJ_SESSION');
                 $clean_name = (string) $usrcp->cleanusername($name);
 
                 $insert_query = [
-                    'INSERT' => 'name ,password, password_salt ,mail, register_time, session_id, clean_name, group_id',
+                    'INSERT' => 'name ,password, password_salt ,mail, register_time, clean_name, group_id',
                     'INTO' => "{$dbprefix}users",
-                    'VALUES' => ':name, :password, :salt, :mail, :time, :session_id, :clean_name, :group_id',
+                    'VALUES' => ':name, :password, :salt, :mail, :time, :clean_name, :group_id',
                     'BIND' => [
                         'name' => $name,
                         'password' => $pass,
                         'salt' => $user_salt,
                         'mail' => $mail,
                         'time' => time(),
-                        'session_id' => $session_id,
                         'clean_name' => $clean_name,
                         'group_id' => $config['default_group'],
                     ],

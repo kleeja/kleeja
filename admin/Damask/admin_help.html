@@ -1,0 +1,102 @@
+<div class="kj-page-header">
+    <div>
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="./">{lang.R_CPINDEX}</a></li>
+                <li class="breadcrumb-item active" aria-current="page">{lang.HELP_TITLE}</li>
+            </ol>
+        </nav>
+        <h1 class="kj-page-title">{lang.HELP_TITLE}</h1>
+        <p class="kj-page-subtitle">{lang.HELP_SUBTITLE}</p>
+    </div>
+    <div class="kj-page-actions">
+        <a class="btn btn-outline-secondary btn-sm" href="https://kleeja.net/getting-started/introduction" target="_blank" rel="noopener">
+            <i class="fa-solid fa-book" aria-hidden="true"></i><span>{lang.HELP_ONLINE_DOCS}</span>
+        </a>
+        <a class="btn btn-outline-secondary btn-sm" href="https://github.com/kleeja/kleeja/issues" target="_blank" rel="noopener">
+            <i class="fa-brands fa-github" aria-hidden="true"></i><span>{lang.HELP_REPORT_PROBLEM}</span>
+        </a>
+    </div>
+</div>
+
+<!-- searching, the contents that follow the reader and opening the guide of a page are in initHelp() in damask.js -->
+<div class="row g-4" data-kj-help data-kj-help-focus="{help_focus}">
+    <div class="col-lg-4 col-xl-3">
+        <div class="kj-help-aside">
+            <div class="kj-help-search" role="search">
+                <label class="visually-hidden" for="kjHelpSearch">{lang.HELP_SEARCH}</label>
+                <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
+                <input type="search" class="form-control" id="kjHelpSearch" placeholder="{lang.HELP_SEARCH_PLACEHOLDER}" autocomplete="off" spellcheck="false" aria-keyshortcuts="/" aria-controls="kjHelpGuides" data-kj-help-search>
+                <kbd class="d-none d-lg-inline-block" aria-hidden="true">/</kbd>
+            </div>
+            <p class="visually-hidden" role="status" aria-live="polite" data-kj-help-status data-kj-help-count="{lang.HELP_RESULTS_COUNT}"></p>
+
+            <details class="card kj-help-toc" open data-kj-help-toc>
+                <summary>{lang.HELP_CONTENTS}<i class="fa-solid fa-chevron-down" aria-hidden="true"></i></summary>
+                <nav aria-label="{lang.HELP_CONTENTS}">
+                    <LOOP NAME="help_rows">
+                    <IF LOOP="group_first">
+                    <div class="kj-help-toc-group" data-kj-help-toc-group>
+                        <p class="kj-help-toc-heading">{{group_title}}</p>
+                        <ul>
+                    </IF>
+                            <li><a href="#help-{{id}}" data-kj-help-link="{{id}}"><i class="fa fa-fw fa-{{icon}}" aria-hidden="true"></i><span>{{title}}</span></a></li>
+                    <IF LOOP="group_last">
+                        </ul>
+                    </div>
+                    </IF>
+                    </LOOP>
+                </nav>
+            </details>
+        </div>
+    </div>
+
+    <div class="col-lg-8 col-xl-9" id="kjHelpGuides">
+        <div class="card kj-help-empty" hidden data-kj-help-empty>
+            <div class="card-body">
+                <span class="kj-icon-tile is-secondary"><i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i></span>
+                <div class="flex-grow-1">
+                    <div class="fw-semibold">{lang.HELP_NO_RESULTS}</div>
+                    <div class="small text-body-secondary">{lang.HELP_NO_RESULTS_HINT}</div>
+                </div>
+                <button type="button" class="btn btn-sm btn-outline-secondary" data-kj-help-clear>{lang.HELP_CLEAR_SEARCH}</button>
+            </div>
+        </div>
+
+        <LOOP NAME="help_rows">
+        <IF LOOP="group_first">
+        <section class="kj-help-group" aria-labelledby="help-group-{{group}}" data-kj-help-group>
+            <h2 class="kj-help-group-title" id="help-group-{{group}}">{{group_title}}</h2>
+        </IF>
+            <article class="card kj-help-guide" id="help-{{id}}" tabindex="-1" aria-labelledby="help-{{id}}-title" data-kj-help-guide>
+                <div class="card-body">
+                    <header class="kj-help-guide-head">
+                        <IF LOOP="image">
+                        <span class="kj-icon-tile"><img src="{{image}}" alt=""></span>
+                        <ELSE>
+                        <span class="kj-icon-tile"><i class="fa fa-fw fa-{{icon}}" aria-hidden="true"></i></span>
+                        </IF>
+                        <div class="kj-help-guide-heading">
+                            <h3 class="kj-help-guide-title" id="help-{{id}}-title">{{title}}<IF LOOP="badge"> <span class="kj-badge is-neutral">{{badge}}</span></IF></h3>
+                            <IF LOOP="intro"><p class="kj-help-guide-intro">{{intro}}</p></IF>
+                        </div>
+                        <IF LOOP="link">
+                        <a class="btn btn-sm btn-outline-secondary kj-help-guide-link" href="{{link}}">
+                            <span>{{link_title}}</span><i class="fa-solid fa-arrow-right kj-flip-rtl" aria-hidden="true"></i>
+                        </a>
+                        </IF>
+                    </header>
+                    <IF LOOP="body">
+                    <div class="kj-help-guide-body<IF LOOP="aside"> has-aside</IF>">
+                        <div class="kj-help-main">{{body}}</div>
+                        <IF LOOP="aside"><div class="kj-help-side">{{aside}}</div></IF>
+                    </div>
+                    </IF>
+                </div>
+            </article>
+        <IF LOOP="group_last">
+        </section>
+        </IF>
+        </LOOP>
+    </div>
+</div>

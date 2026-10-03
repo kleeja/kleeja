@@ -1,6 +1,6 @@
             {{if(!$GLOBALS['php_ver']):}}
             <div class="kj-state">
-                <span class="kj-state-icon is-danger">{{echo inst_icon('x-circle-fill')}}</span>
+                <span class="kj-state-icon is-danger">{{echo inst_icon('circle-xmark')}}</span>
                 <h1>{{echo sprintf($lang['INST_PHP_LESSMIN'], MIN_PHP_VERSION, PHP_VERSION)}}</h1>
             </div>
             {{else:}}
@@ -9,7 +9,7 @@
                 <span class="kj-state-icon">{{echo inst_icon('download')}}</span>
                 <h1>{{echo $lang['INST_INSTALL_CLEAN_VER']}}</h1>
                 {{else:}}
-                <span class="kj-state-icon">{{echo inst_icon('arrow-repeat')}}</span>
+                <span class="kj-state-icon">{{echo inst_icon('arrows-rotate')}}</span>
                 <h1>{{echo $lang['INST_UPDATE_P_VER']}}</h1>
                 {{endif;}}
 

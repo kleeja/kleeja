@@ -1,0 +1,722 @@
+<IF NAME="current_smt == general">
+
+<div class="kj-page-header">
+    <div>
+        <h1 class="kj-page-title">{lang.R_CPINDEX}</h1>
+        <p class="kj-page-subtitle">{usernamelang}</p>
+    </div>
+    <div class="kj-page-actions">
+        <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-toggle="modal" data-bs-target="#customizationModal">
+            <i class="fa-solid fa-sliders" aria-hidden="true"></i><span>{lang.CUSTOMIZATION}</span>
+        </button>
+    </div>
+</div>
+
+<!-- choose which boxes the dashboard shows -->
+<div class="modal fade" id="customizationModal" tabindex="-1" aria-labelledby="customizationModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title" id="customizationModalLabel">{lang.CUSTOMIZATION}</h2>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="{lang.CLOSE}"></button>
+            </div>
+            <div class="modal-body" data-kj-start-boxes data-kj-form-key="{GET_FORM_KEY}">
+                <p class="text-body-secondary small">{lang.ADM_CUSTOMIZE_HINT}</p>
+                <div class="d-none" data-kj-status role="status" aria-live="polite"></div>
+                <ul class="list-group">
+                    <LOOP NAME="startBoxes">
+                    <li class="list-group-item d-flex align-items-center justify-content-between gap-3">
+                        <label class="form-check-label flex-grow-1" for="kjStartBox_{%key%}">{{title}}</label>
+                        <div class="form-check form-switch m-0">
+                            <input class="form-check-input" type="checkbox" role="switch" id="kjStartBox_{%key%}" data-kj-start-box="{%key%}"<IF LOOP="hidden==0"> checked</IF>>
+                        </div>
+                    </li>
+                    </LOOP>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<IF NAME="ADM_NOTIFICATIONS">
+<!-- notifications -->
+<section class="card mb-4<IF NAME="startBoxes.notifications.hidden"> d-none</IF>" id="notifications">
+    <div class="card-header kj-card-header">
+        <h2 class="kj-card-title"><i class="fa-solid fa-bell" aria-hidden="true"></i> {lang.NOTIFICATIONS}</h2>
+    </div>
+    <ul class="list-group list-group-flush">
+        <LOOP NAME="ADM_NOTIFICATIONS">
+        <li class="list-group-item d-flex align-items-start gap-3 py-3">
+            <IF LOOP="msg_type==error">
+            <span class="kj-icon-tile is-sm is-warning"><i class="fa-solid fa-triangle-exclamation" aria-hidden="true"></i></span>
+            <ELSE>
+            <span class="kj-icon-tile is-sm is-info"><i class="fa-solid fa-circle-info" aria-hidden="true"></i></span>
+            </IF>
+            <div class="flex-grow-1" style="min-width: 0">
+                <div class="fw-semibold">{{title}}</div>
+                <div class="small text-body-secondary">{{msg}}</div>
+            </div>
+        </li>
+        </LOOP>
+    </ul>
+</section>
+</IF>
+
+{extra_adm_start_html}
+
+<!-- stats boxes -->
+<div class="row row-cols-1 row-cols-sm-2 row-cols-xxl-4 g-3 mb-4<IF NAME="startBoxes.statsBoxes.hidden"> d-none</IF>" id="statsBoxes">
+    <div class="col">
+        <div class="card kj-stat h-100">
+            <div class="card-body">
+                <div>
+                    <div class="kj-stat-label">{lang.R_CALLS}</div>
+                    <div class="kj-stat-value">{kbubbles.calls}</div>
+                </div>
+                <span class="kj-icon-tile"><i class="fa-solid fa-envelope" aria-hidden="true"></i></span>
+            </div>
+            <div class="card-footer">
+                <a href="./?cp=e_calls">{lang.VIEW} <i class="fa-solid fa-angle-right kj-flip-rtl" aria-hidden="true"></i></a>
+                <a href="./?cp=e_calls&amp;smt=show_h24">{lang.SHOW_FROM_24H}</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="col">
+        <div class="card kj-stat h-100">
+            <div class="card-body">
+                <div>
+                    <div class="kj-stat-label">{lang.R_REPORTS}</div>
+                    <div class="kj-stat-value">{kbubbles.reports}</div>
+                </div>
+                <span class="kj-icon-tile is-navy"><i class="fa-solid fa-flag" aria-hidden="true"></i></span>
+            </div>
+            <div class="card-footer">
+                <a href="./?cp=f_reports">{lang.VIEW} <i class="fa-solid fa-angle-right kj-flip-rtl" aria-hidden="true"></i></a>
+                <a href="./?cp=f_reports&amp;smt=show_h24">{lang.SHOW_FROM_24H}</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="col">
+        <div class="card kj-stat h-100">
+            <div class="card-body">
+                <div>
+                    <div class="kj-stat-label">{lang.AFILES_NUM}</div>
+                    <div class="kj-stat-value">{files_number}</div>
+                    <div class="kj-stat-meta">{stat_files} {lang.FILE} · {stat_imgs} {lang.IMAGE}</div>
+                </div>
+                <span class="kj-icon-tile"><i class="fa-solid fa-copy" aria-hidden="true"></i></span>
+            </div>
+            <div class="card-footer">
+                <a href="./?cp=c_files">{lang.R_FILES}</a>
+                <a href="./?cp=d_img_ctrl">{lang.R_IMG_CTRL}</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="col">
+        <div class="card kj-stat h-100">
+            <div class="card-body">
+                <div>
+                    <div class="kj-stat-label">{lang.AUSERS_NUM}</div>
+                    <div class="kj-stat-value">{users_number}</div>
+                    <IF NAME="config.user_system==1">
+                    <div class="kj-stat-meta">{lang.LAST_REG}: {lst_reg}</div>
+                    </IF>
+                </div>
+                <span class="kj-icon-tile is-navy"><i class="fa-solid fa-users" aria-hidden="true"></i></span>
+            </div>
+            <div class="card-footer">
+                <a href="./?cp=g_users">{lang.R_USERS}</a>
+                <a href="./?cp=h_search&amp;smt=users">{lang.SEARCH_USERS}</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-3 mb-4">
+    <IF NAME="stats_chart">
+    <!-- uploads per day -->
+    <div class="col-xl-8<IF NAME="startBoxes.statsChart.hidden"> d-none</IF>" id="statsChart">
+        <section class="card h-100">
+            <div class="card-header kj-card-header">
+                <h2 class="kj-card-title"><i class="fa-solid fa-chart-column" aria-hidden="true"></i> {lang.STATS}</h2>
+                <ul class="kj-chart-legend ms-auto">
+                    <li><i class="kj-swatch-files" aria-hidden="true"></i>{lang.FILE}</li>
+                    <li><i class="kj-swatch-images" aria-hidden="true"></i>{lang.IMAGE}</li>
+                </ul>
+            </div>
+            <div class="card-body">
+                <div id="kjStatsChart" class="kj-chart" data-kj-label-files="{lang.FILE}" data-kj-label-images="{lang.IMAGE}"></div>
+            </div>
+        </section>
+        <script>
+            {stats_chart}
+        </script>
+    </div>
+    </IF>
+
+    <!-- storage and other info -->
+    <div class="col-xl<IF NAME="startBoxes.extraStats.hidden"> d-none</IF>" id="extraStats">
+        <section class="card h-100">
+            <div class="card-header kj-card-header">
+                <h2 class="kj-card-title"><i class="fa-solid fa-hard-drive" aria-hidden="true"></i> {lang.OTHER_INFO}</h2>
+                <a class="ms-auto small" href="./?cp=start&amp;smt=other">{lang.VIEW}</a>
+            </div>
+            <div class="card-body border-bottom">
+                <div class="kj-stat-label">{lang.AFILES_SIZE_SPACE}</div>
+                <div class="d-flex align-items-baseline justify-content-between gap-2 mb-2">
+                    <span class="kj-stat-value fs-3" dir="ltr">{files_sizes}</span>
+                    <span class="small fw-semibold text-body-secondary" dir="ltr">{per1}%</span>
+                </div>
+                <div class="progress" role="progressbar" aria-label="{lang.AFILES_SIZE_SPACE}" aria-valuenow="{per1}" aria-valuemin="0" aria-valuemax="100">
+                    <div class="progress-bar" style="width: {per1}%"></div>
+                </div>
+            </div>
+            <ul class="list-group list-group-flush">
+                <li class="list-group-item kj-kv">
+                    <span>{lang.LSTDELST}</span>
+                    <span>{last_del_fles}</span>
+                </li>
+                <li class="list-group-item kj-kv">
+                    <span>{lang.KLEEJA_VERSION}</span>
+                    <span dir="ltr">{kleeja_version}</span>
+                </li>
+                <li class="list-group-item kj-kv">
+                    <span>{lang.PHP_VER}</span>
+                    <span dir="ltr">{php_version}</span>
+                </li>
+                <li class="list-group-item kj-kv">
+                    <span>{lang.MYSQL_VER}</span>
+                    <span dir="ltr">{mysql_version}</span>
+                </li>
+            </ul>
+        </section>
+    </div>
+</div>
+
+<div class="row g-3">
+    <IF NAME="last_visit">
+    <!-- since the last visit -->
+    <div class="col-xl<IF NAME="startBoxes.lastVisitActions.hidden"> d-none</IF>" id="lastVisitActions">
+        <section class="card h-100">
+            <div class="card-header kj-card-header">
+                <h2 class="kj-card-title"><i class="fa-solid fa-clock-rotate-left" aria-hidden="true"></i> {lang.LAST_VISIT}</h2>
+                <span class="ms-auto small text-body-secondary">{last_visit}</span>
+            </div>
+            <div class="list-group list-group-flush">
+                <div class="list-group-item py-3">
+                    <div class="fw-semibold mb-2">{lang.FLS_LST_VST_SEARCH}</div>
+                    <div class="d-flex flex-wrap align-items-center gap-2">
+                        <IF NAME="files_last_visit">
+                        <a href="{h_lst_files}{files_last_visit}" class="btn btn-sm btn-primary">{lang.LAST_VIEW}</a>
+                        <span class="small text-body-secondary">{lang.OR}</span>
+                        </IF>
+                        <select class="form-select form-select-sm w-auto" data-kj-since="{h_lst_files}" aria-label="{lang.FLS_LST_VST_SEARCH}">
+                            <option value="">{lang.TIME}…</option>
+                            <option value="3600">{lang.HOUR}</option>
+                            <option value="18000">{lang.5HOURS}</option>
+                            <option value="86400">{lang.DAY}</option>
+                            <option value="604800">{lang.WEEK}</option>
+                            <option value="2592000">{lang.MONTH}</option>
+                            <option value="31536000">{lang.YEAR}</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="list-group-item py-3">
+                    <div class="fw-semibold mb-2">{lang.IMG_LST_VST_SEARCH}</div>
+                    <div class="d-flex flex-wrap align-items-center gap-2">
+                        <IF NAME="image_last_visit">
+                        <a href="{h_lst_imgs}{image_last_visit}" class="btn btn-sm btn-primary">{lang.LAST_VIEW}</a>
+                        <span class="small text-body-secondary">{lang.OR}</span>
+                        </IF>
+                        <select class="form-select form-select-sm w-auto" data-kj-since="{h_lst_imgs}" aria-label="{lang.IMG_LST_VST_SEARCH}">
+                            <option value="">{lang.TIME}…</option>
+                            <option value="3600">{lang.HOUR}</option>
+                            <option value="18000">{lang.5HOURS}</option>
+                            <option value="86400">{lang.DAY}</option>
+                            <option value="604800">{lang.WEEK}</option>
+                            <option value="2592000">{lang.MONTH}</option>
+                            <option value="31536000">{lang.YEAR}</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+    </IF>
+
+    <!-- quick actions -->
+    <div class="col-xl<IF NAME="startBoxes.hurryActions.hidden"> d-none</IF>" id="hurryActions">
+        <section class="card h-100">
+            <div class="card-header kj-card-header">
+                <h2 class="kj-card-title"><i class="fa-solid fa-bolt" aria-hidden="true"></i> {lang.HURRY_HURRY}</h2>
+            </div>
+            <div class="list-group list-group-flush">
+                <div class="list-group-item py-3">
+                    <label class="fw-semibold mb-2" for="lang_change">{lang.LANGUAGE}</label>
+                    <div class="row g-2 align-items-center">
+                        <div class="col-sm">
+                            <select name="lang_change" class="form-select form-select-sm" id="lang_change">
+                                {hurry_langs_list}
+                            </select>
+                        </div>
+                        <div class="col-auto small text-body-secondary">{lang.FOR}</div>
+                        <div class="col-sm">
+                            <select name="groups_list" class="form-select form-select-sm" id="groups_list" aria-label="{lang.GROUP}">
+                                {hurry_groups_list}
+                            </select>
+                        </div>
+                        <div class="col-12 col-sm-auto">
+                            <button type="button" class="btn btn-sm btn-outline-primary w-100" data-kj-lang-apply="{hurry_lang_link}">{lang.CHANGE}</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="list-group-item py-3 d-flex flex-wrap align-items-center justify-content-between gap-2">
+                    <div>
+                        <div class="fw-semibold">{lang.R_REPAIR}</div>
+                        <div class="small text-body-secondary">{lang.DEL_CACHE}</div>
+                    </div>
+                    <a class="btn btn-sm btn-outline-secondary" href="{del_cache_link}">
+                        <i class="fa-solid fa-broom" aria-hidden="true"></i><span>{lang.DELETE}</span>
+                    </a>
+                </div>
+            </div>
+        </section>
+    </div>
+</div>
+
+
+<ELSEIF NAME="current_smt == other">
+
+<div class="kj-page-header">
+    <div>
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="./">{lang.R_CPINDEX}</a></li>
+                <li class="breadcrumb-item active" aria-current="page">{lang.OTHER_INFO}</li>
+            </ol>
+        </nav>
+        <h1 class="kj-page-title">{lang.OTHER_INFO}</h1>
+    </div>
+</div>
+
+<div class="row row-cols-1 row-cols-lg-2 g-3">
+    <div class="col">
+        <section class="card h-100">
+            <div class="card-header kj-card-header">
+                <h2 class="kj-card-title"><i class="fa-solid fa-server" aria-hidden="true"></i> {lang.ADM_SERVER}</h2>
+            </div>
+            <ul class="list-group list-group-flush">
+                <li class="list-group-item kj-kv"><span>{lang.PHP_VER}</span><span dir="ltr">{php_version}</span></li>
+                <li class="list-group-item kj-kv"><span>{lang.MYSQL_VER}</span><span dir="ltr">{mysql_version}</span></li>
+                <li class="list-group-item kj-kv"><span>{lang.KLEEJA_VERSION}</span><span dir="ltr">{kleeja_version}</span></li>
+            </ul>
+        </section>
+    </div>
+
+    <div class="col">
+        <section class="card h-100">
+            <div class="card-header kj-card-header">
+                <h2 class="kj-card-title"><i class="fa-brands fa-php" aria-hidden="true"></i> php.ini</h2>
+            </div>
+            <ul class="list-group list-group-flush" dir="ltr">
+                <li class="list-group-item kj-kv"><code>max_execution_time</code><span>{max_execution_time}</span></li>
+                <li class="list-group-item kj-kv"><code>upload_max_filesize</code><span>{upload_max_filesize}</span></li>
+                <li class="list-group-item kj-kv"><code>post_max_size</code><span>{post_max_size}</span></li>
+                <li class="list-group-item kj-kv"><code>memory_limit</code><span>{memory_limit}</span></li>
+            </ul>
+        </section>
+    </div>
+
+    <div class="col">
+        <section class="card h-100">
+            <div class="card-header kj-card-header">
+                <h2 class="kj-card-title"><i class="fa-brands fa-google" aria-hidden="true"></i> {lang.SEARCH_STAT} · Google</h2>
+            </div>
+            <ul class="list-group list-group-flush">
+                <li class="list-group-item kj-kv"><span>{lang.LAST_GOOGLE}</span><span>{s_last_google}</span></li>
+                <li class="list-group-item kj-kv"><span>{lang.GOOGLE_NUM}</span><span>{s_google_num}</span></li>
+            </ul>
+        </section>
+    </div>
+
+    <div class="col">
+        <section class="card h-100">
+            <div class="card-header kj-card-header">
+                <h2 class="kj-card-title"><i class="fa-brands fa-microsoft" aria-hidden="true"></i> {lang.SEARCH_STAT} · Bing</h2>
+            </div>
+            <ul class="list-group list-group-flush">
+                <li class="list-group-item kj-kv"><span>{lang.LAST_BING}</span><span>{s_last_bing}</span></li>
+                <li class="list-group-item kj-kv"><span>{lang.BING_NUM}</span><span>{s_bing_num}</span></li>
+            </ul>
+        </section>
+    </div>
+</div>
+
+
+<ELSEIF NAME="current_smt == blog">
+
+<div class="kj-page-header">
+    <div>
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="./">{lang.R_CPINDEX}</a></li>
+                <li class="breadcrumb-item active" aria-current="page">{lang.ADM_KLEEJA_BLOG}</li>
+            </ol>
+        </nav>
+        <h1 class="kj-page-title">{lang.ADM_KLEEJA_BLOG}</h1>
+        <p class="kj-page-subtitle">{lang.ADM_BLOG_HINT}</p>
+    </div>
+</div>
+
+<!-- posts are fetched by the browser straight from kleeja.net, see initBlog() in damask.js -->
+<div class="row row-cols-1 row-cols-md-2 row-cols-xxl-3 g-3" data-kj-blog="https://kleeja.net/blog-json" data-kj-blog-lang="{config.language}" data-kj-blog-empty="{lang.ADM_BLOG_EMPTY}" data-kj-blog-error="{lang.ADM_BLOG_ERROR}" aria-live="polite" aria-busy="true">
+    <div class="col-12 d-flex align-items-center gap-2 text-body-secondary">
+        <span class="spinner-border spinner-border-sm" aria-hidden="true"></span> {lang.LOADING}…
+    </div>
+</div>
+
+<template id="kjBlogItem">
+    <div class="col">
+        <article class="card kj-post h-100">
+            <div class="ratio ratio-16x9 kj-post-media" data-kj-blog-media>
+                <img src="" alt="" loading="lazy" data-kj-blog-image>
+            </div>
+            <div class="card-body">
+                <time class="kj-post-date" data-kj-blog-date></time>
+                <h2 class="kj-post-title"><a class="stretched-link" href="#" target="_blank" rel="noopener" data-kj-blog-link></a></h2>
+                <p class="kj-desc mb-0" data-kj-blog-desc></p>
+            </div>
+            <div class="card-footer kj-post-author" data-kj-blog-author>
+                <img src="" alt="" width="24" height="24" loading="lazy" data-kj-blog-avatar>
+                <a class="position-relative z-2" href="#" target="_blank" rel="noopener" data-kj-blog-author-link></a>
+            </div>
+        </article>
+    </div>
+</template>
+
+<div class="mt-4">
+    <a class="btn btn-outline-primary" href="<IF NAME="config.language == ar">https://kleeja.net/ar/blog<ELSE>https://kleeja.net/blog</IF>" target="_blank" rel="noopener">
+        <i class="fa-solid fa-newspaper" aria-hidden="true"></i><span>{lang.ADM_BLOG_VISIT}</span><i class="fa-solid fa-arrow-up-right-from-square kj-flip-rtl small" aria-hidden="true"></i>
+    </a>
+</div>
+
+<ELSEIF NAME="current_smt == team">
+
+<div class="kj-page-header">
+    <div>
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="./">{lang.R_CPINDEX}</a></li>
+                <li class="breadcrumb-item active" aria-current="page">{lang.KLEEJA_TEAM}</li>
+            </ol>
+        </nav>
+        <h1 class="kj-page-title">{lang.KLEEJA_TEAM}</h1>
+        <p class="kj-page-subtitle">{lang.ADM_TEAM_HINT}</p>
+    </div>
+    <div class="kj-page-actions">
+        <a class="btn btn-outline-secondary btn-sm" href="https://github.com/kleeja/kleeja" target="_blank" rel="noopener">
+            <i class="fa-brands fa-github" aria-hidden="true"></i><span>GitHub</span>
+        </a>
+    </div>
+</div>
+
+<!-- the project at a glance; the two counts are filled in by initTeam() in damask.js -->
+<section class="card kj-team-hero mb-4" aria-labelledby="kjTeamHeading">
+    <div class="card-body">
+        <div class="kj-team-intro">
+            <!-- a dark surface in both colour modes, so always the reverse mark -->
+            <img class="kj-team-mark" src="{config.siteurl}images/logo-light.svg" alt="" width="56" height="56">
+            <div>
+                <p class="kj-team-eyebrow">{lang.ADM_TEAM_EYEBROW}</p>
+                <h2 class="kj-team-heading" id="kjTeamHeading">{lang.ADM_TEAM_HEADING}</h2>
+                <p class="kj-team-lead">{lang.ADM_TEAM_LEAD}</p>
+            </div>
+        </div>
+        <dl class="kj-team-stats">
+            <div>
+                <dt>{lang.ADM_TEAM_CONTRIBUTORS}</dt>
+                <dd data-kj-team-people>—</dd>
+            </div>
+            <div>
+                <dt>{lang.ADM_TEAM_COMMITS}</dt>
+                <dd data-kj-team-commits>—</dd>
+            </div>
+            <div>
+                <dt>{lang.ADM_TEAM_FOUNDED}</dt>
+                <dd>2007</dd>
+            </div>
+            <div>
+                <dt>{lang.ADM_TEAM_LICENSE}</dt>
+                <dd>MIT</dd>
+            </div>
+        </dl>
+    </div>
+</section>
+
+<!-- contributors are fetched by the browser straight from GitHub, see initTeam() in damask.js -->
+<div data-kj-team="https://api.github.com/repos/kleeja/kleeja/contributors?per_page=100" aria-busy="true">
+    <p class="visually-hidden" data-kj-team-loading>{lang.LOADING}…</p>
+
+    <section aria-labelledby="kjTeamTopTitle" data-kj-team-section>
+        <div class="kj-section-head">
+            <div>
+                <h2 class="kj-section-title" id="kjTeamTopTitle">{lang.ADM_TEAM_TOP}</h2>
+                <p class="kj-section-hint">{lang.ADM_TEAM_TOP_HINT}</p>
+            </div>
+            <a class="kj-section-link" href="https://github.com/kleeja/kleeja/graphs/contributors" target="_blank" rel="noopener">
+                <i class="fa-solid fa-chart-line" aria-hidden="true"></i><span>{lang.ADM_TEAM_GRAPH}</span><i class="fa-solid fa-arrow-up-right-from-square kj-flip-rtl small" aria-hidden="true"></i>
+            </a>
+        </div>
+        <div class="row row-cols-1 row-cols-md-3 g-3" data-kj-team-leads>
+            <div class="col" aria-hidden="true">
+                <div class="card kj-person is-lead is-loading h-100 placeholder-glow">
+                    <div class="card-body">
+                        <div class="kj-person-head">
+                            <span class="kj-person-avatar placeholder"></span>
+                            <div class="flex-grow-1">
+                                <span class="placeholder col-7"></span>
+                                <span class="placeholder placeholder-sm col-5"></span>
+                            </div>
+                        </div>
+                        <span class="placeholder placeholder-lg col-12"></span>
+                    </div>
+                </div>
+            </div>
+            <div class="col" aria-hidden="true">
+                <div class="card kj-person is-lead is-loading h-100 placeholder-glow">
+                    <div class="card-body">
+                        <div class="kj-person-head">
+                            <span class="kj-person-avatar placeholder"></span>
+                            <div class="flex-grow-1">
+                                <span class="placeholder col-6"></span>
+                                <span class="placeholder placeholder-sm col-4"></span>
+                            </div>
+                        </div>
+                        <span class="placeholder placeholder-lg col-12"></span>
+                    </div>
+                </div>
+            </div>
+            <div class="col" aria-hidden="true">
+                <div class="card kj-person is-lead is-loading h-100 placeholder-glow">
+                    <div class="card-body">
+                        <div class="kj-person-head">
+                            <span class="kj-person-avatar placeholder"></span>
+                            <div class="flex-grow-1">
+                                <span class="placeholder col-8"></span>
+                                <span class="placeholder placeholder-sm col-5"></span>
+                            </div>
+                        </div>
+                        <span class="placeholder placeholder-lg col-12"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section aria-labelledby="kjTeamCommunityTitle" data-kj-team-section data-kj-team-community>
+        <div class="kj-section-head">
+            <div>
+                <h2 class="kj-section-title" id="kjTeamCommunityTitle">
+                    {lang.ADM_TEAM_COMMUNITY} <span class="kj-badge is-neutral" data-kj-team-community-count></span>
+                </h2>
+                <p class="kj-section-hint">{lang.ADM_TEAM_COMMUNITY_HINT}</p>
+            </div>
+        </div>
+        <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-3 row-cols-xxl-4 g-2" data-kj-team-list>
+            <div class="col" aria-hidden="true">
+                <div class="card kj-person is-compact is-loading placeholder-glow">
+                    <div class="card-body"><span class="kj-person-avatar placeholder"></span><span class="placeholder col-6"></span></div>
+                </div>
+            </div>
+            <div class="col" aria-hidden="true">
+                <div class="card kj-person is-compact is-loading placeholder-glow">
+                    <div class="card-body"><span class="kj-person-avatar placeholder"></span><span class="placeholder col-5"></span></div>
+                </div>
+            </div>
+            <div class="col" aria-hidden="true">
+                <div class="card kj-person is-compact is-loading placeholder-glow">
+                    <div class="card-body"><span class="kj-person-avatar placeholder"></span><span class="placeholder col-7"></span></div>
+                </div>
+            </div>
+            <div class="col" aria-hidden="true">
+                <div class="card kj-person is-compact is-loading placeholder-glow">
+                    <div class="card-body"><span class="kj-person-avatar placeholder"></span><span class="placeholder col-4"></span></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <div class="alert alert-info d-flex align-items-start gap-3 d-none" role="status" data-kj-team-error>
+        <i class="fa-solid fa-circle-info kj-alert-icon" aria-hidden="true"></i>
+        <div>
+            {lang.ADM_TEAM_ERROR}
+            <a class="alert-link" href="https://github.com/kleeja/kleeja/graphs/contributors" target="_blank" rel="noopener">{lang.ADM_TEAM_VIEW_GITHUB}</a>
+        </div>
+    </div>
+</div>
+
+<!-- commit statistics, fetched by the browser from GitHub; see initTeamActivity() in damask.js -->
+<section aria-labelledby="kjTeamActivityTitle" aria-busy="true" data-kj-team-activity="https://api.github.com/repos/kleeja/kleeja/stats/" data-kj-label-others="{lang.ADM_TEAM_OTHERS}" data-kj-label-total="{lang.ADM_TEAM_TOTAL}" data-kj-label-week="{lang.ADM_TEAM_WEEK_OF}" data-kj-label-added="{lang.ADM_TEAM_ADDED}" data-kj-label-removed="{lang.ADM_TEAM_REMOVED}" data-kj-label-error="{lang.ADM_TEAM_STATS_ERROR}">
+    <div class="kj-section-head">
+        <div>
+            <h2 class="kj-section-title" id="kjTeamActivityTitle">{lang.ADM_TEAM_ACTIVITY}</h2>
+            <p class="kj-section-hint">{lang.ADM_TEAM_ACTIVITY_HINT}</p>
+        </div>
+        <a class="kj-section-link" href="https://github.com/kleeja/kleeja/pulse" target="_blank" rel="noopener">
+            <i class="fa-solid fa-wave-square" aria-hidden="true"></i><span>{lang.ADM_TEAM_PULSE}</span><i class="fa-solid fa-arrow-up-right-from-square kj-flip-rtl small" aria-hidden="true"></i>
+        </a>
+    </div>
+    <div class="row g-3">
+        <div class="col-xl-7">
+            <section class="card h-100" aria-labelledby="kjTeamYearsTitle">
+                <div class="card-header kj-card-header">
+                    <h3 class="kj-card-title" id="kjTeamYearsTitle"><i class="fa-solid fa-chart-column" aria-hidden="true"></i> {lang.ADM_TEAM_BY_YEAR}</h3>
+                    <ul class="kj-chart-legend ms-auto" data-kj-team-legend></ul>
+                </div>
+                <div class="card-body">
+                    <div class="kj-chart placeholder-glow" data-kj-team-chart="years"><span class="placeholder"></span></div>
+                </div>
+            </section>
+        </div>
+
+        <div class="col-xl-5">
+            <section class="card h-100" aria-labelledby="kjTeamLinesTitle">
+                <div class="card-header kj-card-header">
+                    <h3 class="kj-card-title" id="kjTeamLinesTitle"><i class="fa-solid fa-code-compare" aria-hidden="true"></i> {lang.ADM_TEAM_LINES}</h3>
+                </div>
+                <div class="card-body">
+                    <div class="kj-chart placeholder-glow" data-kj-team-chart="lines"><span class="placeholder"></span></div>
+                </div>
+            </section>
+        </div>
+
+        <div class="col-12">
+            <section class="card" aria-labelledby="kjTeamWeeksTitle">
+                <div class="card-header kj-card-header">
+                    <h3 class="kj-card-title" id="kjTeamWeeksTitle"><i class="fa-solid fa-calendar-week" aria-hidden="true"></i> {lang.ADM_TEAM_BY_WEEK}</h3>
+                    <ul class="kj-chart-legend ms-auto" data-kj-team-legend></ul>
+                </div>
+                <div class="card-body">
+                    <div class="kj-chart placeholder-glow" data-kj-team-chart="weeks"><span class="placeholder"></span></div>
+                </div>
+            </section>
+        </div>
+    </div>
+</section>
+
+<template id="kjTeamLead">
+    <div class="col">
+        <a class="card kj-card-link kj-person is-lead h-100" href="#" target="_blank" rel="noopener" data-kj-team-link>
+            <div class="card-body">
+                <div class="kj-person-head">
+                    <img class="kj-person-avatar" src="" alt="" width="56" height="56" loading="lazy" data-kj-team-avatar>
+                    <div class="flex-grow-1" style="min-width: 0">
+                        <div class="kj-person-name text-truncate" dir="ltr" data-kj-team-login></div>
+                        <div class="kj-person-meta">
+                            <i class="fa-brands fa-github" aria-hidden="true"></i><span>{lang.ADM_TEAM_PROFILE}</span>
+                        </div>
+                    </div>
+                    <span class="kj-person-rank" dir="ltr" data-kj-team-rank></span>
+                </div>
+                <div class="kj-person-foot">
+                    <dl class="kj-person-stats">
+                        <div>
+                            <dt>{lang.ADM_TEAM_COMMITS}</dt>
+                            <dd data-kj-team-count></dd>
+                        </div>
+                        <div>
+                            <dt>{lang.ADM_TEAM_SHARE}</dt>
+                            <dd data-kj-team-share></dd>
+                        </div>
+                    </dl>
+                    <div class="progress kj-person-bar" aria-hidden="true">
+                        <div class="progress-bar" data-kj-team-bar></div>
+                    </div>
+                </div>
+            </div>
+        </a>
+    </div>
+</template>
+
+<template id="kjTeamItem">
+    <div class="col">
+        <a class="card kj-card-link kj-person is-compact h-100" href="#" target="_blank" rel="noopener" data-kj-team-link>
+            <div class="card-body">
+                <img class="kj-person-avatar" src="" alt="" width="40" height="40" loading="lazy" data-kj-team-avatar>
+                <span class="kj-person-name text-truncate" dir="ltr" data-kj-team-login></span>
+                <span class="kj-person-count">
+                    <i class="fa-solid fa-code-commit" aria-hidden="true"></i>
+                    <span class="visually-hidden">{lang.ADM_TEAM_COMMITS}:</span>
+                    <span data-kj-team-count></span>
+                </span>
+            </div>
+        </a>
+    </div>
+</template>
+
+<!-- ways to take part -->
+<section aria-labelledby="kjTeamJoinTitle">
+    <div class="kj-section-head">
+        <div>
+            <h2 class="kj-section-title" id="kjTeamJoinTitle">{lang.ADM_TEAM_JOIN}</h2>
+            <p class="kj-section-hint">{lang.ADM_TEAM_JOIN_HINT}</p>
+        </div>
+    </div>
+    <div class="row row-cols-1 row-cols-sm-2 row-cols-xl-4 g-3">
+        <div class="col">
+            <a class="card kj-card-link kj-team-action h-100" href="https://github.com/kleeja/kleeja/issues" target="_blank" rel="noopener">
+                <div class="card-body">
+                    <span class="kj-icon-tile"><i class="fa-solid fa-bug" aria-hidden="true"></i></span>
+                    <h3 class="kj-team-action-title">{lang.ADM_TEAM_ISSUES}<i class="fa-solid fa-arrow-up-right-from-square kj-flip-rtl" aria-hidden="true"></i></h3>
+                    <p class="kj-team-action-text">{lang.ADM_TEAM_ISSUES_HINT}</p>
+                </div>
+            </a>
+        </div>
+        <div class="col">
+            <a class="card kj-card-link kj-team-action h-100" href="https://github.com/kleeja/kleeja/pulls" target="_blank" rel="noopener">
+                <div class="card-body">
+                    <span class="kj-icon-tile is-navy"><i class="fa-solid fa-code-pull-request" aria-hidden="true"></i></span>
+                    <h3 class="kj-team-action-title">{lang.ADM_TEAM_CODE}<i class="fa-solid fa-arrow-up-right-from-square kj-flip-rtl" aria-hidden="true"></i></h3>
+                    <p class="kj-team-action-text">{lang.ADM_TEAM_CODE_HINT}</p>
+                </div>
+            </a>
+        </div>
+        <div class="col">
+            <a class="card kj-card-link kj-team-action h-100" href="https://github.com/kleeja/kleeja/tree/main/lang" target="_blank" rel="noopener">
+                <div class="card-body">
+                    <span class="kj-icon-tile"><i class="fa-solid fa-language" aria-hidden="true"></i></span>
+                    <h3 class="kj-team-action-title">{lang.ADM_TEAM_TRANSLATE}<i class="fa-solid fa-arrow-up-right-from-square kj-flip-rtl" aria-hidden="true"></i></h3>
+                    <p class="kj-team-action-text">{lang.ADM_TEAM_TRANSLATE_HINT}</p>
+                </div>
+            </a>
+        </div>
+        <div class="col">
+            <a class="card kj-card-link kj-team-action h-100" href="https://github.com/kleeja/store-catalog" target="_blank" rel="noopener">
+                <div class="card-body">
+                    <span class="kj-icon-tile is-navy"><i class="fa-solid fa-puzzle-piece" aria-hidden="true"></i></span>
+                    <h3 class="kj-team-action-title">{lang.ADM_TEAM_EXTEND}<i class="fa-solid fa-arrow-up-right-from-square kj-flip-rtl" aria-hidden="true"></i></h3>
+                    <p class="kj-team-action-text">{lang.ADM_TEAM_EXTEND_HINT}</p>
+                </div>
+            </a>
+        </div>
+    </div>
+</section>
+
+<div class="card kj-team-thanks mt-4">
+    <div class="card-body d-flex flex-wrap align-items-center gap-3">
+        <span class="kj-icon-tile"><i class="fa-solid fa-heart" aria-hidden="true"></i></span>
+        <div class="flex-grow-1">
+            <div class="fw-semibold">{lang.ADM_TEAM_THANKS_TITLE}</div>
+            <div class="small text-body-secondary">{lang.ADM_TEAM_THANKS}</div>
+            <IF NAME="translator_copyrights">
+            <div class="small text-body-secondary mt-1"><i class="fa-solid fa-language" aria-hidden="true"></i> {translator_copyrights}</div>
+            </IF>
+        </div>
+        <span class="kj-badge is-neutral" dir="ltr">Kleeja {kleeja_version}</span>
+    </div>
+</div>
+
+</IF>

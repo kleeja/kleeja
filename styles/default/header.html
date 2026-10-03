@@ -1,85 +1,87 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml" dir="{dir}">
+<!DOCTYPE html>
+<html lang="{lang.LANG_SMALL_NAME}" dir="{dir}">
 <!-- Powered by kleeja || URL www.kleeja.net -->
 <head>
+    <meta charset="{charset}">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="copyrights" content="Powered by Kleeja || kleeja.net">
+    <meta name="theme-color" content="#ECECEC">
     <title>{title}(title? - :){config.sitename}</title>
-    <meta http-equiv="Content-Type" content="text/html;charset={charset}" />
-    <meta http-equiv="Content-Language" content="{lang.LANG_SMALL_NAME}" />
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="copyrights" content="Powered by Kleeja || kleeja.net" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <!-- metatags.info/all_meta_tags -->
-    <link rel="shortcut icon" href="images/favicon.ico" />
-    <link rel="icon" type="image/gif" href="images/favicon.gif" />
-    <link rel="apple-touch-icon" href="images/apple-touch-icon.png" />
-    <link rel="apple-touch-startup-image" href="images/iPhone.png" />
-    <link rel="stylesheet" type="text/css" media="all" href="{STYLE_PATH}css/stylesheet.css" />
 
-    <link rel="stylesheet" type="text/css" media="all" href="{STYLE_PATH}css/color.css" />
-    <IF NAME="lang.DIR==ltr"><link rel="stylesheet" type="text/css" media="all" href="{STYLE_PATH}css/ltr.css" /></IF>
+    <link rel="shortcut icon" href="{config.siteurl}images/favicon.ico">
+    <link rel="icon" type="image/png" href="{config.siteurl}images/favicon.png">
+    <link rel="apple-touch-icon" href="{config.siteurl}images/apple-touch-icon.png">
 
+    <link rel="stylesheet" href="{config.siteurl}includes/static_shared_files/fontawesome/css/all.min.css">
+    <link rel="stylesheet" href="{STYLE_PATH}css/stylesheet.css">
 
-
-    <script type="text/javascript">
-    <!--
-    var number_of_uploads={config.filesnum};
-    var LANG_PAST_URL_HERE = "{lang.PAST_URL_HERE}";
-    var LANG_MORE_F_FILES = "{lang.MORE_F_FILES}";
-    var STYLE_PATH  = "{STYLE_PATH}";
-    -->
+    <script>
+        var STYLE_PATH = "{STYLE_PATH}";
+        var LANG_PAST_URL_HERE = "{lang.PAST_URL_HERE}";
+        var LANG_MORE_F_FILES = "{lang.MORE_F_FILES}";
+        var number_of_uploads = parseInt("{config.filesnum}", 10) || 0;
     </script>
-
 
     <!-- Extra code -->
     {EXTRA_CODE_META}
 </head>
-<body<IF NAME="go_current == login"> onload="document.login_form.lname.focus();"</IF>>
+<body data-page="{go_current}">
+<INCLUDE NAME="icons">
+
 <!-- begin Main -->
 <div id="main">
 
-    <!--begin Header-->
-    <div id="header" class="clearfix">
-        <h1><a title="{config.sitename}" href="{config.siteurl}" class="logo">{config.sitename}</a></h1>
-    </div>
+    <!-- begin Header -->
+    <header id="header">
+        <a class="logo" href="{config.siteurl}" title="{config.sitename}">
+            <img src="{STYLE_PATH}images/logo.png" alt="{config.sitename}" width="216" height="72">
+        </a>
+    </header>
     <!-- @end-Header -->
 
-    <div class="clr"></div>
-
     <!-- begin Top Navigation -->
-    <div class="top_nav">
+    <nav class="top_nav" aria-label="{lang.MENU}">
         <ul class="menu">
-        <LOOP NAME="top_menu"><IF LOOP="show">
-        <li><a href="{{url}}" (go_current=={{name}}?class="current":)>{{title}}</a></li>
-        </IF></LOOP>
+            <LOOP NAME="top_menu">
+                <IF LOOP="show">
+                <li><a href="{{url}}"(go_current=={{name}}? class="current" aria-current="page":)>{{title}}</a></li>
+                </IF>
+            </LOOP>
         </ul>
-    </div><!-- @end-Top-Navigation -->
-
-    <div class="clr"></div>
+    </nav>
+    <!-- @end-Top-Navigation -->
 
     <!-- begin wrapper -->
-    <div id="wrapper" class="clearfix">
+    <div id="wrapper">
 
-    <IF NAME="extras.header">
-    <!-- begin extras header -->
-    <div class="dot"></div>
-        <div class="extras_header">{extras.header}</div>
-    <div class="dot"></div>
-    <!-- @end-extras-header -->
-    </IF>
+        <!-- begin sidebar: the user and the user menu -->
+        <aside id="sidebar">
+            <div id="sidebar_box">
+                <div class="user-card">
+                    <!-- gravatar sends a missing avatar through its proxy, which fails for sites it can not reach -->
+                    <img class="user-avatar" src="{user_avatar}" alt="" width="92" height="92" onerror="this.onerror=null;this.src='{STYLE_PATH}images/user_avater.png';">
+                    <div class="user-hello">
+                        <span class="user-greeting"><img src="{STYLE_PATH}images/Smile.png" width="16" height="16" alt="">{lang.WELCOME}</span>
+                        <span class="user-name">{username}</span>
+                    </div>
+                </div>
+                <ul class="menu side-menu">
+                    <LOOP NAME="side_menu">
+                        <IF LOOP="show">
+                        <li><a href="{{url}}" title="{{title}}"(go_current=={{name}}? class="current":)><i class="side-icon fa-solid fa-{{icon}}" aria-hidden="true"></i><span class="side-label">{{title}}</span></a></li>
+                        </IF>
+                    </LOOP>
+                </ul>
+            </div>
+            <div class="sidebar-dots"></div>
+        </aside>
+        <!-- @end-sidebar -->
 
-    <div class="clr"></div>
+        <div class="content-area">
 
-    <!-- begin menu right -->
-    <div id="sidebar">  
-        <div id="sidebar_box">
-        <IS_BROWSER!="mobile"> 
-            <img src="{user_avatar}" alt="{username}" title="{username}" height="90" width="100" />
-        </IS_BROWSER>
-            <ul class="menu">
-                <LOOP NAME="side_menu"><IF LOOP="show">
-                <li><a href="{{url}}" (go_current=={{name}}?class="current":)><IS_BROWSER!="mobile"><img src="{STYLE_PATH}images/{{name}}.png" style="float:right;" class="pngfix" alt="{lang.LOGIN}" style="vertical-align:middle;" /></IS_BROWSER>{{title}} <IF LOOP="name==logout">[ {username} ]</IF></a></li>
-                </IF></LOOP>
-            </ul>
-        </div>
-        <div class="dot clr"></div>
-    </div><!-- @end-menu-right -->
+        <IF NAME="extras.header">
+            <!-- begin extras header -->
+            <div class="extras_header">{extras.header}</div>
+            <!-- @end-extras-header -->
+        </IF>
+

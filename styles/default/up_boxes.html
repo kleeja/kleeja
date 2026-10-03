@@ -1,74 +1,29 @@
+<!--
+    Upload result boxes, filled by get_up_tpl_box() in includes/functions_display.php
+    Line breaks and the indent after them are removed before use, so keep every tag on one line.
+    Only the b_ variables, siteurl and sitename are replaced here, lang variables are not;
+    js/script.js gives the copy buttons their title.
+-->
 
 <!-- BEGIN image_thumb -->
-<div class="clr"></div>
-
-    <div class="thumb_img"><a target="_blank" href="{b_url_link}"><img src="{b_img_link}" alt="" /></a></div>
-    
-    <table border="0" width="100%" cellspacing="0" cellpadding="0" class="up_box_input">
-        <tr>
-            <td class="btitle">{b_title}</td>
-            <td class="all_box_link"><textarea readonly="readonly" rows="2" cols="40" class="up_input" tabindex="1">[url={b_url_link}][img]{b_img_link}[/img][/url]</textarea></td>
-        </tr>
-    </table>
-
+    <div class="thumb_img"><a target="_blank" rel="noopener" href="{b_url_link}"><img src="{b_img_link}" alt="" loading="lazy"></a></div>
+    <div class="up_box_row"><div class="btitle">{b_title}</div><div class="input-group"><input type="text" class="copy-field" readonly dir="ltr" value="[url={b_url_link}][img]{b_img_link}[/img][/url]" aria-label="{b_title}"><button type="button" class="btn btn-icon" data-copy><svg class="icon" aria-hidden="true"><use href="#i-copy"/></svg></button></div></div>
 <!-- END image_thumb -->
 
 
-
 <!-- BEGIN image -->
-
-    <table border="0" width="100%" cellspacing="0" cellpadding="0" class="up_box_input">
-        <tr>
-            <td class="btitle">{b_title}</td>
-            <td class="all_box_link"><textarea readonly="readonly" rows="1" cols="40" class="up_input" tabindex="2">{b_url_link}</textarea></td>
-        </tr>
-    </table>
-
-    <table border="0" width="100%" cellspacing="0" cellpadding="0" class="up_box_input">
-        <tr>
-            <td class="btitle">{b_bbc_title}</td>
-            <td class="all_box_link"><textarea readonly="readonly" rows="2" cols="40" class="up_input" tabindex="3">[url={siteurl}][img]{b_url_link}[/img][/url]</textarea></td>
-        </tr>
-    </table>
-
-    <table border="0" width="100%" cellspacing="0" cellpadding="0" class="up_box_input">
-        <tr>
-            <td class="btitle">HTML</td>
-            <td class="all_box_link"><textarea readonly="readonly" rows="4" cols="40" class="up_input" tabindex="4">&lt;a href=&quot;{siteurl}&quot; target=&quot;_blank&quot; title=&quot;{siteurl}&quot;&gt;&lt;img src=&quot;{b_url_link}&quot; border=&quot;0&quot; alt=&quot;{b_url_link}&quot; /&gt;&lt;/a&gt;</textarea></td>
-        </tr>
-    </table>
-<!-- END image -->        
-
+    <div class="up_box_row"><div class="btitle">{b_title}</div><div class="input-group"><input type="text" class="copy-field" readonly dir="ltr" value="{b_url_link}" aria-label="{b_title}"><button type="button" class="btn btn-icon" data-copy><svg class="icon" aria-hidden="true"><use href="#i-copy"/></svg></button></div></div>
+    <div class="up_box_row"><div class="btitle">{b_bbc_title}</div><div class="input-group"><input type="text" class="copy-field" readonly dir="ltr" value="[url={siteurl}][img]{b_url_link}[/img][/url]" aria-label="{b_bbc_title}"><button type="button" class="btn btn-icon" data-copy><svg class="icon" aria-hidden="true"><use href="#i-copy"/></svg></button></div></div>
+    <div class="up_box_row"><div class="btitle">HTML</div><div class="input-group"><input type="text" class="copy-field" readonly dir="ltr" value="&lt;a href=&quot;{siteurl}&quot; target=&quot;_blank&quot; title=&quot;{siteurl}&quot;&gt;&lt;img src=&quot;{b_url_link}&quot; border=&quot;0&quot; alt=&quot;{b_url_link}&quot; /&gt;&lt;/a&gt;" aria-label="HTML"><button type="button" class="btn btn-icon" data-copy><svg class="icon" aria-hidden="true"><use href="#i-copy"/></svg></button></div></div>
+<!-- END image -->
 
 
 <!-- BEGIN file -->
-
-    <table border="0" width="100%" cellspacing="0" cellpadding="0" class="up_box_input">
-        <tr>
-            <td class="btitle">{b_title}</td>
-            <td class="all_box_link"><textarea readonly="readonly" rows="2" cols="40" class="up_input" tabindex="5">{b_url_link}</textarea></td>
-        </tr>
-    </table>
-    
-    <table border="0" width="100%" cellspacing="0" cellpadding="0" class="up_box_input">
-        <tr>
-            <td class="btitle">{b_bbc_title}</td>
-            <td class="all_box_link"><textarea readonly="readonly" rows="2" cols="40" class="up_input" tabindex="6">[url={b_url_link}]{b_url_link}[/url]</textarea></td>
-        </tr>
-    </table>
-
+    <div class="up_box_row"><div class="btitle">{b_title}</div><div class="input-group"><input type="text" class="copy-field" readonly dir="ltr" value="{b_url_link}" aria-label="{b_title}"><button type="button" class="btn btn-icon" data-copy><svg class="icon" aria-hidden="true"><use href="#i-copy"/></svg></button></div></div>
+    <div class="up_box_row"><div class="btitle">{b_bbc_title}</div><div class="input-group"><input type="text" class="copy-field" readonly dir="ltr" value="[url={b_url_link}]{b_url_link}[/url]" aria-label="{b_bbc_title}"><button type="button" class="btn btn-icon" data-copy><svg class="icon" aria-hidden="true"><use href="#i-copy"/></svg></button></div></div>
 <!-- END file -->
 
 
-
-
 <!-- BEGIN del_file_code -->
-
-    <table border="0" width="100%" cellspacing="0" cellpadding="0" class="up_box_input">
-        <tr>
-            <td class="btitle">{b_title}</td>
-            <td class="all_box_link"><textarea readonly="readonly" rows="2" cols="40" class="up_input" tabindex="7">{b_code_link}</textarea></td>
-        </tr>
-    </table>
-
+    <div class="up_box_row up_box_delete"><div class="btitle">{b_title}</div><div class="input-group"><input type="text" class="copy-field" readonly dir="ltr" value="{b_code_link}" aria-label="{b_title}"><button type="button" class="btn btn-icon" data-copy><svg class="icon" aria-hidden="true"><use href="#i-copy"/></svg></button></div></div>
 <!-- END del_file_code -->

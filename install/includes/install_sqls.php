@@ -54,12 +54,7 @@ CREATE TABLE `{$dbprefix}stats` (
   `imgs` int(11) unsigned NOT NULL DEFAULT '0',
   `users` int(11) unsigned NOT NULL DEFAULT '0',
   `sizes` bigint(20) NOT NULL DEFAULT '0',
-  `last_file` varchar(350) collate utf8_bin NOT NULL,
   `last_f_del` int(10) NOT NULL,
-  `today` int(4) NOT NULL,
-  `counter_today` int(12) NOT NULL,
-  `counter_all` int(12) NOT NULL,
-  `counter_yesterday` int(12) NOT NULL,
   `ban` text collate utf8_bin NOT NULL,
   `last_google` int(11) unsigned NOT NULL,
   `google_num` int(11) unsigned NOT NULL,
@@ -81,7 +76,6 @@ CREATE TABLE `{$dbprefix}users` (
   `password_salt` varchar(250) collate utf8_bin NOT NULL,
   `mail` varchar(350) collate utf8_bin NOT NULL,
   `founder` tinyint(1) NOT NULL default '0',
-  `session_id` char(32) COLLATE utf8_bin NOT NULL DEFAULT '',
   `clean_name` varchar(300) collate utf8_bin NOT NULL,
   `last_visit` INT(11)  NOT NULL DEFAULT '0',
   `register_time` int(11) unsigned NOT NULL DEFAULT '0',
@@ -139,12 +133,7 @@ CREATE TABLE `{$dbprefix}plugins` (
   `plg_ver` varchar(255) collate utf8_bin NOT NULL,
   `plg_author` varchar(255) collate utf8_bin NOT NULL DEFAULT '',
   `plg_dsc` mediumtext COLLATE utf8_bin NOT NULL,
-  `plg_icon` blob NOT NULL,
-  `plg_uninstall` mediumtext COLLATE utf8_bin NOT NULL,
   `plg_disabled` tinyint(1) unsigned NOT NULL default '0',
-  `plg_instructions` mediumtext COLLATE utf8_bin NOT NULL,
-  `plg_store` longtext COLLATE utf8_bin NOT NULL,
-  `plg_files` text COLLATE utf8_bin NOT NULL,
   KEY `plg_name` (`plg_name`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_bin ;
 ";
@@ -212,9 +201,7 @@ CREATE TABLE `{$dbprefix}filters` (
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_bin AUTO_INCREMENT=1 ;
 ";
 
-$install_sqls[
-    'stats_insert'
-] = "INSERT INTO `{$dbprefix}stats`  VALUES (0,0,1,0,0,:time,0,0,0,0,'',0,0,0,0,'','','','')";
+$install_sqls['stats_insert'] = "INSERT INTO `{$dbprefix}stats`  VALUES (0,0,1,0,:time,'',0,0,0,0,'','','','')";
 $install_params['stats_insert'] = ['time' => time()];
 
 $install_sqls[

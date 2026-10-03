@@ -1,59 +1,58 @@
+<div class="row justify-content-center">
+    <div class="col-md-8 col-lg-6 col-xl-5">
+        <div class="card shadow-sm">
+            <div class="card-body p-4 p-md-5">
+
+                <div class="text-center mb-4">
+                    <span class="icon-box icon-box-lg rounded-circle bg-primary-subtle text-primary-emphasis mb-3"><i class="fa-solid fa-key"></i></span>
+                    <h1 class="h3 fw-bold mb-1">{title}</h1>
+                    <p class="text-body-secondary mb-0">{lang.E_GET_LOSTPASS}</p>
+                </div>
 
 
-<div class="mt-3 mb-3">
-    <h2>{title}</h2>
-    <p class="text-muted">{lang.E_GET_LOSTPASS}</p>
-</div>
+                <!-- error messages -->
+                <IF NAME="ERRORS">
+                <div class="alert alert-danger small" role="alert">
+                    <ul class="mb-0 ps-3">
+                        <LOOP NAME="ERRORS">
+                        <li>{%value%}</li>
+                        </LOOP>
+                    </ul>
+                </div>
+                </IF>
 
 
+                <form action="{action}" method="post">
 
-<!-- error messages -->
-<IF NAME="ERRORS">
-    <div class="alert alert-danger">
-        <ul>
-            <LOOP NAME="ERRORS">
-                <li>{%value%}</li>
-            </LOOP>
-        </ul>
-    </div>
-</IF>
+                    <div class="form-floating mb-3">
+                        <input type="email" class="form-control" id="rmail" name="rmail" value="{t_rmail}" placeholder="{lang.EMAIL}" dir="ltr" autocomplete="email">
+                        <label for="rmail">{lang.EMAIL}</label>
+                    </div>
 
 
+                    <!-- verification code -->
+                    <IF NAME="config.enable_captcha==1">
+                    <div class="mb-4">
+                        <label for="kleeja_code_answer" class="form-label">{lang.VERTY_CODE}</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-body p-1"><img id="kleeja_img_captcha" class="captcha-img rounded-1" src="{captcha_file_path}" width="150" height="25" alt="{lang.REFRESH_CAPTCHA}" title="{lang.REFRESH_CAPTCHA}" onclick="update_kleeja_captcha('{captcha_file_path}', 'kleeja_code_answer');"></span>
+                            <input type="text" name="kleeja_code_answer" id="kleeja_code_answer" class="form-control" dir="ltr" autocomplete="off" aria-describedby="kleeja_code_answer_help">
+                            <button type="button" class="btn btn-outline-secondary" title="{lang.REFRESH_CAPTCHA}" aria-label="{lang.REFRESH_CAPTCHA}" onclick="update_kleeja_captcha('{captcha_file_path}', 'kleeja_code_answer');"><i class="fa-solid fa-arrow-rotate-right"></i></button>
+                        </div>
+                        <div id="kleeja_code_answer_help" class="form-text">{lang.NOTE_CODE}</div>
+                    </div>
+                    </IF>
 
-<form action="{action}" method="post">
+                    {H_FORM_KEYS}
 
-    <div class="form-group">
-        <label for="rmail">{lang.EMAIL}</label>
-        <input type="email" class="form-control" id="rmail"  name="rmail" value="{t_rmail}" style="direction:ltr;">
-    </div>
+                    <button type="submit" name="submit" value="{lang.GET_LOSTPASS}" class="btn btn-primary btn-lg w-100">{lang.GET_LOSTPASS}</button>
 
+                    <p class="text-center small mt-4 mb-0">
+                        <a href="{config.siteurl}(config.mod_writer?login.html:ucp.php?go=login)" class="text-decoration-none"><i class="fa-solid fa-arrow-left icon-dir me-1"></i>{lang.LOGIN}</a>
+                    </p>
+                </form>
 
-    <!-- verification code -->
-    <IF NAME="config.enable_captcha==1">
-
-        <div class="form-group safe_code">
-            <label for="kleeja_code_answer" class=" control-label">{lang.VERTY_CODE}</label>
-            <div class="">
-                <img style="vertical-align:middle;"
-                     id="kleeja_img_captcha"
-                     src="{captcha_file_path}"
-                     alt="{lang.REFRESH_CAPTCHA}"
-                     title="{lang.REFRESH_CAPTCHA}"
-                     onclick="javascript:update_kleeja_captcha('{captcha_file_path}', 'kleeja_code_answer');" />
-
-                <input type="text" name="kleeja_code_answer" class="form-control" style="max-width: 300px" autocomplete="false" id="kleeja_code_answer" aria-describedby="kleeja_code_answer_help"/>
-                <small id="helpBlock" id="kleeja_code_answer_help" class="form-text text-muted">{lang.NOTE_CODE}</small>
             </div>
         </div>
-
-    </IF>
-    
-
-    {H_FORM_KEYS}
-
-    <div class="form-group mt-3">
-        <input type="submit" name="submit" value="{lang.GET_LOSTPASS}" class="btn btn-primary"/>
     </div>
-
-</form>
-
+</div>

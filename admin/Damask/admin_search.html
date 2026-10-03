@@ -1,0 +1,152 @@
+<IF NAME="current_smt==files">
+
+<div class="kj-page-header">
+    <div>
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="./">{lang.R_CPINDEX}</a></li>
+                <li class="breadcrumb-item active" aria-current="page">{lang.SEARCH_FILES}</li>
+            </ol>
+        </nav>
+        <h1 class="kj-page-title">{lang.SEARCH_FILES}</h1>
+    </div>
+    <div class="kj-page-actions">
+        <a class="btn btn-outline-secondary btn-sm" href="./?cp=h_search&amp;smt=users">
+            <i class="fa-solid fa-user" aria-hidden="true"></i><span>{lang.SEARCH_USERS}</span>
+        </a>
+    </div>
+</div>
+
+<form method="post" action="{action}" id="adv_search" class="card" data-kj-require-one="{lang.NO_SEARCH_WORD}">
+    <div class="card-body">
+        <div class="row g-3">
+            <div class="col-md-6">
+                <label class="form-label" for="filename">{lang.FILENAME}</label>
+                <input type="text" class="form-control" id="filename" name="filename">
+            </div>
+
+            <div class="col-md-6">
+                <label class="form-label" for="ext">{lang.FILETYPE}</label>
+                <input type="text" class="form-control" id="ext" name="ext" dir="ltr">
+            </div>
+
+            <div class="col-md-6">
+                <label class="form-label" for="username">{lang.USERNAME}</label>
+                <input type="text" class="form-control" id="username" name="username" value="{filled_username}">
+            </div>
+
+            <div class="col-md-6">
+                <label class="form-label" for="user_ip">{lang.IP}</label>
+                <input type="text" class="form-control" id="user_ip" name="user_ip" value="{filled_ip}" dir="ltr">
+            </div>
+
+            <div class="col-md-6 col-xl-4">
+                <label class="form-label" for="size">{lang.FILESIZE}</label>
+                <div class="input-group">
+                    <select name="than" class="form-select kj-select-narrow" aria-label="{lang.FILESIZE}">
+                        <option value="1">&gt;</option>
+                        <option value="2">&lt;</option>
+                    </select>
+                    <input type="text" class="form-control" id="size" name="size" inputmode="numeric">
+                    <span class="input-group-text">{lang.KILOBYTE}</span>
+                </div>
+            </div>
+
+            <div class="col-md-6 col-xl-4">
+                <label class="form-label" for="ups">{lang.FILEUPS}</label>
+                <div class="input-group">
+                    <select name="uthan" class="form-select kj-select-narrow" aria-label="{lang.FILEUPS}">
+                        <option value="1">&gt;</option>
+                        <option value="2">&lt;</option>
+                    </select>
+                    <input type="text" class="form-control" id="ups" name="ups" inputmode="numeric">
+                </div>
+            </div>
+
+            <div class="col-md-6 col-xl-4">
+                <label class="form-label" for="rep">{lang.REPORT}</label>
+                <div class="input-group">
+                    <select name="rthan" class="form-select kj-select-narrow" aria-label="{lang.REPORT}">
+                        <option value="1">&gt;</option>
+                        <option value="2">&lt;</option>
+                    </select>
+                    <input type="text" class="form-control" id="rep" name="rep" inputmode="numeric">
+                </div>
+            </div>
+
+            <div class="col-md-6 col-xl-4">
+                <label class="form-label" for="lastdown">{lang.LAST_DOWN}</label>
+                <div class="input-group">
+                    <span class="input-group-text">{lang.WAS_B4}</span>
+                    <input type="text" class="form-control" id="lastdown" name="lastdown" inputmode="numeric">
+                    <span class="input-group-text">{lang.DAYS}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card-footer kj-form-actions">
+        <button type="submit" name="search_file" value="1" class="btn btn-primary">
+            <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i><span>{lang.SEARCH_SUBMIT}</span>
+        </button>
+    </div>
+
+    {H_FORM_KEYS}
+</form>
+
+<ELSEIF NAME="current_smt==users">
+
+<div class="kj-page-header">
+    <div>
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="./">{lang.R_CPINDEX}</a></li>
+                <li class="breadcrumb-item"><a href="./?cp=g_users">{lang.R_GROUPS}</a></li>
+                <li class="breadcrumb-item active" aria-current="page">{lang.SEARCH_USERS}</li>
+            </ol>
+        </nav>
+        <h1 class="kj-page-title">{lang.SEARCH_USERS}</h1>
+    </div>
+    <div class="kj-page-actions">
+        <a class="btn btn-outline-secondary btn-sm" href="./?cp=h_search&amp;smt=files">
+            <i class="fa-solid fa-file" aria-hidden="true"></i><span>{lang.SEARCH_FILES}</span>
+        </a>
+    </div>
+</div>
+
+<IF NAME="default_user_system">
+
+<form method="post" action="{action}" id="user_search" class="card" data-kj-require-one="{lang.NO_SEARCH_WORD}">
+    <div class="card-body">
+        <div class="row g-3">
+            <div class="col-md-6">
+                <label class="form-label" for="username">{lang.USERNAME}</label>
+                <input type="text" class="form-control" id="username" name="username">
+            </div>
+
+            <div class="col-md-6">
+                <label class="form-label" for="usermail">{lang.EMAIL}</label>
+                <input type="text" class="form-control" id="usermail" name="usermail" dir="ltr">
+            </div>
+        </div>
+    </div>
+
+    <div class="card-footer kj-form-actions">
+        <button type="submit" name="search_user" value="1" class="btn btn-primary">
+            <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i><span>{lang.SEARCH_SUBMIT}</span>
+        </button>
+    </div>
+
+    {H_FORM_KEYS2}
+</form>
+
+<ELSE>
+
+<div class="alert alert-info d-flex align-items-start gap-2" role="status">
+    <i class="fa-solid fa-circle-info kj-alert-icon" aria-hidden="true"></i>
+    <div>{lang.USERS_NOT_NORMAL_SYS}</div>
+</div>
+
+</IF>
+
+</IF>

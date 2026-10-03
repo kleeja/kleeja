@@ -286,4 +286,11 @@ return [
     'EMAIL_CHANGE_REQ_PASS' => 'In order to change your email address, It\'s required to type your current password.',
     'DRAG_AND_DROP' => 'Drop a file inside&hellip;',
     'OR_MANUAL_SELECT' => 'Or click here to <em>Select</em> a file manually..',
+    'MENU' => 'Menu',
+    'COPY' => 'Copy',
+    'COPIED' => 'Copied',
+    'COLOR_MODE' => 'Color mode',
+    'COLOR_LIGHT' => 'Light',
+    'COLOR_DARK' => 'Dark',
+    'COLOR_AUTO' => 'Auto',
 ];

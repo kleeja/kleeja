@@ -1,69 +1,73 @@
 <!-- register template -->
-<div id="content" class="border_radius">
+<div id="content">
 
     <!-- title -->
-    <h1 class="title">&#9679; {title}</h1>
+    <h1 class="title">{title}</h1>
     <!-- @end-title -->
 
-    <!-- line top -->
-        <div class="line"></div>
-    <!-- @end-line -->
-
     <IF NAME="ERRORS">
-    <!-- msg, Infos & Alerts & Errors -->
-    <dl id="system-message">
-        <dd class="error">
-            <ul>
+    <!-- msg, Alerts & Errors -->
+    <div class="notice notice-error" role="alert">
+        <img src="{STYLE_PATH}images/err.gif" width="29" height="29" alt="">
+        <ul class="notice-body">
             <LOOP NAME="ERRORS">
             <li>{%value%}</li>
             </LOOP>
-            </ul>
-        </dd>
-    </dl>
+        </ul>
+    </div>
     <!-- @end-msg -->
     </IF>
 
-    <!-- form register -->
-    <form action="{action}" method="post">
-    
-        <div class="register">
-            <label>{lang.USERNAME} :</label>
-            <input type="text" name="lname" value="{t_lname}" size="30" tabindex="1" />
-            <label>{lang.PASSWORD} :</label>
-            <input type="password" name="lpass" value="{t_lpass}" size="30" tabindex="2" />
-            <label>{lang.REPEAT_PASS} :</label>
-            <input type="password" name="lpass2" value="{t_lpass2}" size="30" tabindex="3" />
-            <label>{lang.EMAIL} :</label>
-            <input type="text" name="lmail" value="{t_lmail}" size="30" style="direction:ltr" tabindex="4" />
-        </div>
-        
-        <div class="clr"></div>
-        
-        <!-- verification code -->
-        <IF NAME="config.enable_captcha==1">
-        <div class="safe_code">
-            <p>{lang.VERTY_CODE}</p>
-            <div class="clr"></div>
-            <div>
-                <img style="vertical-align:middle;" id="kleeja_img_captcha" src="{captcha_file_path}" alt="{lang.REFRESH_CAPTCHA}" title="{lang.REFRESH_CAPTCHA}" onclick="javascript:update_kleeja_captcha('{captcha_file_path}', 'kleeja_code_answer');" />
-                <input type="text" name="kleeja_code_answer" id="kleeja_code_answer" tabindex="5" />
+    <div class="form-layout">
+        <!-- form register -->
+        <form class="form-main" action="{action}" method="post">
+
+            <div class="field">
+                <label for="lname">{lang.USERNAME}</label>
+                <input class="input-username" type="text" id="lname" name="lname" value="{t_lname}" autocomplete="username" autofocus>
             </div>
-            <div class="clr"></div>
-            <p class="explain">{lang.NOTE_CODE}</p>
-        </div>
-        </IF>
-        <!-- @end-verification-code -->
 
-        <div class="clr"></div>
+            <div class="form-grid-2">
+                <div class="field">
+                    <label for="lpass">{lang.PASSWORD}</label>
+                    <input class="input-password" type="password" id="lpass" name="lpass" value="{t_lpass}" autocomplete="new-password">
+                </div>
+                <div class="field">
+                    <label for="lpass2">{lang.REPEAT_PASS}</label>
+                    <input class="input-password" type="password" id="lpass2" name="lpass2" value="{t_lpass2}" autocomplete="new-password">
+                </div>
+            </div>
 
-        {H_FORM_KEYS}
+            <div class="field">
+                <label for="lmail">{lang.EMAIL}</label>
+                <input type="email" id="lmail" name="lmail" value="{t_lmail}" dir="ltr" autocomplete="email">
+            </div>
 
-        <input type="submit" name="submit" value="{lang.REGISTER}" tabindex="6" />
+            <IF NAME="config.enable_captcha==1">
+            <!-- verification code -->
+            <div class="safe_code">
+                <label class="label" for="kleeja_code_answer">{lang.VERTY_CODE}</label>
+                <div class="captcha">
+                    <img id="kleeja_img_captcha" src="{captcha_file_path}" alt="{lang.REFRESH_CAPTCHA}" title="{lang.REFRESH_CAPTCHA}" data-captcha-refresh="{captcha_file_path}">
+                    <button type="button" class="btn btn-icon" title="{lang.REFRESH_CAPTCHA}" aria-label="{lang.REFRESH_CAPTCHA}" data-captcha-refresh="{captcha_file_path}"><svg class="icon" aria-hidden="true"><use href="#i-refresh"/></svg></button>
+                    <input type="text" name="kleeja_code_answer" id="kleeja_code_answer" autocomplete="off" autocapitalize="off" spellcheck="false">
+                </div>
+                <p class="explain">{lang.NOTE_CODE}</p>
+            </div>
+            <!-- @end-verification-code -->
+            </IF>
 
-    </form>
-    <!-- @end-form-register -->
-    
-    <div class="clr"></div>
-  
+            {H_FORM_KEYS}
+
+            <div class="form-actions">
+                <button type="submit" name="submit" value="{lang.REGISTER}" class="btn btn-primary btn-lg">{lang.REGISTER}</button>
+                <a href="{config.siteurl}(config.mod_writer?login.html:ucp.php?go=login)">{lang.LOGIN}</a>
+            </div>
+        </form>
+        <!-- @end-form-register -->
+
+        <img class="page-art" src="{STYLE_PATH}images/register.gif" width="128" height="128" alt="">
+    </div>
+
 </div>
 <!-- @end-register-template -->

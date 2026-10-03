@@ -1,6 +1,6 @@
-﻿#
-# This is a configuraion file of the style.
-# Change those values when you create 
+#
+# This is a configuration file of the style.
+# Change those values when you create
 # your style ...
 #
 
@@ -8,20 +8,20 @@
 name = Default
 
 #Style desc
-desc:en = Default style of Kleeja, developed and improved by Kleeja team 
-desc:ar = الستايل الافتراضي مع النسخة, وهذا مايقوم فريق كليجا تطويره دوماً
+desc:en = Default style of Kleeja, the classic look rebuilt for today's browsers and phones, developed and improved by Kleeja team
+desc:ar = الستايل الافتراضي مع النسخة, الشكل الكلاسيكي بعد إعادة بنائه للمتصفحات والجوالات الحديثة, وهذا مايقوم فريق كليجا تطويره دوماً
 
 
 #Style copyright
-copyright = 2009-2017 Kleeja.net
+copyright = 2009-2026 Kleeja.net
 
 #Version of style
-version = 2.0
+version = 3.0
 
 #Min. required version of kleeja
-kleeja_version = 1.7
+kleeja_version = 3.0
 
-#name of the style required by this style 
+#name of the style required by this style
 #depend_on = default
 
 #plugins required to install this style

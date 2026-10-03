@@ -277,7 +277,8 @@ function send_mail(
 function delete_cache(string|array $name, bool $all = false): bool
 {
     //Those files are exceptions and not for deletion
-    $exceptions = ['.htaccess', 'index.html', 'php.ini', 'web.config'];
+    //backup.zip is the backup of the last update, it is kept until the next update
+    $exceptions = ['.htaccess', 'index.html', 'php.ini', 'web.config', 'backup.zip'];
 
     //ignore kleeja_log in dev stage.
     if (defined('DEV_STAGE')) {
@@ -456,7 +457,6 @@ function get_mime_for_header(string $ext): string
         'lzh' => 'application/octet-stream',
         'm13' => 'application/x-msmediaview',
         'm14' => 'application/x-msmediaview',
-        'm3u' => 'audio/x-mpegurl',
         'man' => 'application/x-troff-man',
         'mdb' => 'application/x-msaccess',
         'me' => 'application/x-troff-me',
@@ -659,8 +659,9 @@ function get_olang(string $name): bool
     if (is_null($olang) || !is_array($olang)) {
         $olang = [];
     }
-    $lang_to_add = [];
     if (!($lang_to_add = cache()->get('data_lang' . $name))) {
+        $lang_to_add = [];
+
         $query = [
             'SELECT' => 'l.word, l.trans',
             'FROM' => "{$dbprefix}lang l",
@@ -877,6 +878,67 @@ function update_config(string $name, string $value, bool $escape = true, int $gr
     }
 
     return false;
+}
+
+/**
+ * run the database updates that are newer than the current db version, in order,
+ * it stops at the first failed update and keeps db_version before it, so it runs again on the next try
+ *
+ * @param  array $update_schema      [db version => ['sql' => [name => query], 'functions' => [callables]]]
+ * @param  int   $current_db_version
+ * @return array the errors, empty if all the updates are done
+ */
+function kleeja_run_db_updates(array $update_schema, int $current_db_version): array
+{
+    global $SQL, $dbprefix;
+
+    //the failed queries are collected below, not shown in the error page
+    if (!defined('SQL_NO_ERRORS')) {
+        define('SQL_NO_ERRORS', true);
+    }
+
+    $available_db_updates = array_filter(array_keys($update_schema), function (int $v) use ($current_db_version): bool {
+        return $v > $current_db_version;
+    });
+
+    sort($available_db_updates);
+
+    //an update that was applied before, but its version was not saved, is not an error
+    $done_before = function (array $error, string $sql_content): bool {
+        //MySQL: 1060 duplicate column, 1061 duplicate key, 1062 duplicate entry, 1091 dropped column or key
+        return in_array((int) ($error[0] ?? 0), [1060, 1061, 1062, 1091], true) ||
+            preg_match('/duplicate|already exists|UNIQUE constraint failed/i', (string) ($error[1] ?? '')) === 1 ||
+            //SQLite: the column of a DROP COLUMN is gone already
+            (preg_match('/\bDROP\s+COLUMN\b/i', $sql_content) === 1 &&
+                str_contains((string) ($error[1] ?? ''), 'no such column'));
+    };
+
+    $errors = [];
+
+    foreach ($available_db_updates as $db_update_version) {
+        foreach ($update_schema[$db_update_version]['sql'] ?? [] as $name => $sql_content) {
+            if (!$SQL->query($sql_content) && !$done_before($SQL->get_error(), $sql_content)) {
+                $errors[] = $db_update_version . ' - ' . $name . ' : ' . implode(':', $SQL->get_error());
+            }
+        }
+
+        //stop here, so this version is applied again on the next try
+        if (sizeof($errors)) {
+            break;
+        }
+
+        foreach ($update_schema[$db_update_version]['functions'] ?? [] as $n) {
+            if (is_callable($n)) {
+                $n();
+            }
+        }
+
+        $SQL->query("UPDATE `{$dbprefix}config` SET `value` = :version WHERE `name` = 'db_version'", [
+            'version' => $db_update_version,
+        ]);
+    }
+
+    return $errors;
 }
 
 // Delete config
