@@ -138,41 +138,8 @@ class usrcp
                 //all user fileds info
                 $userinfo = $row;
 
-                $user_y = base64_encode(
-                    serialize([
-                        'id' => $row['id'],
-                        'name' => $row['name'],
-                        'mail' => $row['mail'],
-                        'last_visit' => $row['last_visit'],
-                    ]),
-                );
-
                 if (!$hashed && !$loginadm) {
-                    //sign the whole payload (incl. group_id and user info) so none of it can be tampered with
-                    $hash_key_expire = $this->ulogu_signature(
-                        (string) $row['id'],
-                        (string) $row['password'],
-                        (string) $expire,
-                        (string) $row['group_id'],
-                        $user_y,
-                    );
-                    cookie()->set(
-                        'ulogu',
-                        $this->en_de_crypt(
-                            $row['id'] .
-                                '|' .
-                                $row['password'] .
-                                '|' .
-                                $expire .
-                                '|' .
-                                $hash_key_expire .
-                                '|' .
-                                $row['group_id'] .
-                                '|' .
-                                $user_y,
-                        ),
-                        $expire,
-                    );
+                    $this->set_login_cookie($row, $expire);
                 }
 
                 //if last visit > 1 minute then update it
@@ -197,6 +164,44 @@ class usrcp
         } else {
             return false;
         }
+    }
+
+    public function set_login_cookie(array $row, int $expire): void
+    {
+        $user_y = base64_encode(
+            serialize([
+                'id' => $row['id'],
+                'name' => $row['name'],
+                'mail' => $row['mail'],
+                'last_visit' => $row['last_visit'],
+            ]),
+        );
+
+        $hash_key_expire = $this->ulogu_signature(
+            (string) $row['id'],
+            (string) $row['password'],
+            (string) $expire,
+            (string) $row['group_id'],
+            $user_y,
+        );
+
+        cookie()->set(
+            'ulogu',
+            $this->en_de_crypt(
+                $row['id'] .
+                    '|' .
+                    $row['password'] .
+                    '|' .
+                    $expire .
+                    '|' .
+                    $hash_key_expire .
+                    '|' .
+                    $row['group_id'] .
+                    '|' .
+                    $user_y,
+            ),
+            $expire,
+        );
     }
 
     /*
