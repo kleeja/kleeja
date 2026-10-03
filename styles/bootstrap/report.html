@@ -65,7 +65,7 @@
                     <div class="mb-3">
                         <label for="kleeja_code_answer" class="form-label">{lang.VERTY_CODE}</label>
                         <div class="input-group">
-                            <span class="input-group-text bg-body p-1"><img id="kleeja_img_captcha" class="captcha-img rounded-1" src="{captcha_file_path}" width="150" height="25" alt="{lang.REFRESH_CAPTCHA}" title="{lang.REFRESH_CAPTCHA}" onclick="update_kleeja_captcha('{captcha_file_path}', 'kleeja_code_answer');"></span>
+                            <span class="input-group-text p-0 overflow-hidden"><img id="kleeja_img_captcha" class="captcha-img" src="{captcha_file_path}" width="160" height="38" alt="{lang.REFRESH_CAPTCHA}" title="{lang.REFRESH_CAPTCHA}" onclick="update_kleeja_captcha('{captcha_file_path}', 'kleeja_code_answer');"></span>
                             <input type="text" name="kleeja_code_answer" id="kleeja_code_answer" class="form-control" dir="ltr" autocomplete="off" aria-describedby="kleeja_code_answer_help">
                             <button type="button" class="btn btn-outline-secondary" title="{lang.REFRESH_CAPTCHA}" aria-label="{lang.REFRESH_CAPTCHA}" onclick="update_kleeja_captcha('{captcha_file_path}', 'kleeja_code_answer');"><i class="fa-solid fa-arrow-rotate-right"></i></button>
                         </div>

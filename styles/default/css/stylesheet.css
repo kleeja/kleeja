@@ -1086,8 +1086,9 @@ input[type="file"]::file-selector-button {
     gap: 8px;
 }
 
+/* 40px is the 38px image plus its border, so the Kleeja mark in it is not scaled down */
 #kleeja_img_captcha {
-    height: 38px;
+    height: 40px;
     width: auto;
     max-width: 180px;
     background: #ffffff;
