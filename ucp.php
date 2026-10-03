@@ -718,30 +718,10 @@ switch (g('go')) {
                     $SQL->build($update_query);
 
                     //Need to update cookies
-                    $prev_cookie = explode('|', (string) $usrcp->en_de_crypt($usrcp->kleeja_get_cookie('ulogu'), 2));
-                    if (!empty($update_query['BIND']['password'])) {
-                        $prev_cookie[1] = $update_query['BIND']['password'];
+                    $ulogu = explode('|', (string) $usrcp->en_de_crypt((string) cookie()->get('ulogu'), 2));
+                    if (count($ulogu) === 6 && ($row = $usrcp->get_data('id, name, mail, password, group_id, last_visit'))) {
+                        $usrcp->set_login_cookie($row, (int) $ulogu[2]);
                     }
-
-                    $usrinfo = unserialize(base64_decode($prev_cookie[5]), ['allowed_classes' => false]);
-                    if (is_array($usrinfo)) {
-                        $usrinfo['mail'] = $new_mail ? $update_query['BIND']['mail'] : $usrinfo['mail'];
-                        $prev_cookie[5] = base64_encode(serialize($usrinfo));
-                    }
-
-                    $prev_cookie[3] = $usrcp->ulogu_signature(
-                        (string) $prev_cookie[0],
-                        (string) $prev_cookie[1],
-                        (string) $prev_cookie[2],
-                        (string) $prev_cookie[4],
-                        (string) $prev_cookie[5],
-                    );
-
-                    $usrcp->kleeja_set_cookie(
-                        'ulogu',
-                        $usrcp->en_de_crypt(implode('|', $prev_cookie)),
-                        (int) $prev_cookie[2],
-                    );
                 }
 
                 kleeja_info($text, redirect: $action);
