@@ -719,7 +719,10 @@ switch (g('go')) {
 
                     //Need to update cookies
                     $ulogu = explode('|', (string) $usrcp->en_de_crypt((string) cookie()->get('ulogu'), 2));
-                    if (count($ulogu) === 6 && ($row = $usrcp->get_data('id, name, mail, password, group_id, last_visit'))) {
+                    if (
+                        count($ulogu) === 6 &&
+                        ($row = $usrcp->get_data('id, name, mail, password, group_id, last_visit'))
+                    ) {
                         $usrcp->set_login_cookie($row, (int) $ulogu[2]);
                     }
                 }
