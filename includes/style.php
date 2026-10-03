@@ -171,6 +171,8 @@ class kleeja_style
             '/\{%(key|value)%\}/i' => '<?php echo $\\1; ?>',
         ];
 
+        extract(runHook('style_parse_func_step_2', get_defined_vars()));
+
         return preg_replace(array_keys($rep), array_values($rep), $html);
     }
 

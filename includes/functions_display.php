@@ -1270,15 +1270,6 @@ function time_zones(): array
 function configField(string $name, string $type = 'text', array $select_options = []): string
 {
     switch ($type) {
-        default:
-        case 'text':
-            return '<input type="text" id="kj_meta_seo_home_meta_keywords" name="' .
-                $name .
-                '"' .
-                ' value="{con.' .
-                $name .
-                '}" size="50" />';
-
         case 'yesno':
             return '<label>{lang.YES}<input type="radio" id="' .
                 $name .
@@ -1315,6 +1306,13 @@ function configField(string $name, string $type = 'text', array $select_options 
             }
 
             return $return_value . '</select>' . "\n";
+        default:
+            return '<input type="text" id="kj_meta_seo_home_meta_keywords" name="' .
+                $name .
+                '"' .
+                ' value="{con.' .
+                $name .
+                '}" size="50" />';
     }
 }
 

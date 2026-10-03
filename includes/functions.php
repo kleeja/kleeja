@@ -457,7 +457,6 @@ function get_mime_for_header(string $ext): string
         'lzh' => 'application/octet-stream',
         'm13' => 'application/x-msmediaview',
         'm14' => 'application/x-msmediaview',
-        'm3u' => 'audio/x-mpegurl',
         'man' => 'application/x-troff-man',
         'mdb' => 'application/x-msaccess',
         'me' => 'application/x-troff-me',
