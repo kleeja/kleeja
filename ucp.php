@@ -718,14 +718,30 @@ switch (g('go')) {
                     $SQL->build($update_query);
 
                     //Need to update cookies
-                    $prev_cookie = @explode('|', $usrcp->en_de_crypt($usrcp->kleeja_get_cookie('ulogu'), 2));
-                    $insertnewpass = $update_query['BIND']['password'];
-                    $prev_cookie[1] = !empty(p('ppass_new')) ? $insertnewpass : $prev_cookie[1];
-                    $prev_cookie[3] = sha1(md5($config['h_key'] . $prev_cookie[1]) . $prev_cookie[2]);
-                    $usrinfo = unserialize(base64_decode($prev_cookie[5]));
-                    $mail = $new_mail ? strtolower(trim(p('pmail'))) : $usrinfo['mail'];
-                    $prev_cookie[5] = base64_encode(serialize(['id' => $prev_cookie[0], 'name' => $usrinfo['name'], 'mail' => $mail, 'last_visit' => $usrinfo['last_visit']]));
-                    $usrcp->kleeja_set_cookie('ulogu', $usrcp->en_de_crypt(implode('|', $prev_cookie)), $prev_cookie[2]);
+                    $prev_cookie = explode('|', (string) $usrcp->en_de_crypt($usrcp->kleeja_get_cookie('ulogu'), 2));
+                    if (!empty($update_query['BIND']['password'])) {
+                        $prev_cookie[1] = $update_query['BIND']['password'];
+                    }
+
+                    $usrinfo = unserialize(base64_decode($prev_cookie[5]), ['allowed_classes' => false]);
+                    if (is_array($usrinfo)) {
+                        $usrinfo['mail'] = $new_mail ? $update_query['BIND']['mail'] : $usrinfo['mail'];
+                        $prev_cookie[5] = base64_encode(serialize($usrinfo));
+                    }
+
+                    $prev_cookie[3] = $usrcp->ulogu_signature(
+                        (string) $prev_cookie[0],
+                        (string) $prev_cookie[1],
+                        (string) $prev_cookie[2],
+                        (string) $prev_cookie[4],
+                        (string) $prev_cookie[5],
+                    );
+
+                    $usrcp->kleeja_set_cookie(
+                        'ulogu',
+                        $usrcp->en_de_crypt(implode('|', $prev_cookie)),
+                        (int) $prev_cookie[2],
+                    );
                 }
 
                 kleeja_info($text, redirect: $action);
