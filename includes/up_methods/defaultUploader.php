@@ -497,7 +497,7 @@ class defaultUploader implements KleejaUploader
         }
 
         // get the extension of file
-        $fileInfo['fileExtension'] = strtolower(array_pop(explode('.', $fileInfo['originalFileName'])));
+        $fileInfo['fileExtension'] = strtolower(pathinfo($fileInfo['originalFileName'], PATHINFO_EXTENSION));
 
         // them the size
         $fileInfo['fileSize'] = !empty($_FILES['file_' . $fieldNumber . '_']['size'])
