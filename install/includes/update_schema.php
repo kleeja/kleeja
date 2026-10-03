@@ -48,4 +48,14 @@ $update_schema[10]['functions'] = [
             kleeja_unlink(PATH . 'admin/Masmak');
         }
     },
+    //the plugins of older versions are not made for this version and its KleejaDatabase,
+    //so they are disabled until the admin updates them and enables them again
+    function () {
+        global $SQL, $dbprefix;
+
+        $SQL->build([
+            'UPDATE' => "{$dbprefix}plugins",
+            'SET' => 'plg_disabled = 1',
+        ]);
+    },
 ];
