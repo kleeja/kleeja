@@ -1,11 +1,17 @@
-<div class="BoxInner"><div class="BoxTopImg"></div><div class="BoxBody"><div class="inner"><div class="clr"></div>
-    <form method="post" action="{{echo './?step=choose&amp;' . getlang(1)}}">
-        <h2><img src="style/images/stop.png" class="img" alt="" /> {{echo $lang['IS_IT_OFFICIAL']}} </h2>
-        <p class="justify">{{echo $lang['IS_IT_OFFICIAL_DESC']}}</p>
+            <div class="kj-page-head">
+                <span class="kj-icon-tile">{{echo inst_icon('shield-check')}}</span>
+                <div>
+                    <h1>{{echo $lang['IS_IT_OFFICIAL']}}</h1>
+                </div>
+            </div>
 
+            <p class="mb-0">{{echo $lang['IS_IT_OFFICIAL_DESC']}}</p>
 
-        <div class="hr"></div>
-            <button onclick="window.location.href='./?step=what_is_kleeja&amp;{{echo getlang(1)}}';return false;" name="previous" type="submit" class="btn"><span>&laquo;  {{echo $lang['INST_PREVIOUS']}}</span></button>
-            <button name="next" id="next" type="submit" class="btn"><span>{{echo $lang['YES'] . ', '. $lang['INST_NEXT']}} &raquo;</span></button>
-    </form>
-<div class="clr"></div></div></div><div class="BoxBottomImg"></div></div>
+            <div class="kj-actions">
+                <a class="btn btn-outline-secondary" href="./?step=what_is_kleeja&amp;{{echo getlang(1)}}">
+                    {{echo inst_icon('arrow-left', 'kj-icon-flip')}} {{echo $lang['INST_PREVIOUS']}}
+                </a>
+                <a class="btn btn-primary" href="./?step=choose&amp;{{echo getlang(1)}}">
+                    {{echo $lang['YES'] . ', ' . $lang['INST_NEXT']}} {{echo inst_icon('arrow-right', 'kj-icon-flip')}}
+                </a>
+            </div>

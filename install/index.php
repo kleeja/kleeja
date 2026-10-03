@@ -18,18 +18,31 @@ define('IN_COMMON', true);
 //path to this file from Kleeja root folder
 define('PATH', '../');
 
-//before anything check PHP version compatibility
-if (!function_exists('version_compare') || version_compare(PHP_VERSION, 7.0, '<')) {
-    exit(
-        '<h2>You are using an old PHP version (' .
+include_once PATH . 'includes/version.php';
+include_once PATH . 'includes/functions_error.php';
+
+//before anything check PHP version compatibility, the error handler is called directly like in common.php
+if (version_compare(PHP_VERSION, MIN_PHP_VERSION, '<')) {
+    kleeja_show_error(
+        E_USER_ERROR,
+        'You are using an old PHP version (' .
             PHP_VERSION .
-            '), to run Kleeja you should use PHP 7.0 or above.</h2>'
+            '), to run Kleeja you should use PHP ' .
+            MIN_PHP_VERSION .
+            ' or above.',
+        __FILE__,
+        __LINE__,
     );
 }
 
-// if mysqli is not installed
-if (!function_exists('mysqli_connect')) {
-    exit('<h2>In order to use Kleeja, "<b>php_mysqli</b>" extension has to be installed on your server.</h2>');
+// if PDO or its drivers are not installed
+if (!class_exists('PDO') || !array_intersect(['mysql', 'sqlite'], PDO::getAvailableDrivers())) {
+    kleeja_show_error(
+        E_USER_ERROR,
+        'In order to update Kleeja, "pdo_mysql" or "pdo_sqlite" extension has to be installed on your server.',
+        __FILE__,
+        __LINE__,
+    );
 }
 
 if (file_exists(PATH . 'config.php')) {
@@ -38,20 +51,21 @@ if (file_exists(PATH . 'config.php')) {
 
 include_once PATH . 'includes/functions.php';
 
-if (isset($dbtype) && $dbtype == 'sqlite') {
-    include PATH . 'includes/sqlite.php';
-} else {
-    include PATH . 'includes/mysqli.php';
-}
+include_once PATH . 'includes/pdo.php';
 
 include_once 'includes/functions_install.php';
+
+// old links to choose a language
+if (g('step') === 'language' && ig('ln')) {
+    header('Location: ./?step=what_is_kleeja&lang=' . g('ln', default: 'en'));
+
+    exit();
+}
 
 /**
  * print header
  */
-if (!ip('lang')) {
-    echo gettpl('header.html');
-}
+echo gettpl('header.html');
 
 /**
  * Navigation ..
@@ -59,12 +73,6 @@ if (!ip('lang')) {
 switch (g('step', 'str')) {
     default:
     case 'language':
-        if (ig('ln')) {
-            echo '<meta http-equiv="refresh" content="0;url=./?step=what_is_kleeja&lang=' . g('ln', 'str', 'en') . '">';
-
-            exit();
-        }
-
         echo gettpl('lang.html');
 
         break;
@@ -80,24 +88,15 @@ switch (g('step', 'str')) {
         break;
 
     case 'choose':
-        $install_or_no = $php_ver = true;
+        $php_ver = true;
 
         //check version of PHP
         if (!function_exists('version_compare') || version_compare(PHP_VERSION, MIN_PHP_VERSION, '<')) {
             $php_ver = false;
         }
 
-        if (file_exists(PATH . 'config.php')) {
-            include_once PATH . 'config.php';
-
-            if (!empty($dbuser) && !empty($dbname)) {
-                $d = inst_get_config('language');
-
-                if (!empty($d)) {
-                    $install_or_no = false;
-                }
-            }
-        }
+        //config.php is included at the top of this file
+        $install_or_no = !inst_is_installed();
 
         echo gettpl('choose.html');
 

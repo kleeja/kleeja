@@ -1,87 +1,90 @@
-<div class="BoxInner"><div class="BoxTopImg"></div><div class="BoxBody"><div class="inner">
-<div class="clr"></div>
+            {{$urlsite = htmlspecialchars($GLOBALS['urlsite'], ENT_QUOTES);}}
+            <form method="post" action="./install.php?step=data&amp;{{echo getlang(1)}}" class="needs-validation" novalidate>
+                <section class="kj-section">
+                    <h2 class="kj-section-title">{{echo inst_icon('house-door')}} {{echo $lang['INST_SITE_INFO']}}</h2>
+                    <div class="row g-3">
+                        <div class="col-12">
+                            <label class="form-label" for="sitename">{{echo $lang['SITENAME']}}</label>
+                            <input class="form-control" name="sitename" id="sitename" type="text" required>
+                            <div class="invalid-feedback">{{echo $lang['VALIDATING_FORM_WRONG']}}</div>
+                        </div>
+                        <div class="col-md-7">
+                            <label class="form-label" for="siteurl">{{echo $lang['SITEURL']}}</label>
+                            <input class="form-control" name="siteurl" id="siteurl" type="text" inputmode="url" value="{{echo $urlsite}}" dir="ltr" required>
+                            <div class="invalid-feedback">{{echo $lang['VALIDATING_FORM_WRONG']}}</div>
+                        </div>
+                        <div class="col-md-5">
+                            <label class="form-label" for="sitemail">{{echo $lang['SITEMAIL']}}</label>
+                            <input class="form-control" name="sitemail" id="sitemail" type="email" dir="ltr" required pattern="[^@\s]+@[^@\s]+\.[^@\s]+" data-kj-copy-to="#email">
+                            <div class="invalid-feedback">{{echo $lang['WRONG_EMAIL']}}</div>
+                        </div>
+                    </div>
+                </section>
 
-    <form method="post" action="{{echo './install.php?step=data&amp;' . getlang(1)}}" onsubmit="javascript:return formCheck(this, Array('sitename','siteurl','sitemail' ,'username', 'password','email' ));">
-        <h2><img src="style/images/s-home.png" alt="" class="img" />{{echo $lang['INST_SITE_INFO']}}</h2>
-        <table class="DataTable" dir="{{echo $lang['DIR']}}">
-            <tr>
-                <td class="tdd">{{echo $lang['SITENAME']}}</td>
-                <td><input name="sitename" type="text" style="width:70%" /></td>
-            </tr>
-            <tr>
-                <td class="tdd">{{echo $lang['SITEURL']}}</td>
-                <td><input name="siteurl" type="text" value="{{echo $GLOBALS['urlsite']}}" style="direction:ltr;width:70%" /></td>
-            </tr>
-            <tr>
-                <td class="tdd">{{echo $lang['SITEMAIL']}}</td>
-                <td><input name="sitemail" id="sitemail" type="text" onchange="return w_email(this.name);" style="direction:ltr;width:40%" /></td>
-            </tr>
-        </table>
+                <section class="kj-section">
+                    <h2 class="kj-section-title">{{echo inst_icon('person-gear')}} {{echo $lang['INST_ADMIN_INFO']}}</h2>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label" for="username">{{echo $lang['USERNAME']}}</label>
+                            <input class="form-control" name="username" id="username" type="text" autocomplete="username" required>
+                            <div class="invalid-feedback">{{echo $lang['VALIDATING_FORM_WRONG']}}</div>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label" for="email">{{echo $lang['EMAIL']}}</label>
+                            <input class="form-control" name="email" id="email" type="email" dir="ltr" autocomplete="email" required pattern="[^@\s]+@[^@\s]+\.[^@\s]+">
+                            <div class="invalid-feedback">{{echo $lang['WRONG_EMAIL']}}</div>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label" for="password">{{echo $lang['PASSWORD']}}</label>
+                            <div class="input-group has-validation">
+                                <input class="form-control" name="password" id="password" type="password" dir="ltr" autocomplete="new-password" required>
+                                <button class="btn btn-outline-secondary" type="button" data-kj-toggle-password="#password" aria-pressed="false" title="{{echo $lang['INST_SHOW_PASSWORD']}}">
+                                    {{echo inst_icon('eye')}}
+                                    <span class="visually-hidden">{{echo $lang['INST_SHOW_PASSWORD']}}</span>
+                                </button>
+                                <div class="invalid-feedback">{{echo $lang['VALIDATING_FORM_WRONG']}}</div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label" for="password2">{{echo $lang['PASSWORD2']}}</label>
+                            <input class="form-control" name="password2" id="password2" type="password" dir="ltr" autocomplete="new-password" required data-kj-match="#password" data-kj-match-message="{{echo htmlspecialchars($lang['PASS_NEQ_PASS2'], ENT_QUOTES)}}">
+                            <div class="invalid-feedback">{{echo $lang['VALIDATING_FORM_WRONG']}}</div>
+                        </div>
+                    </div>
+                </section>
 
-        <div class="hr"></div>
+                <section class="kj-section">
+                    <h2 class="kj-section-title">{{echo inst_icon('sliders')}} {{echo $lang['INST_OTHER_INFO']}}</h2>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label" for="time_zone">{{echo $lang['TIME_ZONE']}}</label>
+                            <select class="form-select" name="time_zone" id="time_zone" dir="ltr">
+                                {{foreach(time_zones() as $zone => $offset):}}
+                                <option value="{{echo $zone}}"{{if($zone === 'Asia/Damascus'):}} selected{{endif;}}>{{echo $zone}} (GMT{{echo $offset < 0 ? $offset : '+' . $offset}})</option>
+                                {{endforeach;}}
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label" for="urls_type">{{echo $lang['URLS_TYPES']}}</label>
+                            <select class="form-select" name="urls_type" id="urls_type" data-kj-example="#like_this">
+                                <option value="id" data-example="{{echo $urlsite}}do.php?id=123">{{echo $lang['DEFAULT']}}</option>
+                                <option value="filename" data-example="{{echo $urlsite}}do.php?filename=12542219930.gif">{{echo $lang['FILENAME_URL']}}</option>
+                                <option value="direct" data-example="{{echo $urlsite}}uploads/12542219930.gif">{{echo $lang['DIRECT_URL']}}</option>
+                            </select>
+                        </div>
+                        <div class="col-12">
+                            <span class="form-label d-block">{{echo $lang['LIKE_THIS']}}</span>
+                            <code class="kj-example" id="like_this" dir="ltr">{{echo $urlsite}}do.php?id=123</code>
+                        </div>
+                    </div>
+                </section>
 
-        <h2><img src="style/images/s-user.png" alt="" class="img" />{{echo $lang['INST_ADMIN_INFO']}}</h2>
-        <table class="DataTable" dir="{{echo $lang['DIR']}}">
-            <tr>
-                <td class="tdd">{{echo $lang['USERNAME']}}</td>
-                <td><input name="username" type="text" style="width:40%" /></td>
-            </tr>
-            <tr>
-                <td class="tdd">{{echo $lang['PASSWORD']}}</td>
-                <td>
-                    <input id="pass1" name="password" type="text" style="width:40%" />
-                </td>
-            </tr>
-            <tr>
-                <td class="tdd">{{echo $lang['PASSWORD2']}}</td>
-                <td><input id="pass2" name="password2" id="password2" type="text" style="width:40%"  onkeyup="checkPass(); return false;" /></td>
-            </tr>
-            <tr>
-                <td class="tdd">{{echo $lang['EMAIL']}}</td>
-                <td><input name="email" id="email" type="text" style="direction:ltr;width:40%" onchange="return w_email(this.name);" /></td>
-            </tr>
-        </table>
-
-        <div class="hr"></div>
-
-        <h2><img src="style/images/klj_info.png" alt="" class="img" />{{echo $lang['INST_OTHER_INFO']}}</h2>
-        <table class="DataTable" dir="{{echo $lang['DIR']}}">
-            <tr>
-                <td class="tdd">{{echo $lang['TIME_ZONE']}}</td>
-                <td>
-                        <select name="time_zone" id="time_zone" style="text-align:left;direction:ltr">
-                            {{foreach(time_zones() as $z=>$t):}}
-                                <option value="{{echo $z}}" {{if($z=='Asia/Buraydah'):}}selected="selected"{{endif;}}>{{echo $z}} (GMT{{echo $t < 0 ? $t : '+' . $t}}</option>
-                            {{endforeach}}
-                        </select>
-                </td>
-            </tr>
-            <tr>
-                <td class="tdd">{{echo $lang['URLS_TYPES']}}</td>
-                <td>
-                    <script type="text/javascript">
-                        var explains = new Array(3);
-                        explains["id"] = "{{echo $GLOBALS['urlsite']}}do.php?id=123";
-                        explains["filename"] =  "{{echo $GLOBALS['urlsite']}}do.php?filename=12542219930.gif";
-                        explains["direct"] = "{{echo $GLOBALS['urlsite']}}uploads/12542219930.gif";
-                    </script>
-                    <select name="urls_type" onChange="document.getElementById('like_this').innerHTML=explains[this.options[this.selectedIndex].value]" style="width:30%">
-                        <option value="id">{{echo $lang['DEFAULT']}}</option>
-                        <option value="filename">{{echo $lang['FILENAME_URL']}}</option>
-                        <option value="direct">{{echo $lang['DIRECT_URL']}}</option>
-                    </select>
-                </td>
-            </tr>
-            <tr>
-                <td class="tdd">{{echo $lang['LIKE_THIS']}}</td>
-                <td style="direction:ltr;text-align:left" id="like_this">{{echo $GLOBALS['urlsite']}}do.php?id=123</td>
-            </tr>
-        </table>
-
-        <div class="hr"></div>
-        <button onclick="window.location.href='./install.php?step=check&amp;{{echo getlang(1)}}';return false;" name="previous" type="submit" class="btn"><span>&laquo;  {{echo $lang['INST_PREVIOUS']}}</span></button>
-        <button name="datasubmit" type="submit" class="btn"><span>{{echo $lang['INST_NEXT']}} &raquo;</span></button>
-    </form>
-
-<div class="clr"></div>
-</div></div><div class="BoxBottomImg"></div></div>
+                <div class="kj-actions">
+                    <a class="btn btn-outline-secondary" href="./install.php?step=check&amp;{{echo getlang(1)}}">
+                        {{echo inst_icon('arrow-left', 'kj-icon-flip')}} {{echo $lang['INST_PREVIOUS']}}
+                    </a>
+                    <button name="datasubmit" type="submit" class="btn btn-primary">
+                        {{echo $lang['INST_NEXT']}} {{echo inst_icon('arrow-right', 'kj-icon-flip')}}
+                    </button>
+                </div>
+            </form>

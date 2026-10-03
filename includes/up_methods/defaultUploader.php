@@ -140,17 +140,17 @@ class defaultUploader implements KleejaUploader
 
         $is_img = in_array($fileInfo['fileExtension'], ['png', 'gif', 'jpg', 'jpeg', 'bmp']) ? true : false;
 
-        is_array(
-            $plugin_run_result = Plugins::getInstance()->run('defaultUploader_saveToDatabase_qr', get_defined_vars()),
-        )
-            ? extract($plugin_run_result)
-            : null; //run hook
+        extract(runHook('defaultUploader_saveToDatabase_qr', get_defined_vars()));
 
         // insertion query
         $insert_query = [
             'INSERT' => '`' . implode('` , `', array_keys($queryValues)) . '`',
             'INTO' => "{$dbprefix}files",
-            'VALUES' => "'" . implode("', '", array_map([$SQL, 'escape'], array_values($queryValues))) . "'",
+            'VALUES' => ':' . implode(', :', array_keys($queryValues)),
+            'BIND' => array_map(
+                fn(mixed $value): mixed => is_string($value) ? kleeja_html_encode($value) : $value,
+                $queryValues,
+            ),
         ];
 
         // do the query
@@ -162,7 +162,8 @@ class defaultUploader implements KleejaUploader
         // update Kleeja stats
         $update_query = [
             'UPDATE' => "{$dbprefix}stats",
-            'SET' => ($is_img ? 'imgs=imgs+1' : 'files=files+1') . ',sizes=sizes+' . intval($fileInfo['fileSize']) . '',
+            'SET' => ($is_img ? 'imgs=imgs+1' : 'files=files+1') . ', sizes = sizes + :size',
+            'BIND' => ['size' => intval($fileInfo['fileSize'])],
         ];
 
         $SQL->build($update_query);
@@ -258,14 +259,7 @@ class defaultUploader implements KleejaUploader
             //add del link box to the result if there is any
             $img_html_result .= $extra_del;
 
-            is_array(
-                $plugin_run_result = Plugins::getInstance()->run(
-                    'defaultUploader_generateOutputBox_image_result',
-                    get_defined_vars(),
-                ),
-            )
-                ? extract($plugin_run_result)
-                : null; //run hook
+            extract(runHook('defaultUploader_generateOutputBox_image_result', get_defined_vars()));
 
             //show success message
             $this->addInfoMessage(
@@ -288,14 +282,7 @@ class defaultUploader implements KleejaUploader
             //add del link box to the result if there is any
             $else_html_result .= $extra_del;
 
-            is_array(
-                $plugin_run_result = Plugins::getInstance()->run(
-                    'defaultUploader_generateOutputBox_file_result',
-                    get_defined_vars(),
-                ),
-            )
-                ? extract($plugin_run_result)
-                : null; //run hook
+            extract(runHook('defaultUploader_generateOutputBox_file_result', get_defined_vars()));
 
             //show success message
             $this->addInfoMessage(
@@ -331,9 +318,7 @@ class defaultUploader implements KleejaUploader
 
         $return_now = false;
 
-        is_array($plugin_run_result = Plugins::getInstance()->run('defaultUploader_upload_1st', get_defined_vars()))
-            ? extract($plugin_run_result)
-            : null; //run hook
+        extract(runHook('defaultUploader_upload_1st', get_defined_vars()));
 
         // check folder our real folder
         if (!file_exists($current_uploading_folder)) {
@@ -358,12 +343,7 @@ class defaultUploader implements KleejaUploader
 
         // to prevent flooding, user must wait, waiting-time is grapped from Kleeja settings, admin is exceptional
         if (!user_can('enter_acp') && user_is_flooding($current_user_id)) {
-            $this->addErrorMessage(
-                sprintf(
-                    $lang['YOU_HAVE_TO_WAIT'],
-                    $current_user_id == '-1' ? $config['guestsectoupload'] : $config['usersectoupload'],
-                ),
-            );
+            $this->addErrorMessage(sprintf($lang['YOU_HAVE_TO_WAIT'], $config['usersectoupload']));
 
             return;
         }
@@ -512,7 +492,7 @@ class defaultUploader implements KleejaUploader
         }
 
         // get the extension of file
-        $fileInfo['fileExtension'] = strtolower(array_pop(explode('.', $fileInfo['originalFileName'])));
+        $fileInfo['fileExtension'] = strtolower(pathinfo($fileInfo['originalFileName'], PATHINFO_EXTENSION));
 
         // them the size
         $fileInfo['fileSize'] = !empty($_FILES['file_' . $fieldNumber . '_']['size'])
@@ -541,11 +521,7 @@ class defaultUploader implements KleejaUploader
             );
         }
 
-        is_array(
-            $plugin_run_result = Plugins::getInstance()->run('defaultUploader_uploadTypeFile_1st', get_defined_vars()),
-        )
-            ? extract($plugin_run_result)
-            : null; //run hook
+        extract(runHook('defaultUploader_uploadTypeFile_1st', get_defined_vars()));
 
         // now, let process it
         if (!in_array(strtolower($fileInfo['fileExtension']), array_keys($this->getAllowedFileExtensions()))) {
@@ -606,14 +582,7 @@ class defaultUploader implements KleejaUploader
         }
         // no errors, so upload it
         else {
-            is_array(
-                $plugin_run_result = Plugins::getInstance()->run(
-                    'defaultUploader_uploadTypeFile_2nd',
-                    get_defined_vars(),
-                ),
-            )
-                ? extract($plugin_run_result)
-                : null; //run hook
+            extract(runHook('defaultUploader_uploadTypeFile_2nd', get_defined_vars()));
 
             // now, upload the file
             $file = move_uploaded_file(

@@ -1,25 +1,19 @@
-<div class="BoxInner"><div class="BoxTopImg"></div><div class="BoxBody"><div class="inner">
+            <div class="kj-page-head">
+                <span class="kj-icon-tile">{{echo inst_icon('translate')}}</span>
+                <div>
+                    <h1>{{echo $lang['INST_INSTALL_WIZARD']}}</h1>
+                    <p>{{echo $lang['INST_CHOOSE_LANG']}}</p>
+                </div>
+            </div>
 
-
-<div class="language_choose">
-    <ul id="LangChoose">
-        {{if($dh = @opendir(PATH . 'lang')): while (($file = readdir($dh)) !== false): if(strpos($file, '.') === false && $file != '..' && $file != '.'):}}
-        <li>
-            <a href="{{echo './?step=language&amp;ln=' . $file}}">
-            {{if(file_exists('style/images/'.$file.'.png')):}}
-            <img src="style/images/{{echo $file}}.png" alt="{{echo $file}}" />
-            {{elseif(file_exists('../lang/'.$file.'/icon.png')):}}
-                <img src="../lang/{{echo $file}}/icon.png" alt="{{echo $file}}" />
-            {{else:}}
-                <p style="width: 100px; height: 65px; border: 1px solid #ccc;text-align: center; vertical-align: middle;background-color: #2aabd2;font-size: 20px">
-                    {{echo $file}}
-                </p>
-            {{endif;}}
-        </a>
-        </li>
-        {{endif;endwhile;@closedir($dh);endif;}}
-    </ul>
-</div>
-
-    <div class="clr"></div>
-</div></div><div class="BoxBottomImg"></div></div>
+            <div class="row g-3">
+                {{foreach(inst_languages() as $language):}}
+                <div class="col-sm-6">
+                    <a class="kj-lang-option" href="./?step=what_is_kleeja&amp;lang={{echo $language}}" lang="{{echo $language}}" hreflang="{{echo $language}}">
+                        <span class="kj-lang-code">{{echo $language}}</span>
+                        <span class="kj-lang-name">{{echo inst_lang_name($language)}}</span>
+                        {{echo inst_icon('arrow-right', 'kj-icon-flip')}}
+                    </a>
+                </div>
+                {{endforeach;}}
+            </div>

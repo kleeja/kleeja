@@ -9,8 +9,13 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libfreetype6-dev \
     libzip-dev \
     && docker-php-ext-configure gd --with-freetype --with-jpeg \
-    && docker-php-ext-install mysqli gd zip \
+    && docker-php-ext-install pdo_mysql gd zip \
     && rm -rf /var/lib/apt/lists/*
+
+RUN { \
+        echo 'upload_max_filesize = 50M'; \
+        echo 'post_max_size = 500M'; \
+    } > "$PHP_INI_DIR/conf.d/uploads.ini"
 
 RUN groupmod -o -g "${GID}" www-data \
     && usermod -o -u "${UID}" -g "${GID}" www-data

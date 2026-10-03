@@ -45,76 +45,38 @@ define('ADM_FILES_PATH', PATH . 'includes/adm');
 
 //Report all errors, except notices
 error_reporting(defined('DEV_STAGE') ? E_ALL : E_ALL ^ E_NOTICE);
-
-/**
- * functions for start
- * @param int    $error_number
- * @param string $error_string
- * @param string $error_file
- * @param int    $error_line
- */
-function kleeja_show_error(
-    int $error_number,
-    string $error_string = '',
-    string $error_file = '',
-    int $error_line = 0,
-): void {
-    switch ($error_number) {
-        case E_NOTICE:
-        case E_WARNING:
-        case E_USER_WARNING:
-        case E_USER_NOTICE:
-        case E_STRICT:
-            if (function_exists('kleeja_log')) {
-                $error_name = [
-                    2 => 'Warning',
-                    8 => 'Notice',
-                    512 => 'U_Warning',
-                    1024 => 'U_Notice',
-                    2048 => 'Strict',
-                ][$error_number];
-                kleeja_log('[' . $error_name . '] ' . basename($error_file) . ':' . $error_line . ' ' . $error_string);
-            }
-
-            break;
-
-        default:
-            header('HTTP/1.1 503 Service Temporarily Unavailable');
-            echo '<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">' . "\n<head>\n";
-            echo '<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />' . "\n";
-            echo '<title>Kleeja Error</title>' . "\n" . '<style type="text/css">' . "\n\t";
-            echo '.error {color: #333;background:#ffebe8;float:left;width:73%;text-align:left;margin-top:10px;border: 1px solid #dd3c10; padding: 10px;font-family:tahoma,arial;font-size: 12px;}' .
-                "\n";
-            echo "</style>\n</head>\n<body>\n\t" .
-                '<div class="error">' .
-                "\n\n\t\t<h2>Kleeja error  : </h2><br />" .
-                "\n";
-            echo "\n\t\t<strong> [ " .
-                $error_number .
-                ':' .
-                basename($error_file) .
-                ':' .
-                $error_line .
-                ' ] </strong><br /><br />' .
-                "\n\t\t" .
-                $error_string .
-                "\n\t";
-            echo "\n\t\t" .
-                '<br /><br /><small>Visit <a href="https://kleeja.net/" title="kleeja">Kleeja</a> Website for more details.</small>' .
-                "\n\t";
-            echo "</div>\n</body>\n</html>";
-            global $SQL;
-
-            if (isset($SQL)) {
-                @$SQL->close();
-            }
-
-            exit();
-
-            break;
-    }
+if (defined('DEV_STAGE')) {
+    ini_set('display_errors', 1);
+    include PATH . 'includes/dev_tools.php';
 }
+
+//the error handler, it shows the Kleeja error page
+require_once PATH . 'includes/functions_error.php';
+
 set_error_handler('kleeja_show_error');
+
+include PATH . 'includes/version.php';
+
+//the error handler is called directly, E_USER_ERROR is deprecated for trigger_error() since PHP 8.4
+if (version_compare(PHP_VERSION, MIN_PHP_VERSION, '<')) {
+    kleeja_show_error(
+        E_USER_ERROR,
+        'You are using an old PHP version (' .
+            PHP_VERSION .
+            '), to run Kleeja you should use PHP ' .
+            MIN_PHP_VERSION .
+            ' or above.',
+        __FILE__,
+        __LINE__,
+    );
+} elseif (!class_exists('PDO') || !array_intersect(['mysql', 'sqlite'], PDO::getAvailableDrivers())) {
+    kleeja_show_error(
+        E_USER_ERROR,
+        'In order to use Kleeja, "pdo_mysql" or "pdo_sqlite" extension has to be installed on your server.',
+        __FILE__,
+        __LINE__,
+    );
+}
 
 //time of start and end and whatever
 function get_microtime(): float
@@ -151,7 +113,12 @@ if (!is_bot() && PHP_SESSION_ACTIVE !== session_status() && !headers_sent()) {
     }
 
     if (!session_start()) {
-        big_error('Session Error!', 'There is a problem with PHP session. We can not start it.');
+        kleeja_show_error(
+            E_USER_ERROR,
+            'There is a problem with PHP session. We can not start it.',
+            __FILE__,
+            __LINE__,
+        );
     }
 }
 
@@ -167,13 +134,8 @@ define('K_FILE_CHMOD', defined('HAS_SUEXEC') ? 0644 & ~umask() : 0644);
 define('K_DIR_CHMOD', defined('HAS_SUEXEC') ? 0755 & ~umask() : 0755);
 
 include PATH . 'includes/functions_alternative.php';
-include PATH . 'includes/version.php';
 
-if (isset($dbtype) && $dbtype == 'sqlite') {
-    include PATH . 'includes/sqlite.php';
-} else {
-    include PATH . 'includes/mysqli.php';
-}
+include_once PATH . 'includes/pdo.php';
 
 include PATH . 'includes/style.php';
 include PATH . 'includes/usr.php';
@@ -194,7 +156,7 @@ if (empty($script_encoding)) {
 }
 
 //start classes ..
-$SQL = new KleejaDatabase($dbserver, $dbuser, $dbpass, $dbname, $dbprefix);
+$SQL = new KleejaDatabase($dbserver, $dbuser, $dbpass, $dbname, $dbprefix, $dbtype ?? 'mysql');
 //no need after now
 unset($dbpass);
 
@@ -247,9 +209,7 @@ if (isset($config['foldername'])) {
     );
 }
 
-is_array($plugin_run_result = Plugins::getInstance()->run('boot_common', get_defined_vars()))
-    ? extract($plugin_run_result)
-    : null; //run hook
+extract(runHook('boot_common', get_defined_vars()));
 
 /**
  * Set default time zone
@@ -315,6 +275,7 @@ $DEFAULT_PATH_ADMIN = $config['siteurl'] . 'admin/' . ACP_STYLE_NAME . '/';
 
 //get languge of common
 get_lang('common');
+get_olang($config['language']);
 
 //run ban system
 get_ban();
@@ -393,11 +354,9 @@ if (defined('STOP_CAPTCHA')) {
     $config['enable_captcha'] = 0;
 }
 
-is_array($plugin_run_result = Plugins::getInstance()->run('end_common', get_defined_vars()))
-    ? extract($plugin_run_result)
-    : null; //run hook
+extract(runHook('end_common', get_defined_vars()));
 
-register_shutdown_function(function () {
+register_shutdown_function(function (): void {
     session_write_close();
 
     $err = error_get_last();

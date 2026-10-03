@@ -18,9 +18,7 @@ $current_go_case = g('go');
 $show_style = true;
 $styleePath = '';
 
-is_array($plugin_run_result = Plugins::getInstance()->run('begin_go_page', get_defined_vars()))
-    ? extract($plugin_run_result)
-    : null; //run hook
+extract(runHook('begin_go_page', get_defined_vars()));
 
 switch ($current_go_case) {
     //
@@ -61,9 +59,7 @@ switch ($current_go_case) {
             $rando = $rando ? 0 : 1;
         }
 
-        is_array($plugin_run_result = Plugins::getInstance()->run('guide_go_page', get_defined_vars()))
-            ? extract($plugin_run_result)
-            : null; //run hook
+        extract(runHook('guide_go_page', get_defined_vars()));
 
         break;
 
@@ -72,9 +68,7 @@ switch ($current_go_case) {
     //
     case 'report':
         if (!user_can('access_report')) {
-            is_array($plugin_run_result = Plugins::getInstance()->run('user_cannot_access_report', get_defined_vars()))
-                ? extract($plugin_run_result)
-                : null; //run hook
+            extract(runHook('user_cannot_access_report', get_defined_vars()));
             kleeja_info($lang['HV_NOT_PRVLG_ACCESS']);
         }
 
@@ -96,12 +90,11 @@ switch ($current_go_case) {
             $query = [
                 'SELECT' => 'f.real_filename, f.name',
                 'FROM' => "{$dbprefix}files f",
-                'WHERE' => 'id=' . $id_d,
+                'WHERE' => 'id = :id',
+                'BIND' => ['id' => $id_d],
             ];
 
-            is_array($plugin_run_result = Plugins::getInstance()->run('qr_report_go_id', get_defined_vars()))
-                ? extract($plugin_run_result)
-                : null; //run hook
+            extract(runHook('qr_report_go_id', get_defined_vars()));
 
             $result = $SQL->build($query);
 
@@ -109,11 +102,7 @@ switch ($current_go_case) {
                 $row = $SQL->fetch_array($result);
                 $filename_for_show = $row['real_filename'] == '' ? $row['name'] : $row['real_filename'];
             } else {
-                is_array(
-                    $plugin_run_result = Plugins::getInstance()->run('not_exists_qr_report_go_id', get_defined_vars()),
-                )
-                    ? extract($plugin_run_result)
-                    : null; //run hook
+                extract(runHook('not_exists_qr_report_go_id', get_defined_vars()));
                 kleeja_err($lang['FILE_NO_FOUNDED']);
             }
             $SQL->freeresult($result);
@@ -129,15 +118,11 @@ switch ($current_go_case) {
 
         if (!ip('submit')) {
             // first
-            is_array($plugin_run_result = Plugins::getInstance()->run('no_submit_report_go_page', get_defined_vars()))
-                ? extract($plugin_run_result)
-                : null; //run hook
+            extract(runHook('no_submit_report_go_page', get_defined_vars()));
         } else {
             $ERRORS = [];
 
-            is_array($plugin_run_result = Plugins::getInstance()->run('submit_report_go_page', get_defined_vars()))
-                ? extract($plugin_run_result)
-                : null; //run hook
+            extract(runHook('submit_report_go_page', get_defined_vars()));
 
             //check for form key
             if (!kleeja_check_form_key('report')) {
@@ -179,16 +164,14 @@ switch ($current_go_case) {
                 $ERRORS['rid'] = $lang['NO_ID'];
             }
 
-            is_array($plugin_run_result = Plugins::getInstance()->run('submit_report_go_page2', get_defined_vars()))
-                ? extract($plugin_run_result)
-                : null; //run hook
+            extract(runHook('submit_report_go_page2', get_defined_vars()));
 
             //no error , lets do process
             if (empty($ERRORS)) {
-                $name = $NOT_USER ? (string) $SQL->escape(p('rname')) : $usrcp->name();
-                $text = (string) $SQL->escape(p('rtext'));
-                $mail = $NOT_USER ? (string) strtolower(trim($SQL->escape(p('rmail')))) : $usrcp->mail();
-                $url = (string) ip('rid') ? $SQL->escape($url_id) : $SQL->real_escape(p('surl'));
+                $name = $NOT_USER ? kleeja_html_encode(p('rname')) : $usrcp->name();
+                $text = kleeja_html_encode(p('rtext'));
+                $mail = $NOT_USER ? strtolower(trim(kleeja_html_encode(p('rmail')))) : $usrcp->mail();
+                $url = ip('rid') ? kleeja_html_encode($url_id) : p('surl');
                 $time = (int) time();
                 $rid = ip('rid') ? 0 : p('rid', 'int');
                 $ip = get_ip();
@@ -196,12 +179,18 @@ switch ($current_go_case) {
                 $insert_query = [
                     'INSERT' => 'name ,mail ,url ,text ,time ,ip',
                     'INTO' => "{$dbprefix}reports",
-                    'VALUES' => "'$name', '$mail', '$url', '$text', $time, '$ip'",
+                    'VALUES' => ':name, :mail, :url, :text, :time, :ip',
+                    'BIND' => [
+                        'name' => $name,
+                        'mail' => $mail,
+                        'url' => $url,
+                        'text' => $text,
+                        'time' => $time,
+                        'ip' => $ip,
+                    ],
                 ];
 
-                is_array($plugin_run_result = Plugins::getInstance()->run('qr_insert_new_report', get_defined_vars()))
-                    ? extract($plugin_run_result)
-                    : null; //run hook
+                extract(runHook('qr_insert_new_report', get_defined_vars()));
 
                 $SQL->build($insert_query);
 
@@ -209,14 +198,11 @@ switch ($current_go_case) {
                 $update_query = [
                     'UPDATE' => "{$dbprefix}files",
                     'SET' => 'report=report+1',
-                    'WHERE' => 'id=' . $rid,
+                    'WHERE' => 'id = :id',
+                    'BIND' => ['id' => $rid],
                 ];
 
-                is_array(
-                    $plugin_run_result = Plugins::getInstance()->run('qr_update_no_file_report', get_defined_vars()),
-                )
-                    ? extract($plugin_run_result)
-                    : null; //run hook
+                extract(runHook('qr_update_no_file_report', get_defined_vars()));
 
                 $SQL->build($update_query);
 
@@ -230,9 +216,7 @@ switch ($current_go_case) {
             }
         }
 
-        is_array($plugin_run_result = Plugins::getInstance()->run('report_go_page', get_defined_vars()))
-            ? extract($plugin_run_result)
-            : null; //run hook
+        extract(runHook('report_go_page', get_defined_vars()));
 
         break;
 
@@ -244,9 +228,7 @@ switch ($current_go_case) {
         $titlee = $lang['RULES'];
         $contents = strlen($ruless) > 3 ? stripslashes($ruless) : $lang['NO_RULES_NOW'];
 
-        is_array($plugin_run_result = Plugins::getInstance()->run('rules_go_page', get_defined_vars()))
-            ? extract($plugin_run_result)
-            : null; //run hook
+        extract(runHook('rules_go_page', get_defined_vars()));
 
         break;
 
@@ -256,9 +238,7 @@ switch ($current_go_case) {
     case 'call':
         //Not allowed to access this page ?
         if (!user_can('access_call')) {
-            is_array($plugin_run_result = Plugins::getInstance()->run('user_cannot_access_call', get_defined_vars()))
-                ? extract($plugin_run_result)
-                : null; //run hook
+            extract(runHook('user_cannot_access_call', get_defined_vars()));
             kleeja_info($lang['HV_NOT_PRVLG_ACCESS']);
         }
 
@@ -276,17 +256,13 @@ switch ($current_go_case) {
         $t_cmail = p('cmail');
         $t_ctext = p('ctext');
 
-        is_array($plugin_run_result = Plugins::getInstance()->run('no_submit_call_go_page', get_defined_vars()))
-            ? extract($plugin_run_result)
-            : null; //run hook
+        extract(runHook('no_submit_call_go_page', get_defined_vars()));
 
         if (ip('submit')) {
             //after sumit
             $ERRORS = [];
 
-            is_array($plugin_run_result = Plugins::getInstance()->run('submit_call_go_page', get_defined_vars()))
-                ? extract($plugin_run_result)
-                : null; //run hook
+            extract(runHook('submit_call_go_page', get_defined_vars()));
 
             //check for form key
             if (!kleeja_check_form_key('call')) {
@@ -324,27 +300,24 @@ switch ($current_go_case) {
                 update_config('new_version', '');
             }
 
-            is_array($plugin_run_result = Plugins::getInstance()->run('submit_call_go_page2', get_defined_vars()))
-                ? extract($plugin_run_result)
-                : null; //run hook
+            extract(runHook('submit_call_go_page2', get_defined_vars()));
 
             //no errors ,lets do process
             if (empty($ERRORS)) {
-                $name = $NOT_USER ? (string) $SQL->escape(p('cname')) : $usrcp->name();
-                $text = (string) $SQL->escape(p('ctext'));
-                $mail = $NOT_USER ? (string) strtolower(trim($SQL->escape(p('cmail')))) : $usrcp->mail();
+                $name = $NOT_USER ? kleeja_html_encode(p('cname')) : $usrcp->name();
+                $text = kleeja_html_encode(p('ctext'));
+                $mail = $NOT_USER ? strtolower(trim(kleeja_html_encode(p('cmail')))) : $usrcp->mail();
                 $timee = (int) time();
                 $ip = get_ip();
 
                 $insert_query = [
                     'INSERT' => 'name ,text ,mail ,time ,ip',
                     'INTO' => "`{$dbprefix}call`",
-                    'VALUES' => "'$name', '$text', '$mail', $timee, '$ip'",
+                    'VALUES' => ':name, :text, :mail, :time, :ip',
+                    'BIND' => ['name' => $name, 'text' => $text, 'mail' => $mail, 'time' => $timee, 'ip' => $ip],
                 ];
 
-                is_array($plugin_run_result = Plugins::getInstance()->run('qr_insert_new_call', get_defined_vars()))
-                    ? extract($plugin_run_result)
-                    : null; //run hook
+                extract(runHook('qr_insert_new_call', get_defined_vars()));
 
                 if ($SQL->build($insert_query)) {
                     send_mail(
@@ -359,9 +332,7 @@ switch ($current_go_case) {
             }
         }
 
-        is_array($plugin_run_result = Plugins::getInstance()->run('call_go_page', get_defined_vars()))
-            ? extract($plugin_run_result)
-            : null; //run hook
+        extract(runHook('call_go_page', get_defined_vars()));
 
         break;
 
@@ -369,9 +340,7 @@ switch ($current_go_case) {
     //Page for requesting delete file
     //
     case 'del':
-        is_array($plugin_run_result = Plugins::getInstance()->run('del_go_page', get_defined_vars()))
-            ? extract($plugin_run_result)
-            : null; //run hook
+        extract(runHook('del_go_page', get_defined_vars()));
 
         //stop .. check first ..
         if (!$config['del_url_file']) {
@@ -382,7 +351,7 @@ switch ($current_go_case) {
         //f2b3a82060a22a80283ed961d080b79f
         //aa92468375a456de21d7ca05ef945212
         //
-        $cd = preg_replace('/[^0-9a-z]/i', '', $SQL->escape(g('cd'))); // may.. will protect
+        $cd = preg_replace('/[^0-9a-z]/i', '', g('cd'));
 
         if (empty($cd)) {
             kleeja_err($lang['WRONG_URL']);
@@ -392,18 +361,12 @@ switch ($current_go_case) {
                 $query = [
                     'SELECT' => 'f.id, f.name, f.folder, f.size, f.type',
                     'FROM' => "{$dbprefix}files f",
-                    'WHERE' => "f.code_del='" . $cd . "'",
+                    'WHERE' => 'f.code_del = :code_del',
+                    'BIND' => ['code_del' => $cd],
                     'LIMIT' => '1',
                 ];
 
-                is_array(
-                    $plugin_run_result = Plugins::getInstance()->run(
-                        'qr_select_file_with_code_del',
-                        get_defined_vars(),
-                    ),
-                )
-                    ? extract($plugin_run_result)
-                    : null; //run hook
+                extract(runHook('qr_select_file_with_code_del', get_defined_vars()));
 
                 $result = $SQL->build($query);
 
@@ -422,17 +385,11 @@ switch ($current_go_case) {
 
                         $query_del = [
                             'DELETE' => "{$dbprefix}files",
-                            'WHERE' => 'id=' . $row['id'],
+                            'WHERE' => 'id = :id',
+                            'BIND' => ['id' => $row['id']],
                         ];
 
-                        is_array(
-                            $plugin_run_result = Plugins::getInstance()->run(
-                                'qr_del_file_with_code_del',
-                                get_defined_vars(),
-                            ),
-                        )
-                            ? extract($plugin_run_result)
-                            : null; //run hook
+                        extract(runHook('qr_del_file_with_code_del', get_defined_vars()));
 
                         $SQL->build($query_del);
 
@@ -440,7 +397,8 @@ switch ($current_go_case) {
                             //update number of stats
                             $update_query = [
                                 'UPDATE' => "{$dbprefix}stats",
-                                'SET' => ($is_img ? 'imgs=imgs-1' : 'files=files-1') . ',sizes=sizes-' . $row['size'],
+                                'SET' => ($is_img ? 'imgs=imgs-1' : 'files=files-1') . ', sizes = sizes - :size',
+                                'BIND' => ['size' => $row['size']],
                             ];
 
                             $SQL->build($update_query);
@@ -472,7 +430,7 @@ switch ($current_go_case) {
                         }
                         window.onload=confirm_from;
                     </script>';
-                kleeja_info($lang['ARE_YOU_SURE_DO_THIS'], '', true, false, 0, $extra_codes);
+                kleeja_info($lang['ARE_YOU_SURE_DO_THIS'], rs: 0, extra_code_header: $extra_codes);
             }
         } //else
 
@@ -484,9 +442,7 @@ switch ($current_go_case) {
     case 'stats':
         //Not allowed to access this page ?
         if (!user_can('access_stats')) {
-            is_array($plugin_run_result = Plugins::getInstance()->run('user_cannot_access_stats', get_defined_vars()))
-                ? extract($plugin_run_result)
-                : null; //run hook
+            extract(runHook('user_cannot_access_stats', get_defined_vars()));
             kleeja_info($lang['HV_NOT_PRVLG_ACCESS']);
         }
 
@@ -514,9 +470,7 @@ switch ($current_go_case) {
         $lst_reg = empty($stat_last_user) ? $lang['UNKNOWN'] : $stat_last_user;
         $on_muoe = kleeja_date($on_muoe);
 
-        is_array($plugin_run_result = Plugins::getInstance()->run('stats_go_page', get_defined_vars()))
-            ? extract($plugin_run_result)
-            : null; //run hook
+        extract(runHook('stats_go_page', get_defined_vars()));
 
         break;
 
@@ -554,16 +508,14 @@ switch ($current_go_case) {
 
         //do some of the queue ..
         if (preg_match('/:del_[a-z0-9]{0,3}calls:/i', $config['queue'])) {
-            klj_clean_old('call', strpos(':del_allcalls:', $config['queue']) !== false ? 'all' : '30');
+            klj_clean_old('call', strpos($config['queue'], ':del_allcalls:') !== false ? 'all' : '30');
         } elseif (preg_match('/:del_[a-z0-9]{0,3}reports:/i', $config['queue'])) {
-            klj_clean_old('reports', strpos(':del_allreports:', $config['queue']) !== false ? 'all' : '30');
+            klj_clean_old('reports', strpos($config['queue'], ':del_allreports:') !== false ? 'all' : '30');
         } elseif ((int) $config['del_f_day'] > 0) {
             klj_clean_old_files($config['klj_clean_files_from']);
         }
 
-        is_array($plugin_run_result = Plugins::getInstance()->run('go_queue', get_defined_vars()))
-            ? extract($plugin_run_result)
-            : null; //run hook
+        extract(runHook('go_queue', get_defined_vars()));
 
         //end
         $SQL->close();
@@ -595,7 +547,7 @@ switch ($current_go_case) {
                 //no start ? or there
                 $start = !ig('start') ? 0 : g('start', 'int');
 
-                $end = sync_total_files(true, $start);
+                $end = sync_total_files(files: true, start: $start);
 
                 //no end, then sync'ing is done...
                 if (!$end) {
@@ -620,7 +572,7 @@ switch ($current_go_case) {
                     '\';", 3000);</script>' .
                     "\n";
 
-                kleeja_info($text, $title, true, $link_to_go, 2);
+                kleeja_info($text, $title, redirect: $link_to_go, rs: 2);
 
                 break;
 
@@ -631,7 +583,7 @@ switch ($current_go_case) {
                 //no start ? or there
                 $start = !ig('start') ? 0 : g('start', 'int');
 
-                $end = sync_total_files(false, $start);
+                $end = sync_total_files(files: false, start: $start);
 
                 //no end, then sync'ing is done...
                 if (!$end) {
@@ -656,7 +608,7 @@ switch ($current_go_case) {
                     '\';", 3000);</script>' .
                     "\n";
 
-                kleeja_info($text, $title, true, $link_to_go, 2);
+                kleeja_info($text, $title, redirect: $link_to_go, rs: 2);
 
                 break;
         endswitch;
@@ -706,9 +658,7 @@ switch ($current_go_case) {
     default:
         $no_request = true;
 
-        is_array($plugin_run_result = Plugins::getInstance()->run('default_go_page', get_defined_vars()))
-            ? extract($plugin_run_result)
-            : null; //run hook
+        extract(runHook('default_go_page', get_defined_vars()));
 
         if ($no_request) {
             kleeja_err($lang['ERROR_NAVIGATATION']);
@@ -717,9 +667,7 @@ switch ($current_go_case) {
         break;
 } //end switch
 
-is_array($plugin_run_result = Plugins::getInstance()->run('end_go_page', get_defined_vars()))
-    ? extract($plugin_run_result)
-    : null; //run hook
+extract(runHook('end_go_page', get_defined_vars()));
 
 //no template ?
 $stylee = empty($stylee) ? 'info' : $stylee;

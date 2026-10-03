@@ -26,11 +26,7 @@ include_once PATH . 'includes/functions_display.php';
 include_once PATH . 'includes/functions_alternative.php';
 include_once PATH . 'includes/functions.php';
 
-if (isset($dbtype) && $dbtype == 'sqlite') {
-    include PATH . 'includes/sqlite.php';
-} else {
-    include PATH . 'includes/mysqli.php';
-}
+include_once PATH . 'includes/pdo.php';
 
 include_once 'includes/functions_install.php';
 
@@ -42,20 +38,13 @@ if (!ig('step')) {
 }
 
 //
-// Kleeja must be safe ..
+// Kleeja must be safe .. once installed, only the last page of the wizard is shown,
+// otherwise anyone could write another config.php or run the installing queries again
 //
-if (
-    !empty($dbuser) &&
-    !empty($dbname) &&
-    !(ig('step') && in_array(g('step'), ['c', 'check', 'data', 'end', 'wizard']))
-) {
-    $d = inst_get_config('language');
+if (g('step') !== 'end' && inst_is_installed()) {
+    header('Location: ./index.php?' . getlang(1));
 
-    if (!empty($d)) {
-        header('Location: ./index.php');
-
-        exit();
-    }
+    exit();
 }
 
 /**
@@ -96,20 +85,37 @@ SOFTWARE.';
         break;
 
     case 'f':
-        $check_ok = true;
-        $advices = $ziparchive_lib = false;
+        $requirements = [];
 
-        if (!class_exists('ZipArchive')) {
-            $ziparchive_lib = true;
+        $functions = [
+            'unlink' => 'FUNCTION_DISC_UNLINK',
+            'imagecreatetruecolor' => 'FUNCTION_DISC_GD',
+            'fopen' => 'FUNCTION_DISC_FOPEN',
+            'move_uploaded_file' => 'FUNCTION_DISC_MUF',
+        ];
+
+        foreach ($functions as $function => $description) {
+            $exists = function_exists($function);
+
+            $requirements[] = [
+                'ok' => $exists,
+                'title' => sprintf($lang[$exists ? 'FUNCTION_IS_EXISTS' : 'FUNCTION_IS_NOT_EXISTS'], $function),
+                'description' => $lang[$description],
+            ];
         }
 
-        if ($ziparchive_lib) {
-            $advices = true;
-        }
+        $requirements[] = [
+            'ok' => extension_loaded('pdo'),
+            'title' => sprintf(
+                $lang[extension_loaded('pdo') ? 'EXTENSION_IS_EXISTS' : 'EXTENSION_IS_NOT_EXISTS'],
+                'PDO',
+            ),
+            'description' => $lang['EXTENSION_PDO_EXISTS'],
+        ];
 
-        if (!extension_loaded('pdo')) {
-            $check_ok = false;
-        }
+        $check_ok = !in_array(false, array_column($requirements, 'ok'), true);
+        $ziparchive_lib = !class_exists('ZipArchive');
+        $advices = $ziparchive_lib;
 
         echo gettpl('check.html');
 
@@ -119,7 +125,14 @@ SOFTWARE.';
         // after submit, generate config file
         if (ip('dbsubmit')) {
             //create config file, or export it to browser on failure
-            do_config_export(p('db_server'), p('db_user'), p('db_pass'), p('db_name'), p('db_prefix'), p('db_type'));
+            do_config_export(
+                inst_post('db_server'),
+                inst_post('db_user'),
+                inst_post('db_pass', trim: false),
+                inst_post('db_name'),
+                inst_post('db_prefix'),
+                inst_post('db_type'),
+            );
         }
 
         $no_config = !file_exists(PATH . 'config.php') || ig('force') ? false : true;
@@ -130,25 +143,27 @@ SOFTWARE.';
         break;
 
     case 'check':
-        $submit_disabled = $no_connection = $mysql_ver = false;
+        $problems = [];
 
         //config.php
-        if (!empty($dbname)) {
-            if (isset($dbtype) && $dbtype == 'sqlite') {
-                @touch(PATH . $dbname);
-            }
-
+        if (empty($dbname)) {
+            $problems[] = $lang['INST_CHANG_CONFIG'];
+        } else {
             //connect .. for check
-            $SQL = new KleejaDatabase($dbserver, $dbuser, $dbpass, $dbname, $dbprefix);
+            $SQL = inst_db(create: true);
 
             if (!$SQL->is_connected()) {
-                $no_connection = true;
-            } else {
-                if (defined('SQL_LAYER') && SQL_LAYER == 'mysqli') {
-                    if (!empty($SQL->version()) && version_compare($SQL->version(), MIN_MYSQL_VERSION, '<')) {
-                        $mysql_ver = $SQL->version();
-                    }
-                }
+                $problems[] =
+                    $lang['INST_CONNCET_ERR'] .
+                    (isset($dbtype) && $dbtype === 'sqlite'
+                        ? '<br>' . sprintf($lang['INST_CONNCET_ERR_SQLITE'], $dbname)
+                        : '');
+            } elseif (
+                $SQL->driver === 'mysql' &&
+                !empty($SQL->version()) &&
+                version_compare($SQL->version(), MIN_MYSQL_VERSION, '<')
+            ) {
+                $problems[] = sprintf($lang['INST_MYSQL_LESSMIN'], MIN_MYSQL_VERSION, $SQL->version());
             }
         }
 
@@ -159,6 +174,12 @@ SOFTWARE.';
             @chmod(PATH . 'styles', 0755);
             @chmod(PATH . 'uploads', 0755);
             @chmod(PATH . 'uploads/thumbs', 0755);
+        }
+
+        foreach (['cache', 'uploads', 'uploads/thumbs'] as $folder) {
+            if (!is_writable(PATH . $folder)) {
+                $problems[] = '<code dir="ltr">' . $folder . '</code> : ' . $lang['INST_NO_WRTABLE'];
+            }
         }
 
         echo gettpl('check_all.html');
@@ -177,45 +198,40 @@ SOFTWARE.';
                 empty(p('password2')) ||
                 empty(p('email'))
             ) {
-                echo $lang['EMPTY_FIELDS'];
-                echo $footer_inst;
-
-                exit();
+                inst_error($lang['EMPTY_FIELDS']);
             }
 
             //fix bug #r1777 (alta3rq revision)
-            if (!empty(p('password')) && !empty(p('password2')) && p('password') != p('password2')) {
-                echo $lang['PASS_NEQ_PASS2'];
-                echo $footer_inst;
-
-                exit();
+            if (!empty(p('password')) && !empty(p('password2')) && p('password') !== p('password2')) {
+                inst_error($lang['PASS_NEQ_PASS2']);
             }
 
-            if (strpos(p('email'), '@') === false) {
-                echo $lang['WRONG_EMAIL'];
-                echo $footer_inst;
-
-                exit();
+            if (
+                !filter_var(inst_post('email'), FILTER_VALIDATE_EMAIL) ||
+                !filter_var(inst_post('sitemail'), FILTER_VALIDATE_EMAIL)
+            ) {
+                inst_error($lang['WRONG_EMAIL']);
             }
 
-            //connect .. for check
-            $SQL = new KleejaDatabase($dbserver, $dbuser, $dbpass, $dbname, $dbprefix);
+            //connect .. the SQLite file is created here if the check step did not
+            $SQL = inst_db(create: true);
 
             include_once PATH . 'includes/usr.php';
             include_once PATH . 'includes/functions_alternative.php';
             $usrcp = new usrcp();
 
+            //p() HTML encodes the values once, the same way the rest of Kleeja keeps them in the database
             $user_salt = substr(base64_encode(pack('H*', sha1(mt_rand()))), 0, 7);
             $user_pass = $usrcp->kleeja_hash_password(p('password') . $user_salt);
-            $user_name = $SQL->escape(p('username'));
-            $user_mail = $SQL->escape(p('email'));
-            $config_sitename = $SQL->escape(p('sitename'));
-            $config_siteurl = $SQL->escape(p('siteurl'));
-            $config_sitemail = $SQL->escape(p('sitemail'));
-            $config_time_zone = $SQL->escape(p('time_zone'));
-            //$config_style        = ip('style') ? $SQL->escape(p('style')) : '';
-            $config_urls_type = in_array(p('urls_type'), ['id', 'filename', 'direct']) ? p('urls_type') : 'id';
-            $clean_name = $usrcp->cleanusername($SQL->escape($user_name));
+            $user_name = p('username');
+            $user_mail = strtolower(p('email'));
+            $config_sitename = p('sitename');
+            $config_siteurl = rtrim(p('siteurl'), '/') . '/';
+            $config_sitemail = p('sitemail');
+            $config_time_zone = array_key_exists(p('time_zone'), time_zones()) ? p('time_zone') : 'Asia/Damascus';
+            $config_urls_type = in_array(p('urls_type'), ['id', 'filename', 'direct'], true) ? p('urls_type') : 'id';
+            //the login page looks for this name
+            $clean_name = $usrcp->cleanusername($user_name);
 
             /// ok .. we will get sqls now ..
             include 'includes/install_sqls.php';
@@ -224,44 +240,34 @@ SOFTWARE.';
             $err = $dots = 0;
             $errors = '';
 
-            //do important alter before
-            $SQL->query($install_sqls['ALTER_DATABASE_UTF']);
+            //do important alter before, SQLite has no database charset
+            if ($SQL->driver === 'mysql') {
+                $SQL->query($install_sqls['ALTER_DATABASE_UTF']);
+            }
 
             $sqls_done = $sql_err = [];
 
+            //a message for each query, the rest are shown by their names
+            $done_messages = [
+                'call' => 'INST_CRT_CALL',
+                'reports' => 'INST_CRT_REPRS',
+                'stats' => 'INST_CRT_STS',
+                'users' => 'INST_CRT_USRS',
+                'users_insert' => 'INST_CRT_ADM',
+                'files' => 'INST_CRT_FLS',
+                'config' => 'INST_CRT_CNF',
+                'groups_exts' => 'INST_CRT_EXT',
+                'plugins' => 'INST_CRT_PLG',
+                'lang' => 'INST_CRT_LNG',
+            ];
+
             foreach ($install_sqls as $name => $sql_content) {
-                if ($name == 'DROP_TABLES' || $name == 'ALTER_DATABASE_UTF') {
+                if ($name === 'DROP_TABLES' || $name === 'ALTER_DATABASE_UTF') {
                     continue;
                 }
 
-                if ($SQL->query($sql_content)) {
-                    if ($name == 'call') {
-                        $sqls_done[] = $lang['INST_CRT_CALL'];
-                    } elseif ($name == 'reports') {
-                        $sqls_done[] = $lang['INST_CRT_REPRS'];
-                    } elseif ($name == 'stats') {
-                        $sqls_done[] = $lang['INST_CRT_STS'];
-                    } elseif ($name == 'users') {
-                        $sqls_done[] = $lang['INST_CRT_USRS'];
-                    } elseif ($name == 'users') {
-                        $sqls_done[] = $lang['INST_CRT_ADM'];
-                    } elseif ($name == 'files') {
-                        $sqls_done[] = $lang['INST_CRT_FLS'];
-                    } elseif ($name == 'config') {
-                        $sqls_done[] = $lang['INST_CRT_CNF'];
-                    } elseif ($name == 'exts') {
-                        $sqls_done[] = $lang['INST_CRT_EXT'];
-                    } elseif ($name == 'online') {
-                        $sqls_done[] = $lang['INST_CRT_ONL'];
-                    } elseif ($name == 'hooks') {
-                        $sqls_done[] = $lang['INST_CRT_HKS'];
-                    } elseif ($name == 'plugins') {
-                        $sqls_done[] = $lang['INST_CRT_PLG'];
-                    } elseif ($name == 'lang') {
-                        $sqls_done[] = $lang['INST_CRT_LNG'];
-                    } else {
-                        $sqls_done[] = $name . '...';
-                    }
+                if ($SQL->query($sql_content, $install_params[$name] ?? [])) {
+                    $sqls_done[] = isset($done_messages[$name]) ? $lang[$done_messages[$name]] : $name . '...';
                 } else {
                     $errors .= implode(':', $SQL->get_error()) . '' . "\n___\n";
                     $sql_err[] = $lang['INST_SQL_ERR'] . ' : ' . $name . '[basic]';
@@ -269,39 +275,33 @@ SOFTWARE.';
                 }
             } //for
 
-            if ($err == 0) {
+            if ($err === 0) {
                 //add configs
                 foreach ($config_values as $cn) {
                     if (empty($cn[6])) {
                         $cn[6] = 0;
                     }
 
-                    $sql = "INSERT INTO `{$dbprefix}config` (`name`, `value`, `option`, `display_order`, `type`, `plg_id`, `dynamic`) VALUES ('$cn[0]', '$cn[1]', '$cn[2]', '$cn[3]', '$cn[4]', '$cn[5]', '$cn[6]');";
+                    $sql = "INSERT INTO `{$dbprefix}config` (`name`, `value`, `option`, `display_order`, `type`, `plg_id`, `dynamic`) VALUES (?, ?, ?, ?, ?, ?, ?);";
 
-                    if (!$SQL->query($sql)) {
+                    if (!$SQL->query($sql, array_slice($cn, 0, 7))) {
                         $errors .= implode(':', $SQL->get_error()) . '' . "\n___\n";
-                        $sql_err[] = $lang['INST_SQL_ERR'] . ' : [configs_values] ' . $cn;
+                        $sql_err[] = $lang['INST_SQL_ERR'] . ' : [configs_values] ' . $cn[0];
                         $err++;
                     }
                 }
 
                 //add groups configs
                 foreach ($config_values as $cn) {
-                    if ($cn[4] != 'groups' or !$cn[4]) {
+                    if ($cn[4] !== 'groups') {
                         continue;
                     }
 
-                    $itxt = '';
+                    $sql = "INSERT INTO `{$dbprefix}groups_data` (`group_id`, `name`, `value`) VALUES (1, :name, :value), (2, :name, :value), (3, :name, :value);";
 
-                    foreach ([1, 2, 3] as $im) {
-                        $itxt .= ($itxt == '' ? '' : ',') . "($im, '$cn[0]', '$cn[1]')";
-                    }
-
-                    $sql = "INSERT INTO `{$dbprefix}groups_data` (`group_id`, `name`, `value`) VALUES " . $itxt . ';';
-
-                    if (!$SQL->query($sql)) {
+                    if (!$SQL->query($sql, ['name' => $cn[0], 'value' => $cn[1]])) {
                         $errors .= implode(':', $SQL->get_error()) . '' . "\n___\n";
-                        $sql_err[] = $lang['INST_SQL_ERR'] . ' : [groups_configs_values] ' . $cn;
+                        $sql_err[] = $lang['INST_SQL_ERR'] . ' : [groups_configs_values] ' . $cn[0];
                         $err++;
                     }
                 }
@@ -309,14 +309,16 @@ SOFTWARE.';
                 //add exts
                 foreach ($ext_values as $gid => $exts) {
                     $itxt = '';
+                    $params = [];
 
                     foreach ($exts as $t => $v) {
-                        $itxt .= ($itxt == '' ? '' : ',') . "('$t', $gid, $v)";
+                        $itxt .= ($itxt === '' ? '' : ',') . '(?, ?, ?)';
+                        array_push($params, $t, $gid, $v);
                     }
 
                     $sql = "INSERT INTO `{$dbprefix}groups_exts` (`ext`, `group_id`, `size`) VALUES " . $itxt . ';';
 
-                    if (!$SQL->query($sql)) {
+                    if (!$SQL->query($sql, $params)) {
                         $errors .= implode(':', $SQL->get_error()) . '' . "\n___\n";
                         $sql_err[] = $lang['INST_SQL_ERR'] . ' : [ext_values] ' . $gid;
                         $err++;
@@ -327,16 +329,18 @@ SOFTWARE.';
                 foreach ($acls_values as $cn => $ct) {
                     $it = 1;
                     $itxt = '';
+                    $params = [];
 
                     foreach ($ct as $ctk) {
-                        $itxt .= ($itxt == '' ? '' : ',') . "('$cn', '$it', '$ctk')";
+                        $itxt .= ($itxt === '' ? '' : ',') . '(?, ?, ?)';
+                        array_push($params, $cn, $it, $ctk);
                         $it++;
                     }
 
                     $sql =
                         "INSERT INTO `{$dbprefix}groups_acl` (`acl_name`, `group_id`, `acl_can`) VALUES " . $itxt . ';';
 
-                    if (!$SQL->query($sql)) {
+                    if (!$SQL->query($sql, $params)) {
                         $errors .= implode(':', $SQL->get_error()) . '' . "\n___\n";
                         $sql_err[] = $lang['INST_SQL_ERR'] . ' : [acl_values] ' . $cn;
                         $err++;
@@ -347,7 +351,7 @@ SOFTWARE.';
 
             echo gettpl('sqls_done.html');
         } else {
-            $urlsite = 'https://' . $_SERVER['HTTP_HOST'] . str_replace('install', '', dirname($_SERVER['PHP_SELF']));
+            $urlsite = inst_site_url();
             echo gettpl('data.html');
         }
 

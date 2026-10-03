@@ -1,17 +1,17 @@
 <?php
 //
-// kleeja language, admin
+// kleeja language, install
 // English
 //
 
 return [
     'DIR' => 'ltr',
-    'INST_INSTALL_WIZARD' => 'Kleeja installing wizard',
+    'INST_INSTALL_WIZARD' => 'Kleeja installation wizard',
     'INST_INSTALL_CLEAN_VER' => 'New Installation',
-    'INST_UPDATE_P_VER' => 'Update ',
+    'INST_UPDATE_P_VER' => 'Update a previous version',
     'INST_AGR_LICENSE' => 'I agree to terms and agreements',
     'INST_NEXT' => 'Next',
-    'INST_PREVIOUS' => 'back',
+    'INST_PREVIOUS' => 'Previous',
     'INST_SITE_INFO' => 'Site Info',
     'INST_ADMIN_INFO' => 'Admin Info',
     'INST_CHANG_CONFIG' => 'Missing requirements ... make sure you have edited the config.php file.',
@@ -37,10 +37,12 @@ return [
     'INST_SQL_ERR' => 'Error Executing SQL .. ',
     'INST_FINISH_SQL' => 'Kleeja was installed successfully',
     'INST_NOTES' => 'Installation Notes ..!',
-    'INST_END' => 'The installation wizard is finished ,, Please remove the INSTALL directory..!',
-    'INST_NOTE_D' => 'Any observations or problems , please contact with the developers kleeja..!!',
+    'INST_END' =>
+        'The installation wizard is finished, please remove the INSTALL directory <strong>(the site will not work while this directory exists)</strong>',
+    'INST_NOTE_D' =>
+        'For any observations or problems related to Kleeja, please report them on the <a href="https://github.com/kleeja/kleeja/issues">Issues page</a>',
     'INST_FINISH_ERRSQL' => 'Oops! there seems to be a problem, try again.',
-    'INST_KLEEJADEVELOPERS' => 'Thank you for using Kleeja, and we wish you a good luck.',
+    'INST_KLEEJADEVELOPERS' => 'Thank you for using Kleeja, and we wish you good luck.',
     'SITENAME' => 'Website title',
     'SITEURL' => 'Website URL',
     'SITEMAIL' => 'Website Email',
@@ -54,12 +56,12 @@ return [
     'WRONG_EMAIL' => 'Incorrect Email Address!',
 
     'DB_INFO_NW' =>
-        'Enter the database information correctly .. Then press Next and the wizard will export the config.php file and put it in a directory the main script !',
+        'Enter the database information correctly .. Then press Next and the wizard will export the config.php file, then put it in the main script directory!',
     'DB_INFO' => 'Enter the database information ..!',
     'DB_SERVER' => 'Host',
     'DB_TYPE' => 'Database type',
     'DB_TYPE_MYSQL' => 'MySQL',
-    'DB_TYPE_SQLITE' => 'MySQL Improved',
+    'DB_TYPE_SQLITE' => 'SQLite',
     'DB_USER' => 'Database Username',
     'DB_PASSWORD' => 'Database Password',
     'DB_NAME' => 'Database Name',
@@ -86,36 +88,61 @@ return [
     'FUNCTION_DISC_MUF' =>
         'The function move_uploaded_file is used to upload files and it\'s the most important function in the script.',
     'EXTENSION_PDO_EXISTS' =>
-        'The PDO extenstion is used to connect to multi databases with the same code, and to\'s checking SQL before executing it',
-    'EXTENSION_IS_EXISTS' => 'The extenstion %s is loaded.',
-    'EXTENSION_IS_NOT_EXISTS' => 'The extenstion %s isn\'t loaded.',
+        'The PDO extension is used to connect to multiple databases with the same code, and to validate SQL queries before executing them',
+    'EXTENSION_IS_EXISTS' => 'The extension %s is loaded.',
+    'EXTENSION_IS_NOT_EXISTS' => 'The extension %s isn\'t loaded.',
 
     'ADVICES_CHECK' => 'Advanced check (Optional)',
     'ZIPARCHIVE_LIB' =>
-        '<span style="color:red;padding:0 6px">ZipArchive Lib is not available..!</span><br /> It is required to install plugins, styles and to upgrade to newer Kleeja versions!',
+        '<strong>ZipArchive Lib is not available..!</strong><br /> It is required to install plugins, styles and to upgrade to newer Kleeja versions!',
 
     //UPDATE
     'INST_UPDATE_CUR_VER_IS_UP' => 'Your current version database is up-to-date ... hooray!',
 
-    'INST_UPDATE_IS_FINISH' => 'Installation completed! you can now delete the INSTALL directory...',
+    'INST_UPDATE_IS_FINISH' => 'The update wizard is finished! You can now delete the INSTALL directory...',
 
     'INST_PHP_LESSMIN' => 'You need PHP %1$s or above to install Kleeja, your current version is %2$s',
     'INST_MYSQL_LESSMIN' => 'You need MySQL %1$s or above to install Kleeja, your current version is %2$s',
-    'IS_IT_OFFICIAL' => 'Did you get your copy from Kleeja.net (Kleeja official site) ?',
+    'IS_IT_OFFICIAL' =>
+        'Did you get your copy from Kleeja.net (Kleeja official site) or from the official release files on GitHub?',
     'IS_IT_OFFICIAL_DESC' =>
-        'We receive a lot of complaints and questions about the cause of some bugs and issues which occur in kleeja and probably we can\'t figure out what the problem is . After we have checked we have found that there are some unofficially copies released from untrusted publishers .<span class="sure"> So are you sure of this copy is downloaded from kleeja official site ?</span>',
+        'We receive a lot of complaints and questions about the cause of some bugs and issues which occur in kleeja and probably we can\'t figure out what the problem is . After we have checked we have found that there are some unofficial copies released from untrusted publishers .<span class="sure"> So are you sure that this copy was downloaded from <a href="https://kleeja.net" target="_blank" rel="noopener">Kleeja.net</a> or from the <a href="https://github.com/kleeja/kleeja/releases" target="_blank" rel="noopener">official releases on GitHub</a>?</span>',
     'INST_WHAT_IS_KLEEJA_T' => 'What is Kleeja ?',
 
     'INST_WHAT_IS_KLEEJA' =>
-        'Keeja is a free, features rich, files and images upload system. Kleeja is developed to help webmasters to provide a decent files hosting service on their sites . Kleeja comes with a simple source code and powerful User system , also with easy template system so you can easily customize your styles ',
+        'Kleeja is a free, features rich, files and images upload system. Kleeja is developed to help webmasters to provide a decent files hosting service on their sites . Kleeja comes with a simple source code and powerful User system , also with easy template system so you can easily customize your styles ',
 
     'INST_SPECIAL_KLEEJA' => 'Some Kleeja features .. !',
     'INST_WHAT_IS_KLEEJA_ONE' =>
-        'Kleeja has a simple and powerful user system which can be easily integrated with many boards . Kleeja provide simple admin control panel that enables you to control over everything in your site . Also you can customize Kleeja\'s style and install a lot of add-ons  ....  <a target="_blank" href="https://kleeja.net">more details in Kleeja site </a>',
+        'Kleeja has a simple and powerful user system which can be easily integrated with many boards . Kleeja provides a simple admin control panel that enables you to control everything in your site . Also you can customize Kleeja\'s style and install a lot of add-ons  ....  <a target="_blank" href="https://kleeja.net">more details in Kleeja site </a>',
     'YES' => 'Yes',
     'NO' => 'No',
 
+    //WIZARD
+    'INST_CHOOSE_LANG' => 'Choose the language of the installation wizard',
+    'INST_STEP_LANGUAGE' => 'Language',
+    'INST_STEP_WELCOME' => 'Welcome',
+    'INST_STEP_LICENSE' => 'License',
+    'INST_STEP_REQUIREMENTS' => 'Requirements',
+    'INST_STEP_DATABASE' => 'Database',
+    'INST_STEP_SITE' => 'Site setup',
+    'INST_STEP_FINISH' => 'Finish',
+    'INST_STEP_OF' => 'Step %1$d of %2$d',
+    'INST_SHOW_PASSWORD' => 'Show password',
+    'INST_DB_TABLES' => 'Creating the database tables',
+    'INST_CHECK_FAILED' => 'Some checks did not pass, fix them then check again',
+    'INST_ERROR_LOG' => 'Error log',
+    'INST_DARK_MODE' => 'Dark mode',
+    'INST_TRY_AGAIN' => 'Try again',
+    'INST_PREFIX_WRONG' => 'Use English letters, numbers and _ only',
+    'INST_UPDATE_DESC' => 'Your database will be updated from version %1$s to version %2$s.',
+    'INST_UPDATE_BACKUP' => 'Take a backup of your database before you continue.',
+    'INST_UPDATE_LOGIN' => 'Sign in with an admin account to start the update',
+    'INST_UPDATE_NOW' => 'Update now',
+    'INST_UPDATE_WRONG_LOGIN' => 'Wrong username or password, or this account is not an admin.',
+    'INST_UPDATE_FAILED' => 'The update stopped because of a database error, fix it then try again',
+
     'KLEEJA_TEAM_MSG_NAME' => 'Kleeja Development Team',
     'KLEEJA_TEAM_MSG_TEXT' =>
-        "Thank you for choosing Kleeja to empower your website,\n We really hope you enjoy the unique experience that Kleeja offers to you.\nDon't forget to visit https://kleeja.net for future updates, to report bugs/issues kindly visit our <a href=\"https://github.com/kleeja-official/kleeja/issues\">Issues page</a>",
+        "Thank you for choosing Kleeja to empower your website,\n We really hope you enjoy the unique experience that Kleeja offers to you.\nDon't forget to visit https://kleeja.net for future updates, to report bugs/issues kindly visit our Issues page: https://github.com/kleeja/kleeja/issues",
 ];
