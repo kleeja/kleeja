@@ -372,13 +372,6 @@ switch ($current_go_case) {
 
                 if ($SQL->num_rows($result) != 0) {
                     while ($row = $SQL->fetch_array($result)) {
-                        @kleeja_unlink($row['folder'] . '/' . $row['name']);
-
-                        //delete thumb
-                        if (file_exists($row['folder'] . '/thumbs/' . $row['name'])) {
-                            @kleeja_unlink($row['folder'] . '/thumbs/' . $row['name']);
-                        }
-
                         $is_img = in_array($row['type'], ['png', 'gif', 'jpg', 'jpeg', 'tif', 'tiff', 'bmp'])
                             ? true
                             : false;
@@ -394,6 +387,13 @@ switch ($current_go_case) {
                         $SQL->build($query_del);
 
                         if ($SQL->affected()) {
+                            @kleeja_unlink($row['folder'] . '/' . $row['name']);
+
+                            //delete thumb
+                            if (file_exists($row['folder'] . '/thumbs/' . $row['name'])) {
+                                @kleeja_unlink($row['folder'] . '/thumbs/' . $row['name']);
+                            }
+
                             //update number of stats
                             $update_query = [
                                 'UPDATE' => "{$dbprefix}stats",
@@ -411,6 +411,8 @@ switch ($current_go_case) {
                     }
 
                     $SQL->freeresult($result);
+                } else {
+                    kleeja_info($lang['NOT_FOUND']);
                 }
             } else {
                 //fix for IE+
