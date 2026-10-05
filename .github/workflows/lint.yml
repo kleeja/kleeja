@@ -2,7 +2,7 @@ name: Check Code Formatting
 
 on:
   pull_request:
-    branches: [master, dev, main]
+    branches: [master, dev, main, kleeja-4]
     types: [opened, synchronize, reopened]
 
 jobs:
