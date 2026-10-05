@@ -456,7 +456,11 @@ elseif (
 
     //send file headers
     header('Pragma: public');
-    header('Accept-Ranges: bytes');
+    if ($resuming_on) {
+        header('Accept-Ranges: bytes');
+    } else {
+        header('Accept-Ranges: none');
+    }
     header('Content-Description: File Transfer');
 
     //dirty fix
@@ -479,14 +483,21 @@ elseif (
     if (isset($_SERVER['HTTP_RANGE']) && $resuming_on) {
         [$a, $range] = explode('=', $_SERVER['HTTP_RANGE'], 2);
         [$range] = explode(',', $range, 2);
-        [$range, $range_end] = explode('=', $range);
+        [$range, $range_end] = explode('-', $range);
         $range = round(floatval($range), 0);
-        $range_end = !$range_end ? $size - 1 : round(floatval($range_end), 0);
+        $range_end = (!$range_end || floatval($range_end) >= $size) ? $size - 1 : round(floatval($range_end), 0);
+
+        if ($range < 0 || $range >= $size || $range > $range_end) {
+            header('HTTP/1.1 416 Requested Range Not Satisfiable');
+            header("Content-Range: bytes */$size");
+            fclose($fp);
+            exit();
+        }
 
         $partial_length = $range_end - $range + 1;
         header('HTTP/1.1 206 Partial Content');
         header("Content-Length: $partial_length");
-        header('Content-Range: bytes ' . ($range - $range_end / $size));
+        header("Content-Range: bytes $range-$range_end/$size");
 
         fseek($fp, $range);
     } else {
