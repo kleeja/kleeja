@@ -16,5 +16,5 @@ define('KLEEJA_VERSION', '4.0.0');
 define('KLEEJA_DB_VERSION', '10');
 
 // Kleeja min requirements
-define('MIN_PHP_VERSION', '8.0');
+define('MIN_PHP_VERSION', '8.2');
 define('MIN_MYSQL_VERSION', '4.2.2');

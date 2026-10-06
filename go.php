@@ -208,24 +208,25 @@ switch ($current_go_case) {
 
                 $to = $config['sitemail2']; //administrator e-mail
                 $message = [
-                    ['type' => 'text', 'content' => $text],
+                    ['type' => 'text', 'content' => sprintf($lang['MAIL_REPORT_INTRO'], $config['sitename'])],
+                    ['type' => 'alert', 'content' => $text],
                     [
                         'type' => 'text',
-                        'content' =>
-                            $lang['URL'] .
-                            ': ' .
-                            $url .
-                            "\n" .
-                            $lang['TIME'] .
-                            ': ' .
-                            date('d-m-Y h:i a', $time) .
-                            "\n" .
-                            $lang['IP'] .
-                            ': ' .
-                            $ip,
+                        'content' => implode("\n", [
+                            $lang['NAME'] . ': ' . $name,
+                            $lang['EMAIL'] . ': ' . $mail,
+                            $lang['URL'] . ': ' . $url,
+                            $lang['TIME'] . ': ' . date('d-m-Y h:i a', $time),
+                            $lang['IP'] . ': ' . $ip,
+                        ]),
+                    ],
+                    [
+                        'type' => 'button',
+                        'link' => ADMIN_PATH . '?cp=f_reports',
+                        'label' => $lang['MAIL_REPORT_BUTTON'],
                     ],
                 ];
-                $subject = $lang['REPORT'];
+                $subject = sprintf($lang['MAIL_REPORT_SUBJECT'], $config['sitename']);
                 send_mail($to, $message, $subject, $mail, $name);
 
                 kleeja_info($lang['THNX_REPORTED']);
@@ -339,20 +340,24 @@ switch ($current_go_case) {
                     send_mail(
                         $config['sitemail2'],
                         [
-                            ['type' => 'text', 'content' => $text],
+                            ['type' => 'text', 'content' => sprintf($lang['MAIL_CALL_INTRO'], $config['sitename'])],
+                            ['type' => 'alert', 'content' => $text],
                             [
                                 'type' => 'text',
-                                'content' =>
-                                    $lang['TIME'] .
-                                    ': ' .
-                                    date('d-m-Y h:i a', $timee) .
-                                    "\n" .
-                                    $lang['IP'] .
-                                    ': ' .
-                                    $ip,
+                                'content' => implode("\n", [
+                                    $lang['NAME'] . ': ' . $name,
+                                    $lang['EMAIL'] . ': ' . $mail,
+                                    $lang['TIME'] . ': ' . date('d-m-Y h:i a', $timee),
+                                    $lang['IP'] . ': ' . $ip,
+                                ]),
+                            ],
+                            [
+                                'type' => 'button',
+                                'link' => ADMIN_PATH . '?cp=e_calls',
+                                'label' => $lang['MAIL_CALL_BUTTON'],
                             ],
                         ],
-                        $lang['CALL'],
+                        sprintf($lang['MAIL_CALL_SUBJECT'], $config['sitename']),
                         $mail,
                         $name,
                     );
