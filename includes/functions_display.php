@@ -1018,8 +1018,12 @@ function kleeja_style_info(string $style_name): array|false
 /**
  * Browser detection
  * returns whether or not the visiting browser is the one specified [part of kleeja style system]
- * i.e. is_browser('ie6') -> true or false
- * i.e. is_browser('ie, opera') -> true or false
+ * i.e. is_browser('ie11') -> true or false
+ * i.e. is_browser('edge, opera') -> true or false
+ * browsers: ie, edge, opera, firefox, chrome, safari, konqueror
+ * engines: mozilla (Gecko), webkit (Safari and every Chromium browser)
+ * a version can follow the name and matches whole numbers: firefox14 is 14.x, not 143.0
+ * mobile is phones and the tablets that say so, iPadOS sends the macOS agent and can't be told apart
  * @param  string $b browser name, like mozilla
  * @return bool
  */
@@ -1038,104 +1042,36 @@ function is_browser(string $b): bool
         return false;
     }
 
-    //if no agent, let's take the worst case
-    $u_agent = !empty($_SERVER['HTTP_USER_AGENT'])
-        ? htmlspecialchars((string) $_SERVER['HTTP_USER_AGENT'])
-        : (function_exists('getenv')
-            ? getenv('HTTP_USER_AGENT')
-            : '');
+    $u_agent = strtolower((string) ($_SERVER['HTTP_USER_AGENT'] ?? ''));
     $t = trim(preg_replace('/[^a-z]/', '', $b));
     $r = trim(preg_replace('/[a-z]/', '', $b));
 
+    // name => [the agent token and its version, the other browsers that copy that token]
+    $browsers = [
+        'ie' => ['/(?:msie |trident\/.+?rv:)([\d.]+)/', ''],
+        'edge' => ['/\bedg(?:e|a|ios)?\/([\d.]+)/', ''],
+        'opera' => ['/\b(?:opr|opt|opera)[\/ ]([\d.]+)/', ''],
+        'firefox' => ['/\b(?:firefox|fxios)\/([\d.]+)/', ''],
+        'chrome' => ['/\b(?:chrome|crios)\/([\d.]+)/', '/\b(?:edg(?:e|a|ios)?|opr|opt)\//'],
+        'safari' => ['/\bversion\/([\d.]+).*\bsafari\//', '/\b(?:chrome|chromium|crios|fxios|edgios|opt)\/|android/'],
+        'konqueror' => ['/\bkonqueror\/([\d.]+)/', ''],
+        'mozilla' => ['/\bgecko\/([\d.]+)/', ''],
+        'webkit' => ['/\bapplewebkit\/([\d.]+)/', ''],
+    ];
+
     $return = false;
 
-    switch ($t) {
-        case 'ie':
-            $return = strpos(strtolower($u_agent), trim('msie ' . $r)) !== false ? true : false;
-
-            break;
-
-        case 'firefox':
-            $return =
-                strpos(str_replace('/', ' ', strtolower($u_agent)), trim('firefox ' . $r)) !== false ? true : false;
-
-            break;
-
-        case 'safari':
-            $return = strpos(strtolower($u_agent), trim('safari/' . $r)) !== false ? true : false;
-
-            break;
-
-        case 'chrome':
-            $return = strpos(strtolower($u_agent), trim('chrome ' . $r)) !== false ? true : false;
-
-            break;
-
-        case 'flock':
-            $return = strpos(strtolower($u_agent), trim('flock ' . $r)) !== false ? true : false;
-
-            break;
-
-        case 'opera':
-            $return = strpos(strtolower($u_agent), trim('opera ' . $r)) !== false ? true : false;
-
-            break;
-
-        case 'konqueror':
-            $return = strpos(strtolower($u_agent), trim('konqueror/' . $r)) !== false ? true : false;
-
-            break;
-
-        case 'mozilla':
-            $return = strpos(strtolower($u_agent), trim('gecko/' . $r)) !== false ? true : false;
-
-            break;
-
-        case 'webkit':
-            $return = strpos(strtolower($u_agent), trim('applewebkit/' . $r)) !== false ? true : false;
-
-            break;
-        /**
-         * Mobile Phones are so popular those days, so we have to support them ...
-         * This is still in our test lab.
-         * @see http://en.wikipedia.org/wiki/List_of_user_agents_for_mobile_phones
-         **/
-        case 'mobile':
-            $mobile_agents = [
-                'iPhone;',
-                'iPod;',
-                'blackberry',
-                'Android',
-                'HTC',
-                'IEMobile',
-                'LG/',
-                'LG-',
-                'LGE-',
-                'MOT-',
-                'Nokia',
-                'SymbianOS',
-                'nokia_',
-                'PalmSource',
-                'webOS',
-                'SAMSUNG-',
-                'SEC-SGHU',
-                'SonyEricsson',
-                'BOLT/',
-                'Mobile Safari',
-                'Fennec/',
-                'Opera Mini',
-            ];
-            $return = false;
-
-            foreach ($mobile_agents as $agent) {
-                if (strpos($u_agent, $agent) !== false) {
-                    $return = true;
-
-                    break;
-                }
-            }
-
-            break;
+    if ($t == 'mobile') {
+        // Chromium sends this client hint over HTTPS, the rest is for the other browsers
+        $return =
+            ($_SERVER['HTTP_SEC_CH_UA_MOBILE'] ?? '') === '?1' ||
+            preg_match('/mobi|android|iphone|ipod|ipad|blackberry|bb10|opera mini|kaios|symbian/', $u_agent) === 1;
+    } elseif (
+        isset($browsers[$t]) &&
+        preg_match($browsers[$t][0], $u_agent, $m) &&
+        ($browsers[$t][1] === '' || !preg_match($browsers[$t][1], $u_agent))
+    ) {
+        $return = $r === '' || $m[1] === $r || strpos($m[1], $r . '.') === 0;
     }
 
     extract(runHook('is_browser_func', get_defined_vars()));

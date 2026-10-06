@@ -266,11 +266,6 @@ elseif (
                         : null)));
     }
 
-    //is internet explore 8 ?
-    $is_ie8 = is_browser('ie8');
-    //is internet explore 6 ?
-    // $is_ie6 = is_browser('ie6');
-
     $livexts = explode(',', $config['livexts']);
 
     //get info file
@@ -405,13 +400,13 @@ elseif (
         $name = preg_replace('/\./', '_', $name, $dots_in_name);
     }
 
-    if (is_browser('mozilla')) {
-        $h_name = "filename*=UTF-8''" . rawurlencode(htmlspecialchars_decode($name));
-    } elseif (is_browser('opera, safari, konqueror')) {
-        $h_name = 'filename="' . str_replace('"', '', htmlspecialchars_decode($name)) . '"';
-    } else {
-        $h_name = 'filename="' . rawurlencode(htmlspecialchars_decode($name)) . '"';
-    }
+    // RFC 6266: browsers read the UTF-8 filename*, older clients the ASCII filename
+    $h_name = htmlspecialchars_decode($name);
+    $h_name =
+        'filename="' .
+        preg_replace('/[^\x20-\x7E]+|["\\\\]/', '_', $h_name) .
+        "\"; filename*=UTF-8''" .
+        rawurlencode($h_name);
 
     //Figure out the MIME type (if not specified)
     $ext = explode('.', $path_file);
@@ -474,18 +469,13 @@ elseif (
 
     extract(runHook('do_page_headers_set', get_defined_vars()));
 
-    //if(!$is_image && !$is_live && $is_ie8)
-    //{
-    //    header('X-Download-Options: noopen');
-    //}
-
     //add multipart download and resume support
     if (isset($_SERVER['HTTP_RANGE']) && $resuming_on) {
         [$a, $range] = explode('=', $_SERVER['HTTP_RANGE'], 2);
         [$range] = explode(',', $range, 2);
         [$range, $range_end] = explode('-', $range);
         $range = round(floatval($range), 0);
-        $range_end = (!$range_end || floatval($range_end) >= $size) ? $size - 1 : round(floatval($range_end), 0);
+        $range_end = !$range_end || floatval($range_end) >= $size ? $size - 1 : round(floatval($range_end), 0);
 
         if ($range < 0 || $range >= $size || $range > $range_end) {
             header('HTTP/1.1 416 Requested Range Not Satisfiable');

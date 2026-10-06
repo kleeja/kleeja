@@ -72,14 +72,8 @@ $kleeja_version =
 //admin messages system
 $ADM_NOTIFICATIONS = [];
 
-//useing IE6 ! and he is admin ?  omg !
-$u_agent = !empty($_SERVER['HTTP_USER_AGENT'])
-    ? htmlspecialchars((string) strtolower($_SERVER['HTTP_USER_AGENT']))
-    : (function_exists('getenv')
-        ? getenv('HTTP_USER_AGENT')
-        : '');
-
-if (is_browser('ie6, ie8, ie7')) {
+//using Internet Explorer ! the control panel doesn't support any version of it
+if (is_browser('ie')) {
     $ADM_NOTIFICATIONS['IE6'] = [
         'id' => 'IE6',
         'msg_type' => 'error',
