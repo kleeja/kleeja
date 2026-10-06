@@ -13,18 +13,30 @@ if (!defined('IN_COMMON')) {
 }
 
 /**
- * functions for start, it is the error handler of Kleeja, and it is used by the installer too
+ * Error handler for Kleeja; also used by the installer.
+ *
+ * Only non-fatal types ever reach this function (E_WARNING, E_NOTICE,
+ * E_RECOVERABLE_ERROR, E_DEPRECATED, E_USER_*). Fatal types
+ * (E_ERROR, E_PARSE, E_CORE_*, E_COMPILE_*) bypass the handler in the engine.
+ *
  * @param int    $error_number
  * @param string $error_string
  * @param string $error_file
  * @param int    $error_line
+ *
+ * @return bool true = error handled, PHP's internal handler is skipped
  */
 function kleeja_show_error(
     int $error_number,
     string $error_string = '',
     string $error_file = '',
     int $error_line = 0,
-): void {
+): bool {
+    // Respect @ (error suppression operator) and current error_reporting setting
+    if (!(error_reporting() & $error_number)) {
+        return false;
+    }
+
     switch ($error_number) {
         case E_NOTICE:
         case E_WARNING:
@@ -44,8 +56,9 @@ function kleeja_show_error(
                 kleeja_log('[' . $error_name . '] ' . basename($error_file) . ':' . $error_line . ' ' . $error_string);
             }
 
-            break;
+            return true;
 
+        // Only E_USER_ERROR and E_RECOVERABLE_ERROR reach this default case.
         default:
             if (!headers_sent()) {
                 header('HTTP/1.1 503 Service Temporarily Unavailable');
@@ -54,10 +67,6 @@ function kleeja_show_error(
 
             $error_name =
                 [
-                    E_ERROR => 'E_ERROR',
-                    E_PARSE => 'E_PARSE',
-                    E_CORE_ERROR => 'E_CORE_ERROR',
-                    E_COMPILE_ERROR => 'E_COMPILE_ERROR',
                     E_USER_ERROR => 'E_USER_ERROR',
                     E_RECOVERABLE_ERROR => 'E_RECOVERABLE_ERROR',
                 ][$error_number] ?? 'E_UNKNOWN';
@@ -82,9 +91,9 @@ function kleeja_show_error(
                     '{TYPE}' => 'error',
                     '{MESSAGE}' => nl2br($escape($error_string)),
                     '{ERROR_NAME}' => $error_name,
-                    '{ERROR_NUMBER}' => $error_number,
+                    '{ERROR_NUMBER}' => (string) $error_number,
                     '{ERROR_FILE}' => $escape(basename($error_file)),
-                    '{ERROR_LINE}' => $error_line,
+                    '{ERROR_LINE}' => (string) $error_line,
                 ]);
             }
 
@@ -95,8 +104,6 @@ function kleeja_show_error(
             }
 
             exit();
-
-            break;
     }
 }
 
