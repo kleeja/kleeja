@@ -282,13 +282,8 @@ $STYLE_PATH =
     '/';
 $THIS_STYLE_PATH = $config['siteurl'] . 'styles/' . $config['style'] . '/';
 $THIS_STYLE_PATH_ABS = PATH . 'styles/' . $config['style'] . '/';
-$STYLE_PATH_ADMIN =
-    $config['siteurl'] .
-    'admin/' .
-    (is_browser('mobile') || defined('IN_MOBILE') ? ACP_STYLE_NAME : ACP_STYLE_NAME) .
-    '/';
-$STYLE_PATH_ADMIN_ABS =
-    PATH . 'admin/' . (is_browser('mobile') || defined('IN_MOBILE') ? ACP_STYLE_NAME . '/' : ACP_STYLE_NAME . '/');
+$STYLE_PATH_ADMIN = $config['siteurl'] . 'admin/' . ACP_STYLE_NAME . '/';
+$STYLE_PATH_ADMIN_ABS = PATH . 'admin/' . ACP_STYLE_NAME . '/';
 $DEFAULT_PATH_ADMIN_ABS = PATH . 'admin/' . ACP_STYLE_NAME . '/';
 $DEFAULT_PATH_ADMIN = $config['siteurl'] . 'admin/' . ACP_STYLE_NAME . '/';
 
