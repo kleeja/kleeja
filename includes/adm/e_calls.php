@@ -110,24 +110,22 @@ if ($nums_rows > 0) {
             if ($sen[$row['id']]) {
                 $to = $row['mail'];
                 $subject = $lang['REPLY_CALL'] . ':' . $config['sitename'];
-                $message =
-                    "\n " .
-                    $lang['REPLY_CALL'] .
-                    ' ' .
-                    $row['name'] .
-                    "\r\n " .
-                    $lang['REPLIED_ON_CAL'] .
-                    ' : ' .
-                    $config['sitename'] .
-                    "\r\n " .
-                    $lang['BY_EMAIL'] .
-                    ': ' .
-                    $row['mail'] .
-                    "\r\n" .
-                    $lang['ADMIN_REPLIED'] .
-                    "\r\n" .
-                    $sen[$row['id']] .
-                    "\r\n\r\n Kleeja.net ";
+                $message = [
+                    ['type' => 'text', 'content' => $lang['REPLY_CALL'] . ' ' . $row['name']],
+                    [
+                        'type' => 'text',
+                        'content' =>
+                            $lang['REPLIED_ON_CAL'] .
+                            ': ' .
+                            $config['sitename'] .
+                            "\n" .
+                            $lang['BY_EMAIL'] .
+                            ': ' .
+                            $row['mail'],
+                    ],
+                    ['type' => 'text', 'content' => $lang['ADMIN_REPLIED'] . ':'],
+                    ['type' => 'alert', 'content' => $sen[$row['id']]],
+                ];
 
                 $send = send_mail($to, $message, $subject, $config['sitemail'], $config['sitename']);
 

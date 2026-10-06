@@ -207,8 +207,24 @@ switch ($current_go_case) {
                 $SQL->build($update_query);
 
                 $to = $config['sitemail2']; //administrator e-mail
-                $message =
-                    $text . "\n\n\n\n" . 'URL :' . $url . ' - TIME : ' . date('d-m-Y h:i a', $time) . ' - IP:' . $ip;
+                $message = [
+                    ['type' => 'text', 'content' => $text],
+                    [
+                        'type' => 'text',
+                        'content' =>
+                            $lang['URL'] .
+                            ': ' .
+                            $url .
+                            "\n" .
+                            $lang['TIME'] .
+                            ': ' .
+                            date('d-m-Y h:i a', $time) .
+                            "\n" .
+                            $lang['IP'] .
+                            ': ' .
+                            $ip,
+                    ],
+                ];
                 $subject = $lang['REPORT'];
                 send_mail($to, $message, $subject, $mail, $name);
 
@@ -322,7 +338,20 @@ switch ($current_go_case) {
                 if ($SQL->build($insert_query)) {
                     send_mail(
                         $config['sitemail2'],
-                        $text . "\n\n\n\n" . 'TIME : ' . date('d-m-Y h:i a', $timee) . ' - IP:' . $ip,
+                        [
+                            ['type' => 'text', 'content' => $text],
+                            [
+                                'type' => 'text',
+                                'content' =>
+                                    $lang['TIME'] .
+                                    ': ' .
+                                    date('d-m-Y h:i a', $timee) .
+                                    "\n" .
+                                    $lang['IP'] .
+                                    ': ' .
+                                    $ip,
+                            ],
+                        ],
                         $lang['CALL'],
                         $mail,
                         $name,

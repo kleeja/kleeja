@@ -78,8 +78,10 @@ return [
     'GET_LOSTPASS' => 'Get your password',
     'E_GET_LOSTPASS' => 'Enter your email to receive your password.',
     'WRONG_DB_EMAIL' => 'The specified email address cannot be found in our database!',
-    'GET_LOSTPASS_MSG' =>
-        "You have asked for your password to be reset but, to avoid spam click on the link below for confirmation : \r\n %1\$s \r\n New Password : %2\$s",
+    'GET_LOSTPASS_MAIL' =>
+        'You have asked for your password to be reset. To avoid spam, confirm it with the button below, then log in with your new password.',
+    'GET_LOSTPASS_NEWPASS' => 'New password: %s',
+    'GET_LOSTPASS_CONFIRM' => 'Confirm the new password',
     'CANT_SEND_NEWPASS' => 'Error... the new password could not be sent!',
     'OK_SEND_NEWPASS' => 'We have sent you the new password',
     'OK_APPLY_NEWPASS' => 'New password set. you can now login to your account.',

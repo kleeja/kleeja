@@ -889,14 +889,12 @@ switch (g('go')) {
                     urlencode($hash_key) .
                     '&uid=' .
                     $row['id'];
-                $message =
-                    "\n " .
-                    $lang['WELCOME'] .
-                    ' ' .
-                    $row['name'] .
-                    "\r\n " .
-                    sprintf($lang['GET_LOSTPASS_MSG'], $activation_link, $newpass) .
-                    "\r\n\r\n kleeja.net";
+                $message = [
+                    ['type' => 'text', 'content' => $lang['WELCOME'] . ' ' . $row['name']],
+                    ['type' => 'text', 'content' => $lang['GET_LOSTPASS_MAIL']],
+                    ['type' => 'alert', 'content' => sprintf($lang['GET_LOSTPASS_NEWPASS'], $newpass)],
+                    ['type' => 'button', 'link' => $activation_link, 'label' => $lang['GET_LOSTPASS_CONFIRM']],
+                ];
 
                 $update_query = [
                     'UPDATE' => "{$dbprefix}users",

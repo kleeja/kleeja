@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="{lang.LANG_SMALL_NAME}" dir="{lang.DIR}" xmlns="http://www.w3.org/1999/xhtml" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="x-apple-disable-message-reformatting">
+<meta name="format-detection" content="telephone=no, date=no, address=no, email=no">
+<meta name="color-scheme" content="light">
+<meta name="supported-color-schemes" content="light">
+<title>Kleeja</title>
+<!--[if mso]>
+<noscript>
+<xml>
+<o:OfficeDocumentSettings>
+<o:PixelsPerInch>96</o:PixelsPerInch>
+</o:OfficeDocumentSettings>
+</xml>
+</noscript>
+<![endif]-->
+<style>
+body { margin: 0; padding: 0; width: 100% !important; -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; }
+table, td { border-collapse: collapse; mso-table-lspace: 0pt; mso-table-rspace: 0pt; }
+img { border: 0; outline: none; text-decoration: none; -ms-interpolation-mode: bicubic; }
+a { color: #C84B56; }
+@media only screen and (max-width: 620px) {
+    .kj-container { width: 100% !important; }
+    .kj-px { padding-left: 24px !important; padding-right: 24px !important; }
+}
+</style>
+</head>
+<body style="margin: 0; padding: 0; background-color: #F6F7F8;">
+<!-- Gmail drops the attributes of <html> and <body>, so the direction is set again here -->
+<table role="presentation" dir="{lang.DIR}" width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="#F6F7F8" style="width: 100%; background-color: #F6F7F8;">
+    <tr>
+        <td align="center" style="padding: 32px 16px;">
+            <!--[if mso]><table role="presentation" width="600" cellpadding="0" cellspacing="0" border="0" align="center"><tr><td><![endif]-->
+            <table role="presentation" class="kj-container" width="600" cellpadding="0" cellspacing="0" border="0" style="width: 100%; max-width: 600px; border-collapse: separate;">
+                <tr>
+                    <td bgcolor="#FFFFFF" style="background-color: #FFFFFF; border: 1px solid #D9DCE0; border-radius: 8px; overflow: hidden;">
+                        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+                            <!-- Coral accent bar -->
+                            <tr>
+                                <td height="4" bgcolor="#F45B69" style="height: 4px; line-height: 4px; font-size: 4px; background-color: #F45B69;">&nbsp;</td>
+                            </tr>
+                            <!-- Logo -->
+                            <tr>
+                                <td align="center" class="kj-px" style="padding: 32px 40px 24px;">
+                                    <img src="https://kleeja.net/images/logo.png" width="56" height="56" alt="Kleeja" style="display: block; width: 56px; height: 56px; border: 0;">
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="kj-px" style="padding: 0 40px;">
+                                    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+                                        <tr>
+                                            <td height="1" bgcolor="#EDEEF0" style="height: 1px; line-height: 1px; font-size: 1px; background-color: #EDEEF0;">&nbsp;</td>
+                                        </tr>
+                                    </table>
+                                </td>
+                            </tr>
+                            <!-- Content: the blocks of kleeja_mail_template() -->
+                            <tr>
+                                <td class="kj-px" style="padding: 32px 40px 24px;">
+                                    <LOOP NAME="mail_blocks">
+                                    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+                                        <tr>
+                                        <IF LOOP="type == text">
+                                            <td style="padding: 0 0 16px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'IBM Plex Sans Arabic', Tahoma, sans-serif; font-size: 16px; line-height: 1.6; color: #0B1F3A;">
+                                                {{content}}
+                                            </td>
+                                        <ELSEIF LOOP="type == button">
+                                            <td style="padding: 8px 0 24px;">
+                                                <table role="presentation" cellpadding="0" cellspacing="0" border="0">
+                                                    <tr>
+                                                        <td bgcolor="#F45B69" style="background-color: #F45B69; border-radius: 4px; mso-padding-alt: 12px 24px;">
+                                                            <a href="{{link}}" target="_blank" rel="noopener" style="display: inline-block; padding: 12px 24px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'IBM Plex Sans Arabic', Tahoma, sans-serif; font-size: 16px; font-weight: 600; line-height: 1.25; color: #FFFFFF; text-decoration: none; border-radius: 4px;">{{label}}</a>
+                                                        </td>
+                                                    </tr>
+                                                </table>
+                                            </td>
+                                        <ELSEIF LOOP="type == alert">
+                                            <td style="padding: 0 0 16px;">
+                                                <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse: separate;">
+                                                    <tr>
+                                                    <IF LOOP="level == success">
+                                                        <td bgcolor="#E8F2EF" style="padding: 12px 16px; background-color: #E8F2EF; border: 1px solid #16785A; border-radius: 4px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'IBM Plex Sans Arabic', Tahoma, sans-serif; font-size: 15px; line-height: 1.5; color: #0B1F3A;">
+                                                    <ELSEIF LOOP="level == warning">
+                                                        <td bgcolor="#FAF2E7" style="padding: 12px 16px; background-color: #FAF2E7; border: 1px solid #C97A12; border-radius: 4px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'IBM Plex Sans Arabic', Tahoma, sans-serif; font-size: 15px; line-height: 1.5; color: #0B1F3A;">
+                                                    <ELSEIF LOOP="level == error">
+                                                        <td bgcolor="#F9EBEC" style="padding: 12px 16px; background-color: #F9EBEC; border: 1px solid #C2323F; border-radius: 4px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'IBM Plex Sans Arabic', Tahoma, sans-serif; font-size: 15px; line-height: 1.5; color: #0B1F3A;">
+                                                    <ELSE>
+                                                        <td bgcolor="#EAF0F8" style="padding: 12px 16px; background-color: #EAF0F8; border: 1px solid #2D6CB5; border-radius: 4px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'IBM Plex Sans Arabic', Tahoma, sans-serif; font-size: 15px; line-height: 1.5; color: #0B1F3A;">
+                                                    </IF>
+                                                            {{content}}
+                                                        </td>
+                                                    </tr>
+                                                </table>
+                                            </td>
+                                        </IF>
+                                        </tr>
+                                    </table>
+                                    </LOOP>
+                                </td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+                <!-- Footer -->
+                <tr>
+                    <td align="center" class="kj-px" style="padding: 24px 40px 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'IBM Plex Sans Arabic', Tahoma, sans-serif; font-size: 13px; line-height: 1.5; color: #546275;">
+                        <a href="https://kleeja.net" target="_blank" rel="noopener" style="color: #C84B56; text-decoration: underline;">Powered by Kleeja</a>
+                    </td>
+                </tr>
+            </table>
+            <!--[if mso]></td></tr></table><![endif]-->
+        </td>
+    </tr>
+</table>
+</body>
+</html>
