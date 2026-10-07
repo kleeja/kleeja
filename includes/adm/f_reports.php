@@ -110,25 +110,17 @@ if ($nums_rows > 0) {
         if (ip('reply_submit')) {
             if ($sen[$row['id']]) {
                 $to = $row['mail'];
-                $subject = $lang['REPLY_REPORT'] . ':' . $config['sitename'];
-                $message =
-                    "\n " .
-                    $lang['WELCOME'] .
-                    ' ' .
-                    $row['name'] .
-                    "\r\n " .
-                    $lang['U_REPORT_ON'] .
-                    ' ' .
-                    $config['sitename'] .
-                    "\r\n " .
-                    $lang['BY_EMAIL'] .
-                    ' : ' .
-                    $row['mail'] .
-                    "\r\n" .
-                    $lang['ADMIN_REPLIED'] .
-                    ": \r\n" .
-                    $sen[$row['id']] .
-                    "\r\n\r\n kleeja.net";
+                $subject = sprintf($lang['MAIL_REPORT_REPLY_SUBJECT'], $config['sitename']);
+                $message = [
+                    ['type' => 'text', 'content' => sprintf($lang['MAIL_HELLO'], $row['name'])],
+                    ['type' => 'text', 'content' => sprintf($lang['MAIL_REPORT_REPLY_INTRO'], $config['sitename'])],
+                    ['type' => 'alert', 'content' => $sen[$row['id']]],
+                    //the quote is a block of its own, so it takes the direction of its own language
+                    ['type' => 'text', 'content' => $lang['MAIL_YOUR_REPORT']],
+                    ['type' => 'text', 'content' => $row['text']],
+                    ['type' => 'text', 'content' => $lang['URL'] . ': ' . $row['url']],
+                    ['type' => 'text', 'content' => sprintf($lang['MAIL_REGARDS'], $config['sitename'])],
+                ];
 
                 $send = send_mail($to, $message, $subject, $config['sitemail'], $config['sitename']);
 

@@ -189,18 +189,18 @@ function _sm_mk_utf8(string $text): string
 }
 
 /**
- * Send an email message
- * @param  string $to
- * @param  string $body
- * @param  string $subject
- * @param  string $fromAddress
- * @param  string $fromName
- * @param  string $bcc
+ * Send an email message, the HTML of includes/mail_template.html with a plain text copy
+ * @param  string       $to
+ * @param  string|array $body        the blocks of kleeja_mail_template(), or a plain text
+ * @param  string       $subject
+ * @param  string       $fromAddress
+ * @param  string       $fromName
+ * @param  string       $bcc
  * @return bool
  */
 function send_mail(
     string $to,
-    string $body,
+    string|array $body,
     string $subject,
     string $fromAddress,
     string $fromName,
@@ -208,6 +208,11 @@ function send_mail(
 ): bool {
     $sending_mail_handled = false;
     $mail_sent = false;
+
+    //a plain text is one text block, and the hooks get $body as a plain text, like before, and $html_body
+    $blocks = is_array($body) ? $body : [['type' => 'text', 'content' => $body]];
+    $html_body = kleeja_mail_template($blocks);
+    $body = kleeja_mail_text($blocks);
 
     extract(runHook('kleeja_begin_send_mail_func', get_defined_vars()));
 
@@ -217,6 +222,7 @@ function send_mail(
     }
 
     $eol = "\r\n";
+    $boundary = 'kleeja-' . bin2hex(random_bytes(16));
     $headers = '';
     $headers .=
         'From: ' .
@@ -226,8 +232,7 @@ function send_mail(
         '>' .
         $eol;
     $headers .= 'MIME-Version: 1.0' . $eol;
-    $headers .= 'Content-transfer-encoding: 8bit' . $eol; // 7bit
-    $headers .= 'Content-Type: text/plain; charset=utf-8' . $eol; // format=flowed
+    $headers .= 'Content-Type: multipart/alternative; boundary="' . $boundary . '"' . $eol;
     $headers .= 'X-Mailer: Kleeja Mailer' . $eol;
     $headers .=
         'Reply-To: ' .
@@ -243,13 +248,36 @@ function send_mail(
 
     extract(runHook('kleeja_send_mail', get_defined_vars()));
 
-    $body = str_replace(["\n", "\0"], ["\r\n", ''], $body);
+    //the plain text goes first, a mail app shows the last part it can read
+    $message = '';
 
-    // Change the line breaks used in the headers according to OS
+    foreach (['text/plain' => $body, 'text/html' => $html_body] as $content_type => $part) {
+        $part = preg_replace('#\r\n|\r|\n#', $eol, str_replace("\0", '', $part));
+
+        $message .=
+            '--' .
+            $boundary .
+            $eol .
+            'Content-Type: ' .
+            $content_type .
+            '; charset=utf-8' .
+            $eol .
+            'Content-Transfer-Encoding: quoted-printable' .
+            $eol .
+            $eol .
+            quoted_printable_encode($part) .
+            $eol;
+    }
+
+    $message .= '--' . $boundary . '--' . $eol;
+
+    // Change the line breaks used in the headers and the message according to OS
     if (strtoupper(substr(PHP_OS, 0, 3)) == 'MAC') {
         $headers = str_replace("\r\n", "\r", $headers);
+        $message = str_replace("\r\n", "\r", $message);
     } elseif (strtoupper(substr(PHP_OS, 0, 3)) != 'WIN') {
         $headers = str_replace("\r\n", "\n", $headers);
+        $message = str_replace("\r\n", "\n", $message);
     }
 
     extract(runHook('kleeja_send_mail_handle', get_defined_vars()));
@@ -261,11 +289,122 @@ function send_mail(
     $mail_sent = @mail(
         trim(preg_replace('#[\n\r]+#s', '', $to)),
         _sm_mk_utf8(trim(preg_replace('#[\n\r]+#s', '', $subject))),
-        $body,
+        $message,
         $headers,
     );
 
     return $mail_sent;
+}
+
+/**
+ * The blocks of an email that can be sent, see kleeja_mail_template()
+ *
+ * A block of another type, or one with an empty text, is skipped.
+ * @param  array $blocks
+ * @return array
+ */
+function kleeja_mail_blocks(array $blocks): array
+{
+    $mail_blocks = [];
+
+    foreach ($blocks as $block) {
+        $type = $block['type'] ?? '';
+
+        if ($type === 'text' || $type === 'alert') {
+            $content = trim((string) ($block['content'] ?? ''));
+
+            if ($content === '') {
+                continue;
+            }
+
+            $mail_block = ['type' => $type, 'content' => $content];
+
+            if ($type === 'alert') {
+                $level = $block['level'] ?? 'info';
+                $mail_block['level'] = in_array($level, ['info', 'success', 'warning', 'error'], true)
+                    ? $level
+                    : 'info';
+            }
+
+            $mail_blocks[] = $mail_block;
+        } elseif ($type === 'button') {
+            $link = trim((string) ($block['link'] ?? ''));
+            $label = trim((string) ($block['label'] ?? ''));
+
+            if ($link === '' || $label === '') {
+                continue;
+            }
+
+            //a link without a scheme, like example.com, is a website
+            if (!preg_match('#^[a-z][a-z0-9+.-]*:#i', $link)) {
+                $link = 'https://' . ltrim($link, '/');
+            }
+
+            //no javascript: or data: links
+            if (!preg_match('#^(https?|mailto):#i', $link)) {
+                continue;
+            }
+
+            $mail_blocks[] = ['type' => 'button', 'link' => $link, 'label' => $label];
+        }
+    }
+
+    return $mail_blocks;
+}
+
+/**
+ * Render the HTML of an email with includes/mail_template.html, from a list of blocks
+ *
+ *     ['type' => 'text', 'content' => 'Hello']
+ *     ['type' => 'button', 'link' => 'https://example.com', 'label' => 'Visit']
+ *     ['type' => 'alert', 'content' => 'Careful', 'level' => 'warning']   info (the default), success, warning, error
+ *
+ * The texts are printed as text, not HTML, and their line breaks are kept.
+ * @param  array  $blocks
+ * @return string
+ */
+function kleeja_mail_template(array $blocks): string
+{
+    global $tpl;
+
+    $mail_blocks = [];
+
+    foreach (kleeja_mail_blocks($blocks) as $block) {
+        //the texts may be HTML encoded already, as Kleeja saves them, so they are not encoded twice
+        $block = array_map(fn($value) => htmlspecialchars($value, ENT_QUOTES, 'UTF-8', false), $block);
+
+        if (isset($block['content'])) {
+            $block['content'] = nl2br($block['content']);
+        }
+
+        $mail_blocks[] = $block;
+    }
+
+    $template_name = 'mail_template';
+    $template_path = PATH . 'includes/';
+
+    extract(runHook('kleeja_mail_template_func', get_defined_vars()));
+
+    $tpl->assign('mail_blocks', $mail_blocks);
+
+    return $tpl->display($template_name, $template_path);
+}
+
+/**
+ * The plain text of an email, from the blocks of kleeja_mail_template()
+ * @param  array  $blocks
+ * @return string
+ */
+function kleeja_mail_text(array $blocks): string
+{
+    $texts = [];
+
+    foreach (kleeja_mail_blocks($blocks) as $block) {
+        $text = $block['type'] === 'button' ? $block['label'] . ': ' . $block['link'] : $block['content'];
+        $texts[] = html_entity_decode($text, ENT_QUOTES, 'UTF-8');
+    }
+
+    return implode("\n\n", $texts);
 }
 
 /**

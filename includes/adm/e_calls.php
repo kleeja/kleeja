@@ -109,25 +109,16 @@ if ($nums_rows > 0) {
         if (ip('reply_submit')) {
             if ($sen[$row['id']]) {
                 $to = $row['mail'];
-                $subject = $lang['REPLY_CALL'] . ':' . $config['sitename'];
-                $message =
-                    "\n " .
-                    $lang['REPLY_CALL'] .
-                    ' ' .
-                    $row['name'] .
-                    "\r\n " .
-                    $lang['REPLIED_ON_CAL'] .
-                    ' : ' .
-                    $config['sitename'] .
-                    "\r\n " .
-                    $lang['BY_EMAIL'] .
-                    ': ' .
-                    $row['mail'] .
-                    "\r\n" .
-                    $lang['ADMIN_REPLIED'] .
-                    "\r\n" .
-                    $sen[$row['id']] .
-                    "\r\n\r\n Kleeja.net ";
+                $subject = sprintf($lang['MAIL_CALL_REPLY_SUBJECT'], $config['sitename']);
+                $message = [
+                    ['type' => 'text', 'content' => sprintf($lang['MAIL_HELLO'], $row['name'])],
+                    ['type' => 'text', 'content' => sprintf($lang['MAIL_CALL_REPLY_INTRO'], $config['sitename'])],
+                    ['type' => 'alert', 'content' => $sen[$row['id']]],
+                    //the quote is a block of its own, so it takes the direction of its own language
+                    ['type' => 'text', 'content' => $lang['MAIL_YOUR_MESSAGE']],
+                    ['type' => 'text', 'content' => $row['text']],
+                    ['type' => 'text', 'content' => sprintf($lang['MAIL_REGARDS'], $config['sitename'])],
+                ];
 
                 $send = send_mail($to, $message, $subject, $config['sitemail'], $config['sitename']);
 

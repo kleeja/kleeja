@@ -882,21 +882,22 @@ switch (g('go')) {
                 $hash_key = md5($newpass . time());
                 $pass = (string) $usrcp->kleeja_hash_password($newpass . $row['password_salt']);
                 $to = $row['mail'];
-                $subject = $lang['GET_LOSTPASS'] . ':' . $config['sitename'];
+                $subject = sprintf($lang['MAIL_GET_PASS_SUBJECT'], $config['sitename']);
                 $activation_link =
                     $config['siteurl'] .
                     'ucp.php?go=get_pass&activation_key=' .
                     urlencode($hash_key) .
                     '&uid=' .
                     $row['id'];
-                $message =
-                    "\n " .
-                    $lang['WELCOME'] .
-                    ' ' .
-                    $row['name'] .
-                    "\r\n " .
-                    sprintf($lang['GET_LOSTPASS_MSG'], $activation_link, $newpass) .
-                    "\r\n\r\n kleeja.net";
+                $message = [
+                    ['type' => 'text', 'content' => sprintf($lang['MAIL_HELLO'], $row['name'])],
+                    ['type' => 'text', 'content' => sprintf($lang['MAIL_GET_PASS_INTRO'], $config['sitename'])],
+                    ['type' => 'alert', 'content' => sprintf($lang['MAIL_GET_PASS_NEWPASS'], $newpass)],
+                    ['type' => 'text', 'content' => $lang['MAIL_GET_PASS_CONFIRM']],
+                    ['type' => 'button', 'link' => $activation_link, 'label' => $lang['MAIL_GET_PASS_BUTTON']],
+                    ['type' => 'text', 'content' => $lang['MAIL_GET_PASS_IGNORE']],
+                    ['type' => 'text', 'content' => sprintf($lang['MAIL_REGARDS'], $config['sitename'])],
+                ];
 
                 $update_query = [
                     'UPDATE' => "{$dbprefix}users",

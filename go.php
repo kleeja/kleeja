@@ -207,9 +207,26 @@ switch ($current_go_case) {
                 $SQL->build($update_query);
 
                 $to = $config['sitemail2']; //administrator e-mail
-                $message =
-                    $text . "\n\n\n\n" . 'URL :' . $url . ' - TIME : ' . date('d-m-Y h:i a', $time) . ' - IP:' . $ip;
-                $subject = $lang['REPORT'];
+                $message = [
+                    ['type' => 'text', 'content' => sprintf($lang['MAIL_REPORT_INTRO'], $config['sitename'])],
+                    ['type' => 'alert', 'content' => $text],
+                    [
+                        'type' => 'text',
+                        'content' => implode("\n", [
+                            $lang['NAME'] . ': ' . $name,
+                            $lang['EMAIL'] . ': ' . $mail,
+                            $lang['URL'] . ': ' . $url,
+                            $lang['TIME'] . ': ' . date('d-m-Y h:i a', $time),
+                            $lang['IP'] . ': ' . $ip,
+                        ]),
+                    ],
+                    [
+                        'type' => 'button',
+                        'link' => ADMIN_PATH . '?cp=f_reports',
+                        'label' => $lang['MAIL_REPORT_BUTTON'],
+                    ],
+                ];
+                $subject = sprintf($lang['MAIL_REPORT_SUBJECT'], $config['sitename']);
                 send_mail($to, $message, $subject, $mail, $name);
 
                 kleeja_info($lang['THNX_REPORTED']);
@@ -322,8 +339,25 @@ switch ($current_go_case) {
                 if ($SQL->build($insert_query)) {
                     send_mail(
                         $config['sitemail2'],
-                        $text . "\n\n\n\n" . 'TIME : ' . date('d-m-Y h:i a', $timee) . ' - IP:' . $ip,
-                        $lang['CALL'],
+                        [
+                            ['type' => 'text', 'content' => sprintf($lang['MAIL_CALL_INTRO'], $config['sitename'])],
+                            ['type' => 'alert', 'content' => $text],
+                            [
+                                'type' => 'text',
+                                'content' => implode("\n", [
+                                    $lang['NAME'] . ': ' . $name,
+                                    $lang['EMAIL'] . ': ' . $mail,
+                                    $lang['TIME'] . ': ' . date('d-m-Y h:i a', $timee),
+                                    $lang['IP'] . ': ' . $ip,
+                                ]),
+                            ],
+                            [
+                                'type' => 'button',
+                                'link' => ADMIN_PATH . '?cp=e_calls',
+                                'label' => $lang['MAIL_CALL_BUTTON'],
+                            ],
+                        ],
+                        sprintf($lang['MAIL_CALL_SUBJECT'], $config['sitename']),
                         $mail,
                         $name,
                     );
