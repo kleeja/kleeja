@@ -102,7 +102,7 @@ if ($current_smt != 'all') {
         $query['WHERE'] .= " OR name='language'";
     }
 } elseif ($current_smt == 'all') {
-    $query['WHERE'] = "type <> 'groups' OR type = ''";
+    $query['WHERE'] = "type NOT IN ('groups', '0')";
 }
 
 $result = $SQL->build($query);
