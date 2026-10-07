@@ -48,7 +48,7 @@ function kleeja_show_error(
 
         default:
             if (!headers_sent()) {
-                header('HTTP/1.1 503 Service Temporarily Unavailable');
+                http_response_code(503);
                 header('Content-Type: text/html; charset=UTF-8');
             }
 

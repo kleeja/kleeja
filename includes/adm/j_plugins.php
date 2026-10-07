@@ -34,7 +34,7 @@ $plugin_delete_folder_link = $action . '&amp;case=dfolder&amp;' . $GET_FORM_KEY 
 //check _GET Csrf token
 if (!empty($case) && in_array($case, ['install', 'uninstall', 'enable', 'disable', 'download', 'dfolder'])) {
     if (!kleeja_check_form_key_get('adm_plugins_get')) {
-        header('HTTP/1.0 401 Unauthorized');
+        http_response_code(401);
         kleeja_admin_err($lang['INVALID_GET_KEY']);
     }
 }
@@ -42,7 +42,7 @@ if (!empty($case) && in_array($case, ['install', 'uninstall', 'enable', 'disable
 //check _POST Csrf token
 if (ip('newplugin')) {
     if (!kleeja_check_form_key('adm_plugins')) {
-        header('HTTP/1.0 401 Unauthorized');
+        http_response_code(401);
         kleeja_admin_err($lang['INVALID_FORM_KEY'], title: $lang['ERROR'], redirect: $action);
     }
 
@@ -301,7 +301,7 @@ switch ($case):
     //
     case 'install':
         if (intval($userinfo['founder']) !== 1) {
-            header('HTTP/1.0 401 Unauthorized');
+            http_response_code(401);
             kleeja_admin_err($lang['HV_NOT_PRVLG_ACCESS'], $action);
         }
 
@@ -450,7 +450,7 @@ switch ($case):
     //
     case 'uninstall':
         if (intval($userinfo['founder']) !== 1) {
-            header('HTTP/1.0 401 Unauthorized');
+            http_response_code(401);
             kleeja_admin_err($lang['HV_NOT_PRVLG_ACCESS'], $action);
         }
 
@@ -531,7 +531,7 @@ switch ($case):
     case 'disable':
     case 'enable':
         if (intval($userinfo['founder']) !== 1) {
-            header('HTTP/1.0 401 Unauthorized');
+            http_response_code(401);
             kleeja_admin_err($lang['HV_NOT_PRVLG_ACCESS'], $action);
         }
 
@@ -573,7 +573,7 @@ switch ($case):
 
     case 'download':
         if (intval($userinfo['founder']) !== 1) {
-            header('HTTP/1.0 401 Unauthorized');
+            http_response_code(401);
             kleeja_admin_err($lang['HV_NOT_PRVLG_ACCESS']);
         }
 

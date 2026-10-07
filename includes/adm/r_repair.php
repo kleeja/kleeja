@@ -176,7 +176,7 @@ switch ($case):
     //toggle admin start boxes
     case 'toggle_start_box':
         if (!kleeja_check_form_key_get('adm_start_actions')) {
-            header('HTTP/1.1 405 Method Not Allowed');
+            http_response_code(405);
             $adminAjaxContent = $lang['INVALID_FORM_KEY'];
         } else {
             $items = explode(':', $config['hidden_start_boxes']);

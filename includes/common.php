@@ -341,7 +341,7 @@ if (
     }
 
     // Send a 503 HTTP response code to prevent search bots from indexing the maintenace message
-    header('HTTP/1.1 503 Service Temporarily Unavailable');
+    http_response_code(503);
     kleeja_info($config['closemsg'], $lang['SITE_CLOSED']);
 }
 
@@ -349,7 +349,7 @@ if (
 if ($stat_sizes >= $config['total_size'] * 1048576 && !defined('IN_LOGIN') && !defined('IN_ADMIN')) {
     // convert megabytes to bytes
     // Send a 503 HTTP response code to prevent search bots from indexing the maintenace message
-    header('HTTP/1.1 503 Service Temporarily Unavailable');
+    http_response_code(503);
     kleeja_info($lang['SIZES_EXCCEDED'], $lang['STOP_FOR_SIZE']);
 }
 
