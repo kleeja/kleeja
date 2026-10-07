@@ -28,7 +28,7 @@ $case = g('case', default: 'local');
 //check _GET Csrf token
 if (!empty($case) && in_array($case, ['select', 'download', 'dfolder'])) {
     if (!kleeja_check_form_key_get('adm_styles_get')) {
-        header('HTTP/1.0 401 Unauthorized');
+        http_response_code(401);
         kleeja_admin_err($lang['INVALID_GET_KEY'], $action);
     }
 }
@@ -36,7 +36,7 @@ if (!empty($case) && in_array($case, ['select', 'download', 'dfolder'])) {
 //check _POST Csrf token
 if (ip('newstyle')) {
     if (!kleeja_check_form_key('adm_styles')) {
-        header('HTTP/1.0 401 Unauthorized');
+        http_response_code(401);
         kleeja_admin_err($lang['INVALID_FORM_KEY'], title: $lang['ERROR'], redirect: $action);
     }
 
@@ -314,7 +314,7 @@ switch ($case):
 
     case 'download':
         if (intval($userinfo['founder']) !== 1) {
-            header('HTTP/1.0 401 Unauthorized');
+            http_response_code(401);
             kleeja_admin_err($lang['HV_NOT_PRVLG_ACCESS']);
         }
 

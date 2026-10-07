@@ -46,7 +46,7 @@ $show_message = false;
 
 if ($case == 'del' && ig('k')) {
     if (!kleeja_check_form_key_get('adm_ban_get')) {
-        header('HTTP/1.0 401 Unauthorized');
+        http_response_code(401);
         kleeja_admin_err($lang['INVALID_GET_KEY'], $action);
     }
 

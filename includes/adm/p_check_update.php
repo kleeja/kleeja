@@ -31,18 +31,18 @@ $current_smt = preg_replace('/[^a-z0-9_]/i', '', g('smt', default: 'general'));
 if (in_array($current_smt, ['update1', 'update2', 'update3'])) {
     //only founders can do the upgrade process ...
     if (intval($userinfo['founder']) !== 1) {
-        header('HTTP/1.0 401 Unauthorized');
+        http_response_code(401);
         kleeja_admin_err($lang['HV_NOT_PRVLG_ACCESS']);
     }
 
     if (!kleeja_check_form_key_get('UPDATER_FORM_KEY')) {
-        header('HTTP/1.0 401 Unauthorized');
+        http_response_code(401);
 
         kleeja_admin_err($lang['INVALID_GET_KEY']);
     }
 
     if (!is_string($new_version) || !preg_match(KLEEJA_RELEASE_TAG_PATTERN, $new_version)) {
-        header('HTTP/1.0 400 Bad Request');
+        http_response_code(400);
         kleeja_admin_err($lang['ERROR_CHECK_VER']);
     }
 
@@ -149,7 +149,7 @@ elseif ($current_smt == 'update1') {
 //2. extract new kleeja package
 elseif ($current_smt == 'update2') {
     if (!file_exists(PATH . 'cache/step1.done')) {
-        header('HTTP/1.0 401 Unauthorized');
+        http_response_code(401);
         kleeja_admin_err($lang['HV_NOT_PRVLG_ACCESS']);
     }
 
@@ -225,7 +225,7 @@ elseif ($current_smt == 'update2') {
 //3. update, or rollback on failure
 elseif ($current_smt == 'update3') {
     if (!file_exists(PATH . 'cache/step2.done')) {
-        header('HTTP/1.0 401 Unauthorized');
+        http_response_code(401);
         kleeja_admin_err($lang['HV_NOT_PRVLG_ACCESS']);
     }
 

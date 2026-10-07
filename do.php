@@ -370,7 +370,7 @@ elseif (
     // where you can add 'define("MAKE_DOPHP_301_HEADER", true);' in config.php to stop the load
     // if there is any.ead
     if (defined('MAKE_DOPHP_301_HEADER')) {
-        header('HTTP/1.1 301 Moved Permanently');
+        http_response_code(301);
         header('Location: ' . $path_file);
         $SQL->close();
 
@@ -439,7 +439,7 @@ elseif (
     //open the file
     if (($fp = @fopen($path_file, 'rb')) === false) {
         //so ... it's failed to open !
-        header('HTTP/1.0 404 Not Found');
+        http_response_code(404);
         @fclose($fp);
         big_error($lang['FILE_NO_FOUNDED'], $lang['NOT_FOUND']);
     }
@@ -478,20 +478,20 @@ elseif (
         $range_end = !$range_end || floatval($range_end) >= $size ? $size - 1 : round(floatval($range_end), 0);
 
         if ($range < 0 || $range >= $size || $range > $range_end) {
-            header('HTTP/1.1 416 Requested Range Not Satisfiable');
+            http_response_code(416);
             header("Content-Range: bytes */$size");
             fclose($fp);
             exit();
         }
 
         $partial_length = $range_end - $range + 1;
-        header('HTTP/1.1 206 Partial Content');
+        http_response_code(206);
         header("Content-Length: $partial_length");
         header("Content-Range: bytes $range-$range_end/$size");
 
         fseek($fp, $range);
     } else {
-        header('HTTP/1.1 200 OK');
+        http_response_code(200);
         $partial_length = $size;
         header("Content-Length: $partial_length");
     }

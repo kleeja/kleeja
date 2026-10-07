@@ -108,7 +108,7 @@ if (
 
     extract(runHook('before_display_template_admin_page', get_defined_vars()));
 
-    header('HTTP/1.0 401 Unauthorized');
+    http_response_code(401);
 
     if (ig('_ajax_') || ig('check_msgs')) {
         echo_ajax(401, $lang['HV_NOT_PRVLG_ACCESS']);
