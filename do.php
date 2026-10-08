@@ -67,8 +67,10 @@ if (ig('id') || ig('filename')) {
         $uploads = $file_info['uploads'];
 
         $fname2 = str_replace('.', '-', htmlspecialchars($name));
-        $name = $real_filename != '' ? str_replace('.' . $type, '', htmlspecialchars($real_filename)) : $name;
-        $name = strlen($name) > 70 ? substr($name, 0, 70) . '...' : $name;
+        $name = $real_filename != '' ? str_replace('.' . $type, '', $real_filename) : $name;
+        //70 letters, not bytes, and before it is encoded, so neither a letter of a name in Arabic
+        //nor an entity like &quot; is cut in half
+        $name = htmlspecialchars(preg_match('/^.{70}(?=.)/su', $name, $cut) ? $cut[0] . '...' : $name);
         $fusername = $config['user_system'] == 1 && $file_info['fuserid'] > -1 ? $file_info['fusername'] : false;
         $userfolder =
             $config['siteurl'] .

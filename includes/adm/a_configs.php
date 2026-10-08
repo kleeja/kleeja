@@ -191,8 +191,13 @@ while ($row = $SQL->fetch_array($result)) {
 
     //when submit
     if (ip('submit')) {
-        //-->
-        $new[$row['name']] = p($row['name'], default: $con[$row['name']]);
+        //the text as it was typed, it is encoded once when it is saved below.
+        //p() encodes what it reads, and the saved value is encoded already, so both are decoded here,
+        //or every save would encode the text once more (&amp; to &amp;amp;)
+        $new[$row['name']] = htmlspecialchars_decode(
+            p($row['name'], default: htmlspecialchars_decode($con[$row['name']], ENT_QUOTES)),
+            ENT_QUOTES,
+        );
 
         //save them as you want ..
         if ($row['name'] == 'thumbs_imgs') {
@@ -207,9 +212,9 @@ while ($row = $SQL->fetch_array($result)) {
             $thumbs_were = p('thmb_dim_w', 'int') . '*' . p('thmb_dim_h', 'int');
             update_config('thmb_dims', $thumbs_were);
         } elseif ($row['name'] == 'livexts') {
-            $new['livexts'] = implode(',', array_map('trim', explode(',', p('livexts'))));
+            $new['livexts'] = implode(',', array_map('trim', explode(',', $new['livexts'])));
         } elseif ($row['name'] == 'prefixname') {
-            $new['prefixname'] = preg_replace('/[^a-z0-9_\-\}\{\:\.]/', '', strtolower(p('prefixname')));
+            $new['prefixname'] = preg_replace('/[^a-z0-9_\-\}\{\:\.]/', '', strtolower($new['prefixname']));
         } elseif ($row['name'] == 'siteurl') {
             if (p('siteurl')[strlen(p('siteurl')) - 1] != '/') {
                 $new['siteurl'] .= '/';

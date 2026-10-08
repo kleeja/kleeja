@@ -863,7 +863,12 @@ switch ($current_smt):
             if (ip('editdata')) {
                 extract(runHook('after_submit_adm_users_groupdata', get_defined_vars()));
 
-                $new[$row['name']] = p($row['name'], default: $row['value']);
+                //the text as it was typed, it is encoded once when it is saved below,
+                //p() and the saved value are encoded already (see a_configs.php)
+                $new[$row['name']] = htmlspecialchars_decode(
+                    p($row['name'], default: htmlspecialchars_decode($row['value'], ENT_QUOTES)),
+                    ENT_QUOTES,
+                );
 
                 $update_query = [
                     'UPDATE' => "{$dbprefix}groups_data",
