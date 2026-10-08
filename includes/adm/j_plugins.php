@@ -336,23 +336,21 @@ switch ($case):
             exit();
         }
 
-        $kleeja_plugin = [];
-
         //don't show mysql errors
         if (!defined('SQL_NO_ERRORS')) {
             define('SQL_NO_ERRORS', true);
         }
 
-        @include_once PATH . KLEEJA_PLUGINS_FOLDER . '/' . $plg_name . '/init.php';
+        $plugin_definition = Plugins::definition($plg_name);
 
-        $install_callback = $kleeja_plugin[$plg_name]['install'];
-        $plugin_info = $kleeja_plugin[$plg_name]['information'];
+        $install_callback = $plugin_definition['install'] ?? null;
+        $plugin_info = $plugin_definition['information'] ?? [];
         $plugin_first_run = false;
 
-        if (!empty($kleeja_plugin[$plg_name]['first_run'][$config['language']])) {
-            $plugin_first_run = $kleeja_plugin[$plg_name]['first_run'][$config['language']];
-        } elseif (!empty($kleeja_plugin[$plg_name]['first_run']['en'])) {
-            $plugin_first_run = $kleeja_plugin[$plg_name]['first_run']['en'];
+        if (!empty($plugin_definition['first_run'][$config['language']])) {
+            $plugin_first_run = $plugin_definition['first_run'][$config['language']];
+        } elseif (!empty($plugin_definition['first_run']['en'])) {
+            $plugin_first_run = $plugin_definition['first_run']['en'];
         }
 
         //check if compatible with kleeja
@@ -474,17 +472,9 @@ switch ($case):
                 exit();
             }
 
-            $kleeja_plugin = [];
+            $plugin_definition = Plugins::definition($plg_name);
 
-            include_once PATH . KLEEJA_PLUGINS_FOLDER . '/' . $plg_name . '/init.php';
-
-            $uninstall_callback = $kleeja_plugin[$plg_name]['uninstall'];
-
-            if (!is_callable($uninstall_callback)) {
-                redirect(ADMIN_PATH . '?cp=' . basename(__FILE__, '.php'));
-
-                exit();
-            }
+            $uninstall_callback = $plugin_definition['uninstall'] ?? null;
 
             $query = [
                 'SELECT' => 'plg_id',
@@ -498,7 +488,9 @@ switch ($case):
             $pluginDatabaseInfo = $SQL->fetch($result);
 
             //sad to see you go, brother
-            $uninstall_callback(!empty($pluginDatabaseInfo) ? $pluginDatabaseInfo['plg_id'] : 0);
+            if (is_callable($uninstall_callback)) {
+                $uninstall_callback(!empty($pluginDatabaseInfo) ? $pluginDatabaseInfo['plg_id'] : 0);
+            }
 
             delete_cache('', all: true);
 
