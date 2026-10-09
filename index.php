@@ -128,7 +128,7 @@ if ($show_online) {
         extract(runHook('while_qr_select_online_index_page', get_defined_vars()));
 
         $current_online_users++;
-        $online_names[$row['name']] = $row['name'];
+        $online_names[$row['name']] = kleeja_html_display($row['name']);
     } //while
 
     $SQL->freeresult($result);

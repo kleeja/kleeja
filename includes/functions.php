@@ -85,7 +85,11 @@ function get_ban(): void
                 $replace_it = str_replace('.', '\.', $replace_it);
 
                 $is_banned = $ip == $banned_item || @preg_match('/' . preg_quote($replace_it, '/') . '/i', $ip);
-            } elseif (!empty($username) && $banned_item == $username) {
+            } elseif (
+                //both are saved encoded, but not always the same times (older lists encoded every item again at each change)
+                !empty($username) &&
+                kleeja_html_decode($banned_item) == kleeja_html_decode($username)
+            ) {
                 $is_banned = true;
             }
 
@@ -208,6 +212,10 @@ function send_mail(
 ): bool {
     $sending_mail_handled = false;
     $mail_sent = false;
+
+    //the headers are plain text, but the names come from the database encoded, like the site name
+    $subject = kleeja_html_decode($subject);
+    $fromName = kleeja_html_decode($fromName);
 
     //a plain text is one text block, and the hooks get $body as a plain text, like before, and $html_body
     $blocks = is_array($body) ? $body : [['type' => 'text', 'content' => $body]];
@@ -370,8 +378,12 @@ function kleeja_mail_template(array $blocks): string
     $mail_blocks = [];
 
     foreach (kleeja_mail_blocks($blocks) as $block) {
-        //the texts may be HTML encoded already, as Kleeja saves them, so they are not encoded twice
-        $block = array_map(fn($value) => htmlspecialchars($value, ENT_QUOTES, 'UTF-8', false), $block);
+        //the texts may be HTML encoded already, once or twice as Kleeja saves them, so they are decoded first,
+        //and the other entities of the language texts, like &raquo;, are kept
+        $block = array_map(
+            fn($value) => htmlspecialchars(kleeja_html_decode($value), ENT_QUOTES, 'UTF-8', false),
+            $block,
+        );
 
         if (isset($block['content'])) {
             $block['content'] = nl2br($block['content']);
@@ -401,7 +413,7 @@ function kleeja_mail_text(array $blocks): string
 
     foreach (kleeja_mail_blocks($blocks) as $block) {
         $text = $block['type'] === 'button' ? $block['label'] . ': ' . $block['link'] : $block['content'];
-        $texts[] = html_entity_decode($text, ENT_QUOTES, 'UTF-8');
+        $texts[] = html_entity_decode(kleeja_html_decode($text), ENT_QUOTES, 'UTF-8');
     }
 
     return implode("\n\n", $texts);
@@ -1646,6 +1658,38 @@ function p(string $name, string $type = 'str', string $default = ''): string|int
 function kleeja_html_encode(?string $text): string
 {
     return htmlspecialchars($text ?? '', ENT_QUOTES);
+}
+
+/**
+ * the text as it was typed, from a text that is HTML encoded once or more.
+ * p() encodes what it reads, and the text is encoded again when it is saved, so some texts
+ * are kept encoded twice in the database and others once. It decodes until nothing is left to decode
+ *
+ * @param  string|null $text
+ * @return string
+ */
+function kleeja_html_decode(?string $text): string
+{
+    $text ??= '';
+
+    //every decoding makes the text shorter, so it ends
+    while (($decoded = htmlspecialchars_decode($text, ENT_QUOTES)) !== $text) {
+        $text = $decoded;
+    }
+
+    return $text;
+}
+
+/**
+ * a text from the database, encoded once to be printed in HTML, whatever times it was encoded when it was saved.
+ * the database is not changed, it is fixed when it is shown
+ *
+ * @param  string|null $text
+ * @return string
+ */
+function kleeja_html_display(?string $text): string
+{
+    return kleeja_html_encode(kleeja_html_decode($text));
 }
 
 /**

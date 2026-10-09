@@ -277,6 +277,8 @@ if (!($d_groups = $cache->get('data_groups'))) {
 
     //Initiating
     while ($row = $SQL->fetch_array($result)) {
+        //the name is saved encoded twice (p() and kleeja_html_encode()), it is kept encoded once to be printed
+        $row['group_name'] = kleeja_html_display($row['group_name']);
         $d_groups[$row['group_id']]['data'] = $row;
         $d_groups[$row['group_id']]['configs'] = [];
         $d_groups[$row['group_id']]['acls'] = [];

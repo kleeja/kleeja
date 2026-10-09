@@ -377,7 +377,7 @@ switch (g('go')) {
             $data_user['name'] = $usrcp->usernamebyid($user_id);
         }
 
-        $user_name = !$data_user['name'] ? false : $data_user['name'];
+        $user_name = !$data_user['name'] ? false : kleeja_html_display($data_user['name']);
 
         //set page title
         $titlee = $lang['FILEUSER'] . ': ' . $user_name;
@@ -426,7 +426,8 @@ switch (g('go')) {
                 //make new lovely arrays !!
                 $arr[] = [
                     'id' => $row['id'],
-                    'name_file' => shorten_text($file_name, 25),
+                    //decoded before it is cut, so an entity like &quot; is not cut in half
+                    'name_file' => kleeja_html_encode(shorten_text(kleeja_html_decode($file_name), 25)),
                     'file_type' => $row['type'],
                     'uploads' => $row['uploads'],
                     'tdnum' => $tdnumi == 0 ? '<ul>' : '',
@@ -593,7 +594,7 @@ switch (g('go')) {
         $stylee = 'profile';
         $titlee = $lang['PROFILE'];
         $action = 'ucp.php?go=profile';
-        $name = $usrcp->name();
+        $name = kleeja_html_display($usrcp->name());
         $mail = $usrcp->mail();
         extract($usrcp->get_data('show_my_filecp, password_salt'));
         $data_forum = (int) $config['user_system'] == 1;

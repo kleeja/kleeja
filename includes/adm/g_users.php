@@ -671,7 +671,7 @@ switch ($current_smt):
                     'name' => str_replace(
                         ['{lang.ADMINS}', '{lang.USERS}', '{lang.GUESTS}'],
                         [$lang['ADMINS'], $lang['USERS'], $lang['GUESTS']],
-                        $row['group_name'],
+                        kleeja_html_display($row['group_name']),
                     ),
                     'style' => !empty($groups_background_color[$row['group_id']])
                         ? $groups_background_color[$row['group_id']]
@@ -1236,7 +1236,7 @@ switch ($current_smt):
 
                 $arr[] = [
                     'id' => $row['id'],
-                    'name' => $row['name'],
+                    'name' => kleeja_html_display($row['name']),
                     'userfile_link' => $userfile,
                     'delusrfile_link' =>
                         $row['founder'] && (int) $userinfo['founder'] == 0
@@ -1341,8 +1341,9 @@ switch ($current_smt):
 
         $errs = isset($errs) ? $errs : false;
         //prepare them for the template
-        $title_name = $udata['name'];
-        $u_name = p('l_name', default: $udata['name']);
+        $title_name = kleeja_html_display($udata['name']);
+        //p() encodes the saved name once more, so it is decoded first, or every save would encode it again
+        $u_name = p('l_name', default: kleeja_html_decode($udata['name']));
         $u_mail = p('l_mail', default: $udata['mail']);
 
         $u_show_filecp = p('l_show_filecp', 'int', $udata['show_my_filecp']);

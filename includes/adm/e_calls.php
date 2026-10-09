@@ -86,9 +86,10 @@ if ($nums_rows > 0) {
         //make new lovely arrays !!
         $arr[] = [
             'id' => $row['id'],
-            'name' => $row['name'],
+            //saved encoded twice by go.php, older messages once
+            'name' => kleeja_html_display($row['name']),
             'mail' => $row['mail'],
-            'text' => htmlspecialchars($row['TEXT'] ?? $row['text']),
+            'text' => kleeja_html_display($row['TEXT'] ?? $row['text']),
             'human_time' => kleeja_date($row['time']),
             'time' => kleeja_date($row['time'], human_time: false),
             'ip' => $row['ip'],

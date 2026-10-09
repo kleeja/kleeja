@@ -202,13 +202,14 @@ if (ip('submit')) {
                 'id' => $row['id'],
                 'tdnum' => $tdnum == 0 ? '<ul>' : '',
                 'tdnum2' => $tdnum == 4 ? '</ul>' : '',
-                'name' => shorten_text($file_name, 25),
+                //decoded before it is cut, so an entity like &quot; is not cut in half
+                'name' => kleeja_html_encode(shorten_text(kleeja_html_decode($file_name), 25)),
                 'ip' => htmlspecialchars($row['user_ip']),
                 'href' => $url,
                 'size' => readable_size($row['size']),
                 'ups' => $row['uploads'],
                 'time' => date('d-m-Y h:i a', $row['time']),
-                'user' => (int) $row['user'] == -1 ? $lang['GUST'] : $row['username'],
+                'user' => (int) $row['user'] == -1 ? $lang['GUST'] : kleeja_html_display($row['username']),
                 'is_user' => (int) $row['user'] == -1 ? 0 : 1,
                 'thumb_link' => $url_thumb,
             ];

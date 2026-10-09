@@ -20,7 +20,7 @@ $current_smt = preg_replace('/[^a-z0-9_]/i', '', g('smt', default: 'general'));
 $GET_FORM_KEY = kleeja_add_form_key_get('adm_start_actions');
 
 //data
-$lst_reg = empty($stat_last_user) ? $lang['UNKNOWN'] : $stat_last_user;
+$lst_reg = empty($stat_last_user) ? $lang['UNKNOWN'] : kleeja_html_display($stat_last_user);
 $files_number = $stat_files + $stat_imgs;
 $files_sizes = readable_size($stat_sizes);
 $users_number = $stat_users;
