@@ -25,7 +25,7 @@ function Saaheader(string $title = '', string $extra = ''): void
 
     //is user ? and username
     $user_is = $usrcp->name() ? true : false;
-    $username = $usrcp->name() ? $usrcp->name() : $lang['GUST'];
+    $username = $usrcp->name() ? kleeja_html_display($usrcp->name()) : $lang['GUST'];
 
     //our default charset
     $charset = 'utf-8';

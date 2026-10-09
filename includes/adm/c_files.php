@@ -341,7 +341,8 @@ if (ip('submit')) {
                     '" href="' .
                     $url .
                     '" target="blank">' .
-                    shorten_text($file_name, 25) .
+                    //decoded before it is cut, so an entity like &quot; is not cut in half
+                    kleeja_html_encode(shorten_text(kleeja_html_decode($file_name), 25)) .
                     '</a>',
                 'fullname' => $file_name,
                 'size' => readable_size($row['size']),
@@ -361,7 +362,11 @@ if (ip('submit')) {
                 'user' =>
                     $row['user'] == '-1'
                         ? $lang['GUST']
-                        : '<a href="' . $userfile . '" target="_blank">' . $row['username'] . '</a>',
+                        : '<a href="' .
+                            $userfile .
+                            '" target="_blank">' .
+                            kleeja_html_display($row['username']) .
+                            '</a>',
                 'ip' => '<a href="https://ipinfo.io/' . $row['user_ip'] . '" target="_new">' . $row['user_ip'] . '</a>',
                 'showfilesbyip' => basename(ADMIN_PATH) . '?cp=h_search&amp;s_input=1&amp;s_value=' . $row['user_ip'],
             ];

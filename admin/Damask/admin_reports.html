@@ -74,7 +74,7 @@
                             <dt>{lang.TIME}</dt>
                             <dd>{{time}}</dd>
                             <dt>{lang.URL}</dt>
-                            <dd><a href="{{url}}" target="_blank" rel="noopener noreferrer" dir="ltr">{{url}}</a></dd>
+                            <dd><IF LOOP="url_is_link"><a href="{{url}}" target="_blank" rel="noopener noreferrer" dir="ltr">{{url}}</a><ELSE><span dir="ltr">{{url}}</span></IF></dd>
                         </dl>
                         <IF LOOP="mail">
                         <button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#contactForm{{id}}">

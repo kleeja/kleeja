@@ -162,6 +162,16 @@ switch ($current_go_case) {
 
             if (!ip('surl') && !ip('rid')) {
                 $ERRORS['rid'] = $lang['NO_ID'];
+            } elseif (!ip('rid')) {
+                //a link of http or https only, a javascript: link would run in the reports page of the control panel
+                $surl_parts = parse_url(htmlspecialchars_decode(p('surl'), ENT_QUOTES)) ?: [];
+
+                if (
+                    !in_array(strtolower($surl_parts['scheme'] ?? ''), ['http', 'https'], true) ||
+                    empty($surl_parts['host'])
+                ) {
+                    $ERRORS['surl'] = $lang['WRONG_URL'];
+                }
             }
 
             extract(runHook('submit_report_go_page2', get_defined_vars()));
@@ -173,7 +183,7 @@ switch ($current_go_case) {
                 $mail = $NOT_USER ? strtolower(trim(kleeja_html_encode(p('rmail')))) : $usrcp->mail();
                 $url = ip('rid') ? kleeja_html_encode($url_id) : p('surl');
                 $time = (int) time();
-                $rid = ip('rid') ? 0 : p('rid', 'int');
+                $rid = ip('rid') ? p('rid', 'int') : 0;
                 $ip = get_ip();
 
                 $insert_query = [
@@ -503,7 +513,7 @@ switch ($current_go_case) {
         $users_st = $stat_users;
         $sizes_st = readable_size($stat_sizes);
         $lst_dl_st = (int) $config['del_f_day'] <= 0 ? false : kleeja_date($stat_last_f_del);
-        $lst_reg = empty($stat_last_user) ? $lang['UNKNOWN'] : $stat_last_user;
+        $lst_reg = empty($stat_last_user) ? $lang['UNKNOWN'] : kleeja_html_display($stat_last_user);
         $on_muoe = kleeja_date($on_muoe);
 
         extract(runHook('stats_go_page', get_defined_vars()));

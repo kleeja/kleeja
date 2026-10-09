@@ -86,10 +86,13 @@ if ($nums_rows > 0) {
         //make new lovely arrays !!
         $arr[] = [
             'id' => $row['id'],
-            'name' => $row['name'],
+            //saved encoded twice by go.php, older reports once
+            'name' => kleeja_html_display($row['name']),
             'mail' => $row['mail'],
-            'url' => $row['url'],
-            'text' => $row['text'],
+            'url' => kleeja_html_display($row['url']),
+            //only http and https are links, a javascript: link of an older report is shown as a text
+            'url_is_link' => (bool) preg_match('#^https?://#i', kleeja_html_decode($row['url'])),
+            'text' => kleeja_html_display($row['text']),
             'human_time' => kleeja_date($row['time']),
             'time' => kleeja_date($row['time'], human_time: false),
             'ip' => $row['ip'],

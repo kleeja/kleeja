@@ -757,8 +757,8 @@ class KleejaTemplateCompiler
         }
 
         $code = match (strtolower((string) $filter)) {
-            //the texts are saved encoded already, so it does not encode them twice
-            'e' => 'htmlspecialchars((string) (' . $code . '), ENT_QUOTES, \'UTF-8\', false)',
+            //the texts are saved encoded already, once or twice, so they are decoded then encoded once
+            'e' => 'htmlspecialchars(kleeja_html_decode((string) (' . $code . ')), ENT_QUOTES, \'UTF-8\', false)',
             'url' => 'rawurlencode((string) (' . $code . '))',
             'js' => 'json_encode(' .
                 $code .
