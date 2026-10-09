@@ -24,7 +24,7 @@ class Plugins
     /**
      * The catalog of plugins and styles of Kleeja 4, in the kleeja/store-catalog repository
      */
-    public const STORE_CATALOG_LINK = 'https://raw.githubusercontent.com/kleeja/store-catalog/master/kleeja-4-catalog.json';
+    public const STORE_CATALOG_LINK = 'https://raw.githubusercontent.com/kleeja/store-catalog/main/kleeja-4-catalog.json';
 
     /**
      * A plugin name is a folder name, it can't be empty, "." or ".."
