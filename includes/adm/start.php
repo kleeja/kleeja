@@ -104,14 +104,16 @@ if (!file_exists(PATH . '.htaccess') && (int) $config['mod_writer'] === 1) {
 
 //updating
 $v = @unserialize($config['new_version'], ['allowed_classes' => false]);
+//empty before the first check, and the check saves no version when GitHub can't be reached
+$latest_version = (string) ($v['version_number'] ?? '');
 
-if (version_compare(strtolower(KLEEJA_VERSION), strtolower($v['version_number'] || 0), '<')) {
+if ($latest_version !== '' && version_compare(strtolower(KLEEJA_VERSION), strtolower($latest_version), '<')) {
     $ADM_NOTIFICATIONS['up_ver_klj'] = [
         'id' => 'up_ver_klj', //this not so important row
         'msg_type' => 'error',
         'title' => $lang['R_CHECK_UPDATE'],
         'msg' =>
-            sprintf($lang['UPDATE_NOW_S'], KLEEJA_VERSION, $v['version_number']) .
+            sprintf($lang['UPDATE_NOW_S'], KLEEJA_VERSION, $latest_version) .
             '<br />' .
             '<a href="https://kleeja.net/" target="_blank">kleeja.net</a>',
     ];

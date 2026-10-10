@@ -203,8 +203,10 @@ switch ($case):
 
             //is this style require some plugins to be installed
             if (isset($style_info['plugins_required'])) {
-                $plugins_required = explode(',', $style_info['plugins_required']);
-                $plugins_required = array_map('trim', $plugins_required);
+                //the names are the keys, so an installed plugin is found and removed by its name
+                $plugins_required = array_flip(
+                    array_filter(array_map('trim', explode(',', $style_info['plugins_required'])), 'strlen'),
+                );
 
                 $query = [
                     'SELECT' => 'plg_name, plg_disabled',
@@ -213,21 +215,19 @@ switch ($case):
 
                 $result = $SQL->build($query);
 
-                if ($SQL->num_rows($result) !== 0) {
-                    $plugins_required = array_flip($plugins_required);
-                    while ($row = $SQL->fetch_array($result)) {
-                        if (in_array($row['plg_name'], $plugins_required) and (int) $row['plg_disabled'] !== 1) {
-                            unset($plugins_required[$row['plg_name']]);
-                        }
+                while ($row = $SQL->fetch_array($result)) {
+                    if (isset($plugins_required[$row['plg_name']]) && (int) $row['plg_disabled'] !== 1) {
+                        unset($plugins_required[$row['plg_name']]);
                     }
                 }
 
                 $SQL->freeresult($result);
 
-                $plugins_required = array_flip($plugins_required);
-
+                //the ones left are not installed, or they are disabled
                 if (sizeof($plugins_required)) {
-                    kleeja_admin_err(sprintf($lang['PLUGINS_REQ_NO_STYLE_ERR'], implode(', ', $plugins_required)));
+                    kleeja_admin_err(
+                        sprintf($lang['PLUGINS_REQ_NO_STYLE_ERR'], implode(', ', array_keys($plugins_required))),
+                    );
                 }
             }
         }
