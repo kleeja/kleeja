@@ -33,8 +33,8 @@ if (!empty($case) && in_array($case, ['select', 'download', 'dfolder'])) {
     }
 }
 
-//check _POST Csrf token
-if (ip('newstyle')) {
+//check _POST Csrf token, the upload form sends newstyle, and ?case=upload without it is checked too
+if (ip('newstyle') || $case == 'upload') {
     if (!kleeja_check_form_key('adm_styles')) {
         http_response_code(401);
         kleeja_admin_err($lang['INVALID_FORM_KEY'], title: $lang['ERROR'], redirect: $action);
@@ -245,11 +245,11 @@ switch ($case):
         break;
 
     case 'upload':
+        $ERRORS = [];
+
         if (intval($userinfo['founder']) !== 1) {
             $ERRORS[] = $lang['HV_NOT_PRVLG_ACCESS'];
         }
-
-        $ERRORS = [];
 
         //is uploaded?
         if (empty($_FILES['style_file']['tmp_name'])) {

@@ -58,4 +58,34 @@ $update_schema[10]['functions'] = [
             'SET' => 'plg_disabled = 1',
         ]);
     },
+    //configField() gave every text field the same id before, so the labels of those settings pointed to nothing
+    function () {
+        global $SQL, $dbprefix;
+
+        $old_id = 'id="kj_meta_seo_home_meta_keywords"';
+
+        $result = $SQL->build([
+            'SELECT' => 'name, `option`',
+            'FROM' => "{$dbprefix}config",
+            'WHERE' => '`option` LIKE :old_id',
+            'BIND' => ['old_id' => '%' . $old_id . '%'],
+        ]);
+
+        $fields = [];
+
+        while ($row = $SQL->fetch($result)) {
+            $fields[$row['name']] = str_replace($old_id, 'id="' . $row['name'] . '"', $row['option']);
+        }
+
+        $SQL->freeresult($result);
+
+        foreach ($fields as $name => $option) {
+            $SQL->build([
+                'UPDATE' => "{$dbprefix}config",
+                'SET' => '`option` = :option',
+                'WHERE' => 'name = :name',
+                'BIND' => ['option' => $option, 'name' => $name],
+            ]);
+        }
+    },
 ];

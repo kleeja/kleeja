@@ -923,7 +923,8 @@ function get_up_tpl_box(string $box_name, array $extra = []): string
             if (trim($config['style_depend_on']) != '') {
                 $depend_on = $config['style_depend_on'];
             } else {
-                $depend_on = 'default';
+                //bootstrap is the default style
+                $depend_on = 'bootstrap';
             }
 
             $tpl_path = str_replace('/' . $config['style'] . '/', '/' . trim($depend_on) . '/', $tpl_path);
@@ -1243,7 +1244,9 @@ function configField(string $name, string $type = 'text', array $select_options 
 
             return $return_value . '</select>' . "\n";
         default:
-            return '<input type="text" id="kj_meta_seo_home_meta_keywords" name="' .
+            return '<input type="text" id="' .
+                $name .
+                '" name="' .
                 $name .
                 '"' .
                 ' value="{con.' .

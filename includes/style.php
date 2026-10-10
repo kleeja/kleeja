@@ -99,7 +99,7 @@ class kleeja_style
         $template_path = rtrim($style_path, '/') . '/' . $template_name . '.html';
         $candidates = [$template_path];
 
-        //a missing template is taken from the style this one depends on, or else from the default style
+        //a missing template is taken from the style this one depends on, or else from bootstrap, the default style
         if (trim($config['style_depend_on']) != '') {
             $candidates[] = str_replace(
                 '/' . $config['style'] . '/',
@@ -108,8 +108,8 @@ class kleeja_style
             );
         } elseif ($is_admin_template) {
             $candidates[] = $DEFAULT_PATH_ADMIN_ABS . $template_name . '.html';
-        } elseif ($config['style'] != 'default') {
-            $candidates[] = str_replace('/' . $config['style'] . '/', '/default/', $template_path);
+        } elseif ($config['style'] !== 'bootstrap') {
+            $candidates[] = str_replace('/' . $config['style'] . '/', '/bootstrap/', $template_path);
         }
 
         foreach ($candidates as $candidate) {
