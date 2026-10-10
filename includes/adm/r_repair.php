@@ -183,7 +183,7 @@ switch ($case):
             $items = array_filter($items);
 
             $name = g('name');
-            $hide = g('toggle', 'int') == 1;
+            $hide = g('toggle', 'int') === 1;
 
             //showing a box that is not hidden changes nothing
             $new_items = $items;
@@ -194,7 +194,7 @@ switch ($case):
                 $new_items[] = $name;
             }
 
-            if ($new_items != $items) {
+            if ($new_items !== $items) {
                 update_config('hidden_start_boxes', implode(':', $new_items));
             }
 

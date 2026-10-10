@@ -118,9 +118,9 @@ switch (g('go')) {
         $ERRORS = false;
 
         //config register
-        if ((int) $config['register'] != 1 && (int) $config['user_system'] == 1) {
+        if ((int) $config['register'] !== 1 && (int) $config['user_system'] === 1) {
             kleeja_info($lang['REGISTER_CLOSED'], $lang['PLACE_NO_YOU']);
-        } elseif ($config['user_system'] != '1') {
+        } elseif ((int) $config['user_system'] !== 1) {
             $goto_forum_link = '...';
             extract(runHook('register_not_default_sys', get_defined_vars()));
 
@@ -166,11 +166,11 @@ switch (g('go')) {
                 $ERRORS['captcha'] = $lang['WRONG_VERTY_CODE'];
             }
 
-            if (trim(p('lname')) == '' || trim(p('lpass')) == '' || trim(p('lmail')) == '') {
+            if (trim(p('lname')) === '' || trim(p('lpass')) === '' || trim(p('lmail')) === '') {
                 $ERRORS['empty_fields'] = $lang['EMPTY_FIELDS'];
             }
 
-            if ($t_lpass != $t_lpass2) {
+            if ($t_lpass !== $t_lpass2) {
                 $ERRORS['pass_neq_pass2'] = $lang['PASS_NEQ_PASS2'];
             }
 
@@ -194,7 +194,7 @@ switch (g('go')) {
                     $SQL->query("SELECT * FROM {$dbprefix}users WHERE clean_name = :clean_name", [
                         'clean_name' => trim(kleeja_html_encode($usrcp->cleanusername(p('lname')))),
                     ]),
-                ) != 0
+                ) !== 0
             ) {
                 $ERRORS['name_exists_before'] = $lang['EXIST_NAME'];
             } elseif (
@@ -202,7 +202,7 @@ switch (g('go')) {
                     $SQL->query("SELECT * FROM {$dbprefix}users WHERE mail = :mail", [
                         'mail' => strtolower(trim(kleeja_html_encode(p('lmail')))),
                     ]),
-                ) != 0
+                ) !== 0
             ) {
                 $ERRORS['mail_exists_before'] = $lang['EXIST_EMAIL'];
             }
@@ -296,7 +296,7 @@ switch (g('go')) {
 
         $user_id_get = ig('id') ? g('id', 'int') : false;
         $user_id = !$user_id_get && $usrcp->id() ? $usrcp->id() : $user_id_get;
-        $user_himself = $usrcp->id() == $user_id;
+        $user_himself = (int) $usrcp->id() === (int) $user_id;
         $action = $config['siteurl'] . 'ucp.php?go=fileuser' . (ig('page') ? '&amp;page=' . g('page', 'int') : '');
 
         //no logon before
@@ -317,13 +317,13 @@ switch (g('go')) {
         }
 
         //fileuser is closed ?
-        if ((int) $config['enable_userfile'] != 1 && !user_can('enter_acp')) {
+        if ((int) $config['enable_userfile'] !== 1 && !user_can('enter_acp')) {
             kleeja_info($lang['USERFILE_CLOSED'], $lang['CLOSED_FEATURE']);
         }
 
         //get user options and name
         $data_user =
-            $config['user_system'] == 1
+            (int) $config['user_system'] === 1
                 ? $usrcp->get_data('name, show_my_filecp', $user_id)
                 : ['name' => $usrcp->usernamebyid($user_id), 'show_my_filecp' => '1'];
 
@@ -333,7 +333,7 @@ switch (g('go')) {
         }
 
         //this user closed his folder, and it's not the current user folder
-        if (!$data_user['show_my_filecp'] && $usrcp->id() != $user_id && !user_can('enter_acp')) {
+        if (!$data_user['show_my_filecp'] && (int) $usrcp->id() !== (int) $user_id && !user_can('enter_acp')) {
             kleeja_info($lang['USERFILE_CLOSED'], $lang['CLOSED_FEATURE']);
         }
 
@@ -367,13 +367,13 @@ switch (g('go')) {
                     ($currentPage > 1 && $currentPage <= $total_pages ? '-' . $currentPage : '') .
                     '.html'
                 : 'ucp.php?go=fileuser' .
-                    (ig('id') ? (g('id', 'int') == $usrcp->id() ? '' : '&amp;id=' . g('id')) : null));
+                    (ig('id') ? (g('id', 'int') === (int) $usrcp->id() ? '' : '&amp;id=' . g('id')) : null));
 
         $page_nums = $Pager->print_nums(str_replace('.html', '', $linkgoto));
 
         $no_results = true;
 
-        if ((int) $config['user_system'] != 1 && $usrcp->id() != $user_id) {
+        if ((int) $config['user_system'] !== 1 && (int) $usrcp->id() !== (int) $user_id) {
             $data_user['name'] = $usrcp->usernamebyid($user_id);
         }
 
@@ -383,7 +383,7 @@ switch (g('go')) {
         $titlee = $lang['FILEUSER'] . ': ' . $user_name;
 
         //there is result ? show them
-        if ($nums_rows != 0) {
+        if ($nums_rows !== 0) {
             $no_results = false;
 
             if (!ip('submit_all_files')) {
@@ -421,7 +421,7 @@ switch (g('go')) {
                         ? 'images/filetypes/' . $row['type'] . '.png'
                         : 'images/filetypes/file.png');
 
-                $file_name = $row['real_filename'] == '' ? $row['name'] : $row['real_filename'];
+                $file_name = $row['real_filename'] === '' ? $row['name'] : $row['real_filename'];
 
                 //make new lovely arrays !!
                 $arr[] = [
@@ -430,8 +430,8 @@ switch (g('go')) {
                     'name_file' => kleeja_html_encode(shorten_text(kleeja_html_decode($file_name), 25)),
                     'file_type' => $row['type'],
                     'uploads' => $row['uploads'],
-                    'tdnum' => $tdnumi == 0 ? '<ul>' : '',
-                    'tdnum2' => $tdnumi == 4 ? '</ul>' : '',
+                    'tdnum' => $tdnumi === 0 ? '<ul>' : '',
+                    'tdnum2' => $tdnumi === 4 ? '</ul>' : '',
                     'href' => $url,
                     'size' => readable_size($row['size']),
                     'time' => !empty($row['time']) ? kleeja_date($row['time']) : '...',
@@ -439,7 +439,7 @@ switch (g('go')) {
                     'is_image' => $is_image,
                 ];
 
-                $tdnumi = $tdnumi == 2 ? 0 : $tdnumi + 1;
+                $tdnumi = $tdnumi === 2 ? 0 : $tdnumi + 1;
 
                 if (ip('submit_files') && $user_himself) {
                     extract(runHook('submit_in_fileuser', get_defined_vars()));
@@ -597,7 +597,7 @@ switch (g('go')) {
         $name = kleeja_html_display($usrcp->name());
         $mail = $usrcp->mail();
         extract($usrcp->get_data('show_my_filecp, password_salt'));
-        $data_forum = (int) $config['user_system'] == 1;
+        $data_forum = (int) $config['user_system'] === 1;
         $link_avater = sprintf(
             $lang['EDIT_U_AVATER_LINK'],
             '<a target="_blank" href="https://www.gravatar.com/">',
@@ -632,7 +632,7 @@ switch (g('go')) {
 
             //if there is new pass AND new pass1 = new pass2 AND old pass is exists & true
             if (!empty(p('ppass_new'))) {
-                if (p('ppass_new') != p('ppass_new2')) {
+                if (p('ppass_new') !== p('ppass_new2')) {
                     $ERRORS['pass1_neq_pass2'] = $lang['PASS_O_PASS2'];
                 }
                 //if current pass is not correct
@@ -647,7 +647,7 @@ switch (g('go')) {
             //if email is not equal to current email AND email not exists before
             $new_mail = false;
 
-            if ($usrcp->mail() != trim(strtolower(p('pmail')))) {
+            if ($usrcp->mail() !== trim(strtolower(p('pmail')))) {
                 //if current pass is not correct
                 if (
                     empty(p('pppass_old')) ||
@@ -661,7 +661,7 @@ switch (g('go')) {
                         '/^[_a-z0-9-]+(\.[_a-z0-9-]+)*@[a-z0-9-]+(\.[a-z0-9-]+)*(\.[a-z]{2,4})$/i',
                         trim(p('pmail')),
                     ) ||
-                    trim(p('pmail')) == ''
+                    trim(p('pmail')) === ''
                 ) {
                     $ERRORS['wrong_email'] = $lang['WRONG_EMAIL'];
                 }
@@ -671,7 +671,7 @@ switch (g('go')) {
                         $SQL->query("SELECT * FROM {$dbprefix}users WHERE mail = :mail", [
                             'mail' => strtolower(trim(kleeja_html_encode(p('pmail')))),
                         ]),
-                    ) != 0
+                    ) !== 0
                 ) {
                     $ERRORS['mail_exists_before'] = $lang['EXIST_EMAIL'];
                 } else {
@@ -686,11 +686,11 @@ switch (g('go')) {
                 $user_salt = substr(base64_encode(pack('H*', sha1(mt_rand()))), 0, 7);
                 $mail = $new_mail ? 'mail = :mail' : '';
                 $showmyfile =
-                    p('show_my_filecp', 'int') != $show_my_filecp
-                        ? ($mail == '' ? '' : ', ') . 'show_my_filecp = :show_my_filecp'
+                    p('show_my_filecp', 'int') !== (int) $show_my_filecp
+                        ? ($mail === '' ? '' : ', ') . 'show_my_filecp = :show_my_filecp'
                         : '';
                 $pass = !empty(p('ppass_new'))
-                    ? ($showmyfile != '' || $mail != '' ? ', ' : '') . 'password = :password, password_salt = :salt'
+                    ? ($showmyfile !== '' || $mail !== '' ? ', ' : '') . 'password = :password, password_salt = :salt'
                     : '';
                 $id = (int) $usrcp->id();
 
@@ -710,7 +710,7 @@ switch (g('go')) {
 
                 extract(runHook('qr_update_data_in_profile', get_defined_vars()));
 
-                if (trim($update_query['SET']) == '') {
+                if (trim($update_query['SET']) === '') {
                     $text = $lang['DATA_CHANGED_NO'];
                 } else {
                     $text = $lang['DATA_CHANGED_O_LO'];
@@ -739,7 +739,7 @@ switch (g('go')) {
     //
     case 'get_pass':
         //if not default system, let's give him a link for integrated script
-        if ((int) $config['user_system'] != 1) {
+        if ((int) $config['user_system'] !== 1) {
             $forgetpass_link = '...';
             extract(runHook('get_pass_resetpass_link', get_defined_vars()));
 
@@ -765,7 +765,7 @@ switch (g('go')) {
             $u_id = g('uid', 'int');
 
             //if it's empty ?
-            if (trim($h_key) == '') {
+            if (trim($h_key) === '') {
                 big_error('No hash key', 'This is not a good link ... try again!');
             }
 
@@ -851,7 +851,7 @@ switch (g('go')) {
                     $SQL->query("SELECT name FROM {$dbprefix}users WHERE mail = :mail", [
                         'mail' => kleeja_html_encode(strtolower(p('rmail'))),
                     ]),
-                ) == 0
+                ) === 0
             ) {
                 $ERRORS['no_rmail'] = $lang['WRONG_DB_EMAIL'];
             }

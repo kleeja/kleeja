@@ -40,11 +40,11 @@ $query = [
 $result = $SQL->build($query);
 
 while ($row = $SQL->fetch_array($result)) {
-    if ($row['type'] == 'KLIVE') {
+    if ($row['type'] === 'KLIVE') {
         continue;
     }
 
-    if ($row['plg_id'] > 0 && (is_null($row['plg_disabled']) || $row['plg_disabled'] == 1)) {
+    if ($row['plg_id'] > 0 && (is_null($row['plg_disabled']) || (int) $row['plg_disabled'] === 1)) {
         continue;
     }
 
@@ -57,7 +57,7 @@ while ($row = $SQL->fetch_array($result)) {
         'name' => $name,
         'link' => $base_action . '&amp;smt=' . $row['type'],
         'goto' => $row['type'],
-        'current' => $current_smt == $row['type'],
+        'current' => $current_smt === $row['type'],
     ];
 }
 
@@ -65,7 +65,7 @@ $go_menu['all'] = [
     'name' => $lang['CONFIG_KLJ_MENUS_ALL'],
     'link' => $base_action . '&amp;smt=all',
     'goto' => 'all',
-    'current' => $current_smt == 'all',
+    'current' => $current_smt === 'all',
 ];
 
 //
@@ -94,14 +94,14 @@ $query = [
 $CONFIGEXTEND = kleeja_html_encode($current_smt);
 $CONFIGEXTENDLANG = $go_menu[$current_smt]['name'];
 
-if ($current_smt != 'all') {
+if ($current_smt !== 'all') {
     $query['WHERE'] = "type = :type OR type = ''";
     $query['BIND'] = ['type' => kleeja_html_encode($current_smt)];
 
-    if ($current_smt == 'interface') {
+    if ($current_smt === 'interface') {
         $query['WHERE'] .= " OR name='language'";
     }
-} elseif ($current_smt == 'all') {
+} elseif ($current_smt === 'all') {
     $query['WHERE'] = "type <> 'groups' OR type = ''";
 }
 
@@ -110,27 +110,27 @@ $result = $SQL->build($query);
 $thumbs_are = get_config('thmb_dims');
 
 while ($row = $SQL->fetch_array($result)) {
-    if ($row['type'] == 'KLIVE') {
+    if ($row['type'] === 'KLIVE') {
         continue;
     }
 
-    if ($row['name'] == 'language' && $current_smt == 'interface') {
+    if ($row['name'] === 'language' && $current_smt === 'interface') {
         $row['type'] = 'interface';
     }
 
     //make new lovely array !!
     $con[$row['name']] = $row['value'];
 
-    if ($row['name'] == 'thumbs_imgs') {
+    if ($row['name'] === 'thumbs_imgs') {
         [$thmb_dim_w, $thmb_dim_h] = array_map('trim', @explode('*', $thumbs_are));
-    } elseif ($row['name'] == 'time_zone') {
+    } elseif ($row['name'] === 'time_zone') {
         $zones = time_zones();
 
         foreach ($zones as $z => $t) {
             $gmt_diff = $t < 0 ? $t : '+' . $t;
             $time_zones .=
                 '<option ' .
-                ($con['time_zone'] == $z ? 'selected="selected"' : '') .
+                ($con['time_zone'] === $z ? 'selected="selected"' : '') .
                 ' value="' .
                 $z .
                 '">' .
@@ -139,14 +139,14 @@ while ($row = $SQL->fetch_array($result)) {
                 '</option>' .
                 "\n";
         }
-    } elseif ($row['name'] == 'language') {
+    } elseif ($row['name'] === 'language') {
         //get languages
         if ($dh = @opendir(PATH . 'lang')) {
             while (($file = readdir($dh)) !== false) {
-                if (strpos($file, '.') === false && $file != '..' && $file != '.') {
+                if (strpos($file, '.') === false && $file !== '..' && $file !== '.') {
                     $lngfiles .=
                         '<option ' .
-                        ($con['language'] == $file ? 'selected="selected"' : '') .
+                        ($con['language'] === $file ? 'selected="selected"' : '') .
                         ' value="' .
                         $file .
                         '">' .
@@ -200,7 +200,7 @@ while ($row = $SQL->fetch_array($result)) {
         );
 
         //save them as you want ..
-        if ($row['name'] == 'thumbs_imgs') {
+        if ($row['name'] === 'thumbs_imgs') {
             if (p('thmb_dim_w', 'int') < 10) {
                 $_POST['thmb_dim_w'] = 10;
             }
@@ -211,16 +211,16 @@ while ($row = $SQL->fetch_array($result)) {
 
             $thumbs_were = p('thmb_dim_w', 'int') . '*' . p('thmb_dim_h', 'int');
             update_config('thmb_dims', $thumbs_were);
-        } elseif ($row['name'] == 'livexts') {
+        } elseif ($row['name'] === 'livexts') {
             $new['livexts'] = implode(',', array_map('trim', explode(',', $new['livexts'])));
-        } elseif ($row['name'] == 'prefixname') {
+        } elseif ($row['name'] === 'prefixname') {
             $new['prefixname'] = preg_replace('/[^a-z0-9_\-\}\{\:\.]/', '', strtolower($new['prefixname']));
-        } elseif ($row['name'] == 'siteurl') {
-            if (p('siteurl')[strlen(p('siteurl')) - 1] != '/') {
+        } elseif ($row['name'] === 'siteurl') {
+            if (p('siteurl')[strlen(p('siteurl')) - 1] !== '/') {
                 $new['siteurl'] .= '/';
             }
-        } elseif ($row['name'] == 'mod_writer') {
-            if ($new['mod_writer'] == 1) {
+        } elseif ($row['name'] === 'mod_writer') {
+            if ((int) $new['mod_writer'] === 1) {
                 if (
                     !file_exists(PATH . '.htaccess') &&
                     file_exists(PATH . 'htaccess.txt') &&
@@ -236,7 +236,7 @@ while ($row = $SQL->fetch_array($result)) {
                     rename(PATH . 'htaccess.txt', PATH . '.htaccess');
                 }
             }
-        } elseif ($row['name'] == 'language') {
+        } elseif ($row['name'] === 'language') {
             $got_lang = preg_replace('/[^a-zA-Z0-9]/', '', $new[$row['name']]);
 
             //all groups
@@ -281,7 +281,7 @@ foreach ($types as $typekey => $type) {
     $options .= $type;
 
     foreach ($optionss as $key => $option) {
-        if ($option['type'] == $typekey) {
+        if ($option['type'] === (string) $typekey) {
             $options .= str_replace(
                 ['<input ', '<select ', '<td>', '</td>', '<label>', '<tr>', '</tr>'],
                 [
@@ -326,7 +326,7 @@ if (ip('submit')) {
     delete_cache('data_config');
 
     foreach ($need_refresh_configs as $l) {
-        if (ip($l) && p($l) != $config[$l]) {
+        if (ip($l) && p($l) !== $config[$l]) {
             header('Location: ' . basename(ADMIN_PATH));
 
             exit();

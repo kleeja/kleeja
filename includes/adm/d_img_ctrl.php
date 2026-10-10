@@ -120,7 +120,7 @@ if (ip('submit')) {
     ];
 
     //if user system is default, we use users table
-    if ((int) $config['user_system'] == 1) {
+    if ((int) $config['user_system'] === 1) {
         $query['JOINS'] = [
             [
                 'LEFT JOIN' => "{$dbprefix}users u",
@@ -164,7 +164,7 @@ if (ip('submit')) {
     $no_results = $affected = $sizes = false;
 
     if ($nums_rows > 0) {
-        $query['SELECT'] = 'f.*' . ((int) $config['user_system'] == 1 ? ', u.name AS username' : '');
+        $query['SELECT'] = 'f.*' . ((int) $config['user_system'] === 1 ? ', u.name AS username' : '');
         $query['LIMIT'] = ':start, :perpage';
         $query['BIND'] += ['start' => $start, 'perpage' => $images_acp_perpage];
         $result = $SQL->build($query);
@@ -186,7 +186,7 @@ if (ip('submit')) {
             $url_thumb = kleeja_get_link('thumb', $file_info);
 
             //for username in integrated user system
-            if ($row['user'] != '-1' and (int) $config['user_system'] != 1) {
+            if ((int) $row['user'] !== -1 and (int) $config['user_system'] !== 1) {
                 if (!in_array($row['user'], $ids_and_names)) {
                     $row['username'] = $usrcp->usernamebyid($row['user']);
                     $ids_and_names[$row['user']] = $row['username'];
@@ -195,13 +195,13 @@ if (ip('submit')) {
                 }
             }
 
-            $file_name = $row['real_filename'] == '' ? $row['name'] : $row['real_filename'];
+            $file_name = $row['real_filename'] === '' ? $row['name'] : $row['real_filename'];
 
             //make new lovely arrays !!
             $arr[] = [
                 'id' => $row['id'],
-                'tdnum' => $tdnum == 0 ? '<ul>' : '',
-                'tdnum2' => $tdnum == 4 ? '</ul>' : '',
+                'tdnum' => $tdnum === 0 ? '<ul>' : '',
+                'tdnum2' => $tdnum === 4 ? '</ul>' : '',
                 //decoded before it is cut, so an entity like &quot; is not cut in half
                 'name' => kleeja_html_encode(shorten_text(kleeja_html_decode($file_name), 25)),
                 'ip' => htmlspecialchars($row['user_ip']),
@@ -209,13 +209,13 @@ if (ip('submit')) {
                 'size' => readable_size($row['size']),
                 'ups' => $row['uploads'],
                 'time' => date('d-m-Y h:i a', $row['time']),
-                'user' => (int) $row['user'] == -1 ? $lang['GUST'] : kleeja_html_display($row['username']),
-                'is_user' => (int) $row['user'] == -1 ? 0 : 1,
+                'user' => (int) $row['user'] === -1 ? $lang['GUST'] : kleeja_html_display($row['username']),
+                'is_user' => (int) $row['user'] === -1 ? 0 : 1,
                 'thumb_link' => $url_thumb,
             ];
 
             //fix ...
-            $tdnum = $tdnum == 4 ? 0 : $tdnum + 1;
+            $tdnum = $tdnum === 4 ? 0 : $tdnum + 1;
 
             $del[$row['id']] = p('del_' . $row['id']);
 

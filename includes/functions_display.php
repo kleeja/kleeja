@@ -147,7 +147,7 @@ function Saaheader(string $title = '', string $extra = ''): void
 
     $header = $tpl->display('header');
 
-    if ($config['siteclose'] == '1' && user_can('enter_acp') && !defined('IN_ADMIN')) {
+    if ((int) $config['siteclose'] === 1 && user_can('enter_acp') && !defined('IN_ADMIN')) {
         //add notification bar
         $header = preg_replace(
             '/<body([^\>]*)>/i',
@@ -182,7 +182,7 @@ function Saafooter(): void
     //show stats ..
     $page_stats = '';
 
-    if ($config['statfooter'] != 0 || defined('DEV_STAGE')) {
+    if ((int) $config['statfooter'] !== 0 || defined('DEV_STAGE')) {
         $hksys = !defined('STOP_PLUGINS') ? 'Enabled' : 'Disabled';
         $endtime = get_microtime();
         $loadtime = number_format($endtime - $starttm, 4);
@@ -768,7 +768,7 @@ function kleeja_check_form_key_get(string $request_id): bool
     foreach ([time(), time() - 3600] as $key_time) {
         $token = substr(sha1($config['h_key'] . date('H-d-m', $key_time) . $request_id), 0, 20);
 
-        if ($token == g('formkey')) {
+        if ($token === g('formkey')) {
             $return = true;
 
             break;
@@ -858,8 +858,8 @@ function kleeja_get_link(string $pid, array $extra = []): string
     //to prevent bug with rewrite
     if ($config['mod_writer'] && !empty($extra['::NAME::'])) {
         if (
-            (($pid == 'image' || $pid == 'thumb') && $config['id_form_img'] != 'direct') ||
-            ($pid == 'file' && $config['id_form'] != 'direct')
+            (($pid === 'image' || $pid === 'thumb') && $config['id_form_img'] !== 'direct') ||
+            ($pid === 'file' && $config['id_form'] !== 'direct')
         ) {
             $extra['::NAME::'] = str_replace('.', '-', $extra['::NAME::']);
         }
@@ -920,7 +920,7 @@ function get_up_tpl_box(string $box_name, array $extra = []): string
         if (!file_exists($tpl_path)) {
             $depend_on = false;
 
-            if (trim($config['style_depend_on']) != '') {
+            if (trim($config['style_depend_on']) !== '') {
                 $depend_on = $config['style_depend_on'];
             } else {
                 //bootstrap is the default style
@@ -993,7 +993,7 @@ function kleeja_style_info(string $style_name): array|false
 
     foreach ($inf_l as $m) {
         //comments
-        if ((isset($m[0]) && $m[0] == '#') || trim($m) == '') {
+        if ((isset($m[0]) && $m[0] === '#') || trim($m) === '') {
             continue;
         }
 
@@ -1062,7 +1062,7 @@ function is_browser(string $b): bool
 
     $return = false;
 
-    if ($t == 'mobile') {
+    if ($t === 'mobile') {
         // Chromium sends this client hint over HTTPS, the rest is for the other browsers
         $return =
             ($_SERVER['HTTP_SEC_CH_UA_MOBILE'] ?? '') === '?1' ||
@@ -1148,10 +1148,10 @@ function kleeja_date(int $time, bool $human_time = true, string $format = ''): s
         $difference /= $lengths[$j];
     }
 
-    $difference = round($difference);
+    $difference = (int) round($difference);
 
-    if ($difference != 1) {
-        if ($difference == 2) {
+    if ($difference !== 1) {
+        if ($difference === 2) {
             $return = $lang['W_PERIODS_DP_' . $j];
         } else {
             $return = $difference . ' ' . ($difference > 10 ? $lang['W_PERIODS_' . $j] : $lang['W_PERIODS_P_' . $j]);

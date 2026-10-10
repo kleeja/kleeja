@@ -92,11 +92,11 @@ class usrcp
                 $phppass = $hashed ? $pass : $pass . $row['password_salt'];
 
                 //CHECK IF IT'S MD5 PASSWORD
-                if (strlen($row['password']) == '32' && empty($row['password_salt']) && defined('CONVERTED_SCRIPT')) {
+                if (strlen($row['password']) === 32 && empty($row['password_salt']) && defined('CONVERTED_SCRIPT')) {
                     $passmd5 = md5($pass);
 
                     ////update old md5 hash to phpass hash
-                    if ($row['password'] == $passmd5) {
+                    if ($row['password'] === $passmd5) {
                         ////new salt
                         $new_salt = substr(base64_encode(pack('H*', sha1(mt_rand()))), 0, 7);
                         ////new password hash
@@ -120,8 +120,8 @@ class usrcp
                 }
 
                 if (
-                    ($phppass != $row['password'] && $hashed) ||
-                    ($this->kleeja_hash_password($phppass, $row['password']) != true && $hashed == false)
+                    ($phppass !== $row['password'] && $hashed) ||
+                    ($this->kleeja_hash_password($phppass, $row['password']) !== true && $hashed === false)
                 ) {
                     return false;
                 }
@@ -435,7 +435,7 @@ class usrcp
         $return = $hasher->HashPassword($password);
 
         //return check or hash
-        return $check_pass != false ? $hasher->CheckPassword($password, $check_pass) : $return;
+        return $check_pass !== '' ? $hasher->CheckPassword($password, $check_pass) : $return;
     }
 
     //kleeja cookie
@@ -568,7 +568,7 @@ class usrcp
                 }
             }
 
-            if ($user_data == false) {
+            if ($user_data === false) {
                 $this->logout();
             } else {
                 return $user_data;

@@ -100,7 +100,7 @@ class kleeja_style
         $candidates = [$template_path];
 
         //a missing template is taken from the style this one depends on, or else from bootstrap, the default style
-        if (trim($config['style_depend_on']) != '') {
+        if (trim($config['style_depend_on']) !== '') {
             $candidates[] = str_replace(
                 '/' . $config['style'] . '/',
                 '/' . $config['style_depend_on'] . '/',
@@ -494,8 +494,8 @@ class KleejaTemplateCompiler
             $this->compile_row_block(strtoupper($tag['row_tag']), $tag['row_column'], $tag['row'], $text, $end);
         } elseif ($tag['rand'] !== null) {
             $this->code(
-                '<?php $KLEEJA_tpl_rand_is = (!isset($KLEEJA_tpl_rand_is) || $KLEEJA_tpl_rand_is == 0) ? 1 : 0; ' .
-                    'echo $KLEEJA_tpl_rand_is == 1 ? ' .
+                '<?php $KLEEJA_tpl_rand_is = (!isset($KLEEJA_tpl_rand_is) || $KLEEJA_tpl_rand_is === 0) ? 1 : 0; ' .
+                    'echo $KLEEJA_tpl_rand_is === 1 ? ' .
                     $this->export($tag['rand_first']) .
                     ' : ' .
                     $this->export($tag['rand_second']) .
@@ -826,7 +826,7 @@ class KleejaTemplateCompiler
             '<?php if (intval($value[' .
                 $this->export($column) .
                 ']) % 2' .
-                ($tag === 'EVEN' ? ' == 0' : '') .
+                ($tag === 'EVEN' ? ' === 0' : '') .
                 ') { ?>',
         );
         $this->text(' ');

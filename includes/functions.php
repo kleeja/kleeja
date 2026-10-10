@@ -84,11 +84,11 @@ function get_ban(): void
                 $replace_it = str_replace('*', '([0-9]{1,3})', $banned_item);
                 $replace_it = str_replace('.', '\.', $replace_it);
 
-                $is_banned = $ip == $banned_item || @preg_match('/' . preg_quote($replace_it, '/') . '/i', $ip);
+                $is_banned = $ip === $banned_item || @preg_match('/' . preg_quote($replace_it, '/') . '/i', $ip);
             } elseif (
                 //both are saved encoded, but not always the same times (older lists encoded every item again at each change)
                 !empty($username) &&
-                kleeja_html_decode($banned_item) == kleeja_html_decode($username)
+                kleeja_html_decode($banned_item) === kleeja_html_decode($username)
             ) {
                 $is_banned = true;
             }
@@ -101,7 +101,7 @@ function get_ban(): void
                 //
                 if (
                     (defined('IN_DOWNLOAD') && (ig('img') || ig('thmb') || ig('thmbf') || ig('imgf'))) ||
-                    g('go', 'str', '') == 'queue'
+                    g('go', 'str', '') === 'queue'
                 ) {
                     @$SQL->close();
                     $fullname = 'images/banned_user.jpg';
@@ -280,10 +280,10 @@ function send_mail(
     $message .= '--' . $boundary . '--' . $eol;
 
     // Change the line breaks used in the headers and the message according to OS
-    if (strtoupper(substr(PHP_OS, 0, 3)) == 'MAC') {
+    if (strtoupper(substr(PHP_OS, 0, 3)) === 'MAC') {
         $headers = str_replace("\r\n", "\r", $headers);
         $message = str_replace("\r\n", "\r", $message);
-    } elseif (strtoupper(substr(PHP_OS, 0, 3)) != 'WIN') {
+    } elseif (strtoupper(substr(PHP_OS, 0, 3)) !== 'WIN') {
         $headers = str_replace("\r\n", "\n", $headers);
         $message = str_replace("\r\n", "\n", $message);
     }
@@ -454,7 +454,7 @@ function delete_cache(string|array $name, bool $all = false): bool
 
         if ($dh = @opendir($path_to_cache)) {
             while (($file = @readdir($dh)) !== false) {
-                if ($file != '.' && $file != '..' && !in_array($file, $exceptions)) {
+                if ($file !== '.' && $file !== '..' && !in_array($file, $exceptions)) {
                     kleeja_unlink($path_to_cache . '/' . $file, cache_file: true);
                 }
             }
@@ -769,7 +769,7 @@ function get_lang(string $name, string $folder = ''): bool
 
     $name = str_replace('..', '', $name);
 
-    if ($folder != '') {
+    if ($folder !== '') {
         $folder = str_replace(['..', '/'], '', $folder);
         $name = $folder . '/' . $name;
     }
@@ -898,11 +898,11 @@ function add_config(
         return true;
     }
 
-    if ($html != '' && $type == '0') {
+    if ($html !== '' && $type === '0') {
         $type = 'other';
     }
 
-    if ($type == 'groups') {
+    if ($type === 'groups') {
         //add this option to all groups
         $group_ids = array_keys($d_groups);
 
@@ -997,10 +997,10 @@ function update_config(string $name, string $value, bool $escape = true, int $gr
     //what if this config is a group-configs related ?
     $group_id_sql = '';
 
-    if (array_key_exists($name, $d_groups[$userinfo['group_id']]['configs']) && $group != false) {
+    if (array_key_exists($name, $d_groups[$userinfo['group_id']]['configs']) && $group !== 0) {
         $table = "{$dbprefix}groups_data";
         $group_id_sql = ' AND group_id = :group_id';
-        $bind['group_id'] = $group == -1 ? $userinfo['group_id'] : $group;
+        $bind['group_id'] = $group === -1 ? $userinfo['group_id'] : $group;
     }
 
     $update_query = [
@@ -1015,7 +1015,7 @@ function update_config(string $name, string $value, bool $escape = true, int $gr
     $SQL->build($update_query);
 
     if ($SQL->affected()) {
-        if ($table == "{$dbprefix}groups_data") {
+        if ($table === "{$dbprefix}groups_data") {
             $d_groups[$userinfo['group_id']]['configs'][$name] = $value;
             delete_cache('data_groups');
 
@@ -1290,7 +1290,7 @@ function klj_clean_old_files(int $from = 0): void
 
         $num_of_files_to_delete = $SQL->num_rows($result);
 
-        if ($num_of_files_to_delete == 0) {
+        if ($num_of_files_to_delete === 0) {
             //update $stat_last_f_del !!
             $update_query = [
                 'UPDATE' => "{$dbprefix}stats",
@@ -1423,7 +1423,7 @@ function klj_clean_old(string $table, string $for = 'all'): void
         'LIMIT' => '30',
     ];
 
-    if ($for != 'all') {
+    if ($for !== 'all') {
         $query['WHERE'] = 'f.time < :time';
         $query['BIND'] = ['time' => $days];
     }
@@ -1433,8 +1433,8 @@ function klj_clean_old(string $table, string $for = 'all'): void
     $result = $SQL->build($query);
     $num_to_delete = $SQL->num_rows($result);
 
-    if ($num_to_delete == 0) {
-        $t = $table == 'call' ? 'calls' : $table;
+    if ($num_to_delete === 0) {
+        $t = $table === 'call' ? 'calls' : $table;
         update_config('queue', preg_match('/:del_' . $for . $t . ':/i', '', $config['queue']));
         $SQL->freeresult($result);
 
@@ -1502,14 +1502,14 @@ function kleeja_check_captcha(): bool
 {
     global $config;
 
-    if ((int) $config['enable_captcha'] == 0 && !defined('IN_REAL_INDEX') && !defined('IN_ADMIN')) {
+    if ((int) $config['enable_captcha'] === 0 && !defined('IN_REAL_INDEX') && !defined('IN_ADMIN')) {
         return true;
     }
 
     $return = false;
 
     if (!empty($_SESSION['klj_sec_code']) && ip('kleeja_code_answer')) {
-        if ($_SESSION['klj_sec_code'] == trim(p('kleeja_code_answer'))) {
+        if ($_SESSION['klj_sec_code'] === trim(p('kleeja_code_answer'))) {
             unset($_SESSION['klj_sec_code']);
             $return = true;
         }
@@ -1609,7 +1609,7 @@ function user_can(string $acl_name, int $group_id = 0): bool
 {
     global $d_groups, $userinfo;
 
-    if ($group_id == 0) {
+    if ($group_id === 0) {
         $group_id = $userinfo['group_id'];
     }
 
@@ -1630,22 +1630,22 @@ function ip(string $name): bool
 function g(string $name, string $type = 'str', string $default = ''): string|int
 {
     if (isset($_GET[$name]) && is_string($_GET[$name])) {
-        return $type == 'str' ? htmlspecialchars($_GET[$name], ENT_QUOTES) : intval($_GET[$name]);
+        return $type === 'str' ? htmlspecialchars($_GET[$name], ENT_QUOTES) : intval($_GET[$name]);
     }
 
-    return $type == 'str' ? htmlspecialchars($default, ENT_QUOTES) : intval($default);
+    return $type === 'str' ? htmlspecialchars($default, ENT_QUOTES) : intval($default);
 }
 
 //an array given instead of a single value (name[]=...) is treated as not sent, so $default is returned
 function p(string $name, string $type = 'str', string $default = ''): string|int
 {
     if (isset($_POST[$name]) && is_string($_POST[$name])) {
-        return $type == 'str'
+        return $type === 'str'
             ? str_replace(["\r\n", "\r", "\0"], ["\n", "\n", ''], htmlspecialchars(trim($_POST[$name]), ENT_QUOTES))
             : intval($_POST[$name]);
     }
 
-    return $type == 'str' ? htmlspecialchars($default) : intval($default);
+    return $type === 'str' ? htmlspecialchars($default) : intval($default);
 }
 
 /**

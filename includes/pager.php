@@ -101,7 +101,7 @@ class Pagination
             return '';
         }
 
-        $link_plus .= $link_plus != '' ? ' ' : '';
+        $link_plus .= $link_plus !== '' ? ' ' : '';
 
         $re = '<nav aria-label="Page navigation">';
         $re .= '<ul id="pagination" class="pagination">';
@@ -152,14 +152,14 @@ class Pagination
         }
 
         for (
-            $current = $this->currentPage == 5 ? $this->currentPage - 3 : $this->currentPage - 2,
-            $stop = $this->currentPage + 4 == $this->totalPages ? $this->currentPage + 4 : $this->currentPage + 3;
+            $current = $this->currentPage === 5 ? $this->currentPage - 3 : $this->currentPage - 2,
+            $stop = $this->currentPage + 4 === $this->totalPages ? $this->currentPage + 4 : $this->currentPage + 3;
             $current < $stop;
             ++$current
         ) {
             if ($current < 1 || $current > $this->totalPages) {
                 continue;
-            } elseif ($current != $this->currentPage) {
+            } elseif ($current !== $this->currentPage) {
                 $re .= '<li class="page-item">';
                 $re .=
                     $config['mod_writer'] && !defined('IN_ADMIN')
@@ -190,7 +190,7 @@ class Pagination
         }
 
         if ($this->currentPage <= $this->totalPages - 3) {
-            if ($this->currentPage != $this->totalPages - 3 && $this->currentPage != $this->totalPages - 4) {
+            if ($this->currentPage !== $this->totalPages - 3 && $this->currentPage !== $this->totalPages - 4) {
                 $re .= '<li class="page-item"><a class="paginate page-link dots"><span>...</span></a></li>';
             }
 

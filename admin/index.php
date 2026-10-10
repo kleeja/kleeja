@@ -34,11 +34,11 @@ get_lang('acp');
 //
 if (
     empty($_SESSION['ADMINLOGIN']) ||
-    $_SESSION['ADMINLOGIN'] != md5(sha1($config['h_key']) . $usrcp->name() . $config['siteurl']) ||
-    (empty($_SESSION['USER_SESS']) || $_SESSION['USER_SESS'] != KJ_SESSION) ||
+    $_SESSION['ADMINLOGIN'] !== md5(sha1($config['h_key']) . $usrcp->name() . $config['siteurl']) ||
+    (empty($_SESSION['USER_SESS']) || $_SESSION['USER_SESS'] !== KJ_SESSION) ||
     (empty($_SESSION['ADMINLOGIN_T']) || $_SESSION['ADMINLOGIN_T'] < time())
 ) {
-    if (ig('go') && g('go') == 'login') {
+    if (ig('go') && g('go') === 'login') {
         if (ip('submit')) {
             //login
             $ERRORS = [];
@@ -122,11 +122,11 @@ if (
 } //end login
 
 //ummm let's say it's illegal action
-if ($_SERVER['REQUEST_METHOD'] == 'POST' && defined('STOP_CSRF')) {
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && defined('STOP_CSRF')) {
     $t_reff = explode('/', $_SERVER['HTTP_REFERER']);
     $t_host = explode('/', $_SERVER['HTTP_HOST']);
 
-    if ($t_reff[2] != $t_host[0]) {
+    if ($t_reff[2] !== $t_host[0]) {
         $usrcp->logout_cp();
 
         redirect($config['siteurl']);
@@ -221,7 +221,7 @@ extract(runHook('begin_admin_page', get_defined_vars()));
  * 'configs' word listed as dangrous requested word
  * so we replaced this word with 'options' instead.
  */
-if ($go_to == 'options') {
+if ($go_to === 'options') {
     $go_to = 'a_configs';
 }
 
@@ -278,7 +278,7 @@ foreach ($adm_extensions as $m) {
     extract(runHook('foreach_ext_admin_page', get_defined_vars()));
 
     $s = $m;
-    $m = isset($m[1]) && $m[1] == '_' ? substr($m, 2) : $m;
+    $m = isset($m[1]) && $m[1] === '_' ? substr($m, 2) : $m;
 
     ++$i;
     $adm_extensions_menu[$i] = [
@@ -296,16 +296,16 @@ foreach ($adm_extensions as $m) {
             './' .
             basename(ADMIN_PATH) .
             '?cp=' .
-            ($m == 'configs' ? 'options' : $s) .
+            ($m === 'configs' ? 'options' : $s) .
             (@in_array($m, $ext_formkey) ? '&amp;' . $GET_FORM_KEY_GLOBAL : ''),
         'confirm' => (@in_array($m, $ext_confirm)) ? true : false,
-        'current' => $s == $go_to ? true : false,
+        'current' => $s === $go_to ? true : false,
         'goto' => str_replace('a_configs', 'options', $s),
         'bubble' => !empty($kbubbles[$m])
             ? '<span class="badge badge-pill badge-warning bubble_' .
                 $m .
                 '"' .
-                ($kbubbles[$m] == 0 ? ' style="display:none"' : '') .
+                ((int) $kbubbles[$m] === 0 ? ' style="display:none"' : '') .
                 '>' .
                 $kbubbles[$m] .
                 '</span>'
@@ -330,14 +330,14 @@ $adm_extensions_menu[$i] = [
     'title' => $lang['R_HELP'] ?? 'HELP',
     'link' => './' . basename(ADMIN_PATH) . '?cp=s_help',
     'confirm' => false,
-    'current' => $go_to == 's_help',
+    'current' => $go_to === 's_help',
     'goto' => 's_help',
     'bubble' => '',
     'counter' => '',
 ];
 
 //the help button of the top bar opens the guide of the current page
-$help_link = './' . basename(ADMIN_PATH) . '?cp=s_help' . ($go_to != 's_help' ? '&amp;page=' . urlencode($go_to) : '');
+$help_link = './' . basename(ADMIN_PATH) . '?cp=s_help' . ($go_to !== 's_help' ? '&amp;page=' . urlencode($go_to) : '');
 
 //to attach kleeja version in the menu start item
 $assigned_klj_ver = preg_replace('!#([a-z0-9]+)!', '', KLEEJA_VERSION);
@@ -389,7 +389,7 @@ if (isset($go_menu)) {
             $d['goto'] .
             '">' .
             '<a' .
-            ($m == 'site' ? ' target="_blank" ' : ' ') .
+            ($m === 'site' ? ' target="_blank" ' : ' ') .
             'href="' .
             $d['link'] .
             '" ' .

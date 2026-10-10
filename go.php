@@ -35,7 +35,7 @@ switch ($current_go_case) {
 
         foreach ($tgroups as $gid) {
             //if this is admin group, dont show it public
-            if ($gid == 1 && (int) $userinfo['group_id'] != 1) {
+            if ($gid === 1 && (int) $userinfo['group_id'] !== 1) {
                 continue;
             }
 
@@ -50,8 +50,8 @@ switch ($current_go_case) {
                         [$lang['ADMINS'], $lang['USERS'], $lang['GUESTS']],
                         $d_groups[$gid]['data']['group_name'],
                     ),
-                    'most_firstrow' => $same_group == 0 ? true : false,
-                    'firstrow' => $same_group == 0 or ($same_group != $gid ? true : false),
+                    'most_firstrow' => $same_group === 0 ? true : false,
+                    'firstrow' => $same_group === 0 or ($same_group !== $gid ? true : false),
                     'rando' => $rando,
                 ];
                 $same_group = $gid;
@@ -77,7 +77,7 @@ switch ($current_go_case) {
         $titlee = $lang['REPORT'];
         $id_d = ig('id') ? g('id', 'int') : (ip('rid') ? p('rid', 'int') : 0);
         $url_id =
-            (int) $config['mod_writer'] == 1
+            (int) $config['mod_writer'] === 1
                 ? $config['siteurl'] . 'download' . $id_d . '.html'
                 : $config['siteurl'] . 'do.php?id=' . $id_d;
         $action = $config['siteurl'] . 'go.php?go=report';
@@ -100,7 +100,7 @@ switch ($current_go_case) {
 
             if ($SQL->num_rows($result)) {
                 $row = $SQL->fetch_array($result);
-                $filename_for_show = $row['real_filename'] == '' ? $row['name'] : $row['real_filename'];
+                $filename_for_show = $row['real_filename'] === '' ? $row['name'] : $row['real_filename'];
             } else {
                 extract(runHook('not_exists_qr_report_go_id', get_defined_vars()));
                 kleeja_err($lang['FILE_NO_FOUNDED']);
@@ -141,7 +141,7 @@ switch ($current_go_case) {
                     (empty(p('rurl')) ? '  [ ' . $lang['URL'] . ' ] ' : '');
             }
 
-            if (ip('surl') && trim(p('surl')) == '') {
+            if (ip('surl') && trim(p('surl')) === '') {
                 $ERRORS['surl'] = $lang['EMPTY_FIELDS'] . ' : [ ' . $lang['URL_F_FILE'] . ' ]';
             }
 
@@ -323,7 +323,7 @@ switch ($current_go_case) {
                 $ERRORS['ctext'] = $lang['NO_ME300TEXT'];
             }
 
-            if ($t_cname == '_kleeja_') {
+            if ($t_cname === '_kleeja_') {
                 update_config('new_version', '');
             }
 
@@ -401,7 +401,7 @@ switch ($current_go_case) {
             kleeja_err($lang['WRONG_URL']);
         } else {
             //to check
-            if (ig('sure') && g('sure') == 'ok') {
+            if (ig('sure') && g('sure') === 'ok') {
                 $query = [
                     'SELECT' => 'f.id, f.name, f.folder, f.size, f.type',
                     'FROM' => "{$dbprefix}files f",
@@ -414,7 +414,7 @@ switch ($current_go_case) {
 
                 $result = $SQL->build($query);
 
-                if ($SQL->num_rows($result) != 0) {
+                if ($SQL->num_rows($result) !== 0) {
                     while ($row = $SQL->fetch_array($result)) {
                         $is_img = in_array($row['type'], ['png', 'gif', 'jpg', 'jpeg', 'tif', 'tiff', 'bmp'])
                             ? true
@@ -498,7 +498,7 @@ switch ($current_go_case) {
         }
 
         //stats of most online users
-        if (empty($config['most_user_online_ever']) || trim($config['most_user_online_ever']) == '') {
+        if (empty($config['most_user_online_ever']) || trim($config['most_user_online_ever']) === '') {
             $most_online = 1; // 1 == you
             $on_muoe = time();
         } else {
@@ -528,7 +528,7 @@ switch ($current_go_case) {
         //go.php?go=down&n=$1&f=$2&i=$3
         if (ig('n')) {
             $url_file =
-                (int) $config['mod_writer'] == 1
+                (int) $config['mod_writer'] === 1
                     ? $config['siteurl'] . 'download' . g('i', 'int') . '.html'
                     : $config['siteurl'] . 'do.php?id=' . g('n', 'int');
         } else {

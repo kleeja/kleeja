@@ -240,7 +240,7 @@ class defaultUploader implements KleejaUploader
 
             // watermark on image
             if (
-                $config['write_imgs'] != 0 &&
+                (int) $config['write_imgs'] !== 0 &&
                 in_array($fileInfo['fileExtension'], ['gif', 'png', 'jpg', 'jpeg', 'bmp'])
             ) {
                 helper_watermark(
@@ -352,7 +352,7 @@ class defaultUploader implements KleejaUploader
         if (isset($_SESSION['FIILES_NOT_DUPLI'])) {
             if (
                 !empty($_SESSION['FIILES_NOT_DUPLI']) &&
-                $_SESSION['FIILES_NOT_DUPLI'] == sha1(serialize(array_column($_FILES, 'name')))
+                $_SESSION['FIILES_NOT_DUPLI'] === sha1(serialize(array_column($_FILES, 'name')))
             ) {
                 unset($_SESSION['FIILES_NOT_DUPLI']);
 
@@ -447,7 +447,7 @@ class defaultUploader implements KleejaUploader
         }
 
         // well, no file uploaded, ask user to choose a file before submit
-        if ($this->total_uploaded_files == 0 && sizeof($this->messages) == 0) {
+        if ($this->total_uploaded_files === 0 && sizeof($this->messages) === 0) {
             $this->addErrorMessage($lang['CHOSE_F']);
         }
     }
@@ -527,7 +527,7 @@ class defaultUploader implements KleejaUploader
         // now, let process it
         if (!in_array(strtolower($fileInfo['fileExtension']), array_keys($this->getAllowedFileExtensions()))) {
             // guest
-            if ($current_user_id == '-1') {
+            if ($current_user_id === -1) {
                 $this->addErrorMessage(
                     sprintf($lang['FORBID_EXT'], $fileInfo['fileExtension']) .
                         '<br> <a href="' .
@@ -551,7 +551,7 @@ class defaultUploader implements KleejaUploader
             );
         }
         // check file extension for bad stuff
-        elseif (ext_check_safe($_FILES['file_' . $fieldNumber . '_']['name']) == false) {
+        elseif (ext_check_safe($_FILES['file_' . $fieldNumber . '_']['name']) === false) {
             $this->addErrorMessage(
                 sprintf($lang['WRONG_F_NAME'], htmlspecialchars($_FILES['file_' . $fieldNumber . '_']['name'])),
             );
@@ -562,7 +562,7 @@ class defaultUploader implements KleejaUploader
                 $_FILES['file_' . $fieldNumber . '_']['type'],
                 $fileInfo['fileExtension'],
                 $_FILES['file_' . $fieldNumber . '_']['tmp_name'],
-            ) == false
+            ) === false
         ) {
             $this->addErrorMessage(
                 sprintf($lang['NOT_SAFE_FILE'], htmlspecialchars($_FILES['file_' . $fieldNumber . '_']['name'])),

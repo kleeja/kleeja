@@ -61,7 +61,7 @@ function kleeja_admin_err(
     }
 
     // assign {text} in err template
-    $text = $msg . ($redirect != false ? redirect($redirect, header: false, exit: false, sec: $rs, return: true) : '');
+    $text = $msg . ($redirect ? redirect($redirect, header: false, exit: false, sec: $rs, return: true) : '');
     $SHOW_LIST = $navigation;
 
     //header
@@ -166,7 +166,7 @@ function update_filter(
 ): bool {
     global $SQL, $dbprefix;
 
-    $by_id = strval(intval($id_or_uid)) == strval($id_or_uid);
+    $by_id = strval(intval($id_or_uid)) === strval($id_or_uid);
 
     $update_query = [
         'UPDATE' => "{$dbprefix}filters",
@@ -236,7 +236,7 @@ function get_filter(
             ($filter_type ? ' AND f.filter_type = :type' : '') .
             ($user_id ? ' AND f.filter_user = :user' : ''),
         'BIND' => [
-            'item' => $get_by == 'filter_id' ? intval($item) : kleeja_html_encode($item),
+            'item' => $get_by === 'filter_id' ? intval($item) : kleeja_html_encode($item),
             'type' => kleeja_html_encode($filter_type),
             'user' => $user_id,
         ],
@@ -287,7 +287,7 @@ function filter_exists(
             ($filter_type ? ' AND f.filter_type = :type' : '') .
             ($user_id ? ' AND f.filter_user = :user' : ''),
         'BIND' => [
-            'item' => $get_by == 'filter_id' ? intval($item) : kleeja_html_encode($item),
+            'item' => $get_by === 'filter_id' ? intval($item) : kleeja_html_encode($item),
             'type' => kleeja_html_encode($filter_type),
             'user' => $user_id,
         ],
@@ -329,7 +329,7 @@ function build_search_query(mixed $search): array
     //if searched by a username
     $usernamee = '';
 
-    if (!empty($search['username']) && (int) $config['user_system'] == 1) {
+    if (!empty($search['username']) && (int) $config['user_system'] === 1) {
         $query = [
             'SELECT' => 'u.id',
             'FROM' => "{$dbprefix}users u",
@@ -352,13 +352,13 @@ function build_search_query(mixed $search): array
     }
 
     //build query
-    $file_namee = $search['filename'] != '' ? 'AND (f.real_filename LIKE :filename OR f.name LIKE :filename)' : '';
-    $size_than = ' f.size ' . ($search['than'] != 1 ? '<=' : '>=') . ' :size ';
-    $ups_than = $search['ups'] != '' ? 'AND f.uploads ' . ($search['uthan'] != 1 ? '<' : '>') . ' :ups ' : '';
-    $rep_than = $search['rep'] != '' ? 'AND f.report ' . ($search['rthan'] != 1 ? '<' : '>') . ' :rep ' : '';
-    $lstd_than = $search['lastdown'] != '' ? 'AND f.last_down = :last_down ' : '';
-    $exte = $search['ext'] != '' ? 'AND f.type IN (:exts)' : '';
-    $ipp = $search['user_ip'] != '' ? 'AND f.user_ip LIKE :user_ip ' : '';
+    $file_namee = $search['filename'] !== '' ? 'AND (f.real_filename LIKE :filename OR f.name LIKE :filename)' : '';
+    $size_than = ' f.size ' . ((int) $search['than'] !== 1 ? '<=' : '>=') . ' :size ';
+    $ups_than = $search['ups'] !== '' ? 'AND f.uploads ' . ((int) $search['uthan'] !== 1 ? '<' : '>') . ' :ups ' : '';
+    $rep_than = $search['rep'] !== '' ? 'AND f.report ' . ((int) $search['rthan'] !== 1 ? '<' : '>') . ' :rep ' : '';
+    $lstd_than = $search['lastdown'] !== '' ? 'AND f.last_down = :last_down ' : '';
+    $exte = $search['ext'] !== '' ? 'AND f.type IN (:exts)' : '';
+    $ipp = $search['user_ip'] !== '' ? 'AND f.user_ip LIKE :user_ip ' : '';
 
     //values of placeholders that are not in the query are skipped
     return [
@@ -425,7 +425,7 @@ function sync_total_files(bool $files = true, int $start = 0): int|false
 
     $this_step_count = $v['num_files'];
 
-    if ($this_step_count == 0) {
+    if ((int) $this_step_count === 0) {
         return false;
     }
 
@@ -559,19 +559,19 @@ function adm_help_lang_section(string $guide_key, string $section): array
     ];
 
     [$type, $name] = array_pad(explode(':', $section, 2), 2, '');
-    $prefix = $guide_key . '_' . ($name != '' ? $name : $names[$type] ?? strtoupper($type));
+    $prefix = $guide_key . '_' . ($name !== '' ? $name : $names[$type] ?? strtoupper($type));
 
     $built = ['type' => $type, 'title' => $lang[$prefix . '_TITLE'] ?? '', 'items' => []];
 
-    if ($type == 'text') {
+    if ($type === 'text') {
         $built['text'] = $lang[$prefix] ?? '';
 
         return $built;
     }
 
-    for ($n = 1; isset($lang[$prefix . ($type == 'faq' ? '_Q_' : '_') . $n]); $n++) {
+    for ($n = 1; isset($lang[$prefix . ($type === 'faq' ? '_Q_' : '_') . $n]); $n++) {
         $built['items'][] =
-            $type == 'faq'
+            $type === 'faq'
                 ? ['q' => $lang[$prefix . '_Q_' . $n], 'a' => $lang[$prefix . '_A_' . $n] ?? '']
                 : $lang[$prefix . '_' . $n];
     }
@@ -617,7 +617,7 @@ function adm_help_prepare_guide(string $id, array $guide, array $groups): array
 
         foreach ($items as $n => $item) {
             $items[$n] =
-                $type == 'faq'
+                $type === 'faq'
                     ? ['q' => adm_help_text($item['q'] ?? ''), 'a' => adm_help_text($item['a'] ?? '')]
                     : ['text' => adm_help_text($item)];
         }
@@ -636,7 +636,7 @@ function adm_help_prepare_guide(string $id, array $guide, array $groups): array
 
         $sections[] = [
             'type' => $type,
-            'title' => $title !== '' || $type == 'text' ? $title : $lang['HELP_SECTION_' . strtoupper($type)],
+            'title' => $title !== '' || $type === 'text' ? $title : $lang['HELP_SECTION_' . strtoupper($type)],
             'icon' => $section_icons[$type],
             'items' => $items,
             'text' => $text,

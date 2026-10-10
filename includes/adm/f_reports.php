@@ -37,7 +37,7 @@ if (ip('submit')) {
 }
 
 //add delete process to the queue
-if ($current_smt == 'del_d30' || $current_smt == 'del_all') {
+if ($current_smt === 'del_d30' || $current_smt === 'del_all') {
     if (strpos($config['queue'], ':' . $current_smt . 'reports:') !== false) {
         kleeja_admin_err(
             $lang['DELETE_PROCESS_IN_WORK'],
@@ -60,7 +60,7 @@ $query = [
     'ORDER BY' => 'r.id DESC',
 ];
 
-if ($current_smt == 'show_h24') {
+if ($current_smt === 'show_h24') {
     $query['WHERE'] = 'r.time > :time';
     $query['BIND'] = ['time' => time() - 3600 * 24];
 }
@@ -96,7 +96,7 @@ if ($nums_rows > 0) {
             'human_time' => kleeja_date($row['time']),
             'time' => kleeja_date($row['time'], human_time: false),
             'ip' => $row['ip'],
-            'sent' => $row['id'] == $msg_sent,
+            'sent' => (int) $row['id'] === $msg_sent,
             'ip_finder' => 'https://ipinfo.io/' . htmlspecialchars($row['ip']),
         ];
 
@@ -193,27 +193,27 @@ $go_menu = [
         'name' => $lang['R_REPORTS'],
         'link' => basename(ADMIN_PATH) . '?cp=f_reports&amp;smt=general',
         'goto' => 'general',
-        'current' => $current_smt == 'general',
+        'current' => $current_smt === 'general',
     ],
     'show_h24' => [
         'name' => $lang['SHOW_FROM_24H'],
         'link' => basename(ADMIN_PATH) . '?cp=f_reports&amp;smt=show_h24',
         'goto' => 'show_h24',
-        'current' => $current_smt == 'show_h24',
+        'current' => $current_smt === 'show_h24',
     ],
     //TODO : CHECK IF IT'S ALREADY DONE ?
     'del_d30' => [
         'name' => $lang['DELETE_EARLIER_30DAYS'],
         'link' => basename(ADMIN_PATH) . '?cp=f_reports&amp;smt=del_d30',
         'goto' => 'del_d30',
-        'current' => $current_smt == 'del_d30',
+        'current' => $current_smt === 'del_d30',
         'confirm' => true,
     ],
     'del_all' => [
         'name' => $lang['DELETE_ALL'],
         'link' => basename(ADMIN_PATH) . '?cp=f_reports&amp;smt=del_all',
         'goto' => 'del_all',
-        'current' => $current_smt == 'del_all',
+        'current' => $current_smt === 'del_all',
         'confirm' => true,
     ],
 ];

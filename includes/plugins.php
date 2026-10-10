@@ -289,7 +289,7 @@ class Plugins
             return self::install($plugin_name);
         }
 
-        return $row['plg_disabled'] == 0 || self::enable($plugin_name);
+        return (int) $row['plg_disabled'] === 0 || self::enable($plugin_name);
     }
 
     /**
@@ -582,7 +582,7 @@ class Plugins
         }
 
         foreach ($catalog as $item) {
-            if (($item['type'] ?? '') != 'plugin' || ($item['name'] ?? '') != $plugin_name) {
+            if (($item['type'] ?? '') !== 'plugin' || ($item['name'] ?? '') !== $plugin_name) {
                 continue;
             }
 

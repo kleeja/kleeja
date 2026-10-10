@@ -18,7 +18,7 @@ $stylee = 'admin_search';
 $action = basename(ADMIN_PATH) . '?cp=h_search';
 
 //wut the default user system
-$default_user_system = (int) $config['user_system'] == 1;
+$default_user_system = (int) $config['user_system'] === 1;
 
 $H_FORM_KEYS = kleeja_add_form_key('adm_files_search');
 $H_FORM_KEYS2 = kleeja_add_form_key('adm_users_search');
@@ -29,9 +29,9 @@ $current_smt = preg_replace('/[^a-z0-9_]/i', '', g('smt', default: 'files'));
 $filled_ip = $filled_username = '';
 
 if (ig('s_input')) {
-    if (g('s_input', 'int') == 2) {
+    if (g('s_input', 'int') === 2) {
         $filled_username = g('s_value');
-    } elseif (g('s_input', 'int') == 1) {
+    } elseif (g('s_input', 'int') === 1) {
         $filled_ip = g('s_value');
     }
 }
@@ -62,7 +62,7 @@ if (ip('search_file')) {
     unset($s['search_file'], $s['k_form_key'], $s['k_form_time']);
 
     foreach ($s as $key => $v) {
-        if ($s[$key] == '') {
+        if ($s[$key] === '') {
             unset($s[$key]);
         }
     }
@@ -125,14 +125,14 @@ $go_menu = [
         'name' => $lang['SEARCH_FILES'],
         'link' => basename(ADMIN_PATH) . '?cp=h_search&amp;smt=files',
         'goto' => 'files',
-        'current' => $current_smt == 'files',
+        'current' => $current_smt === 'files',
     ],
     //'sep1' => array('class'=>'separator'),
     'users' => [
         'name' => $lang['SEARCH_USERS'],
         'link' => basename(ADMIN_PATH) . '?cp=h_search&amp;smt=users',
         'goto' => 'users',
-        'current' => $current_smt == 'users',
+        'current' => $current_smt === 'users',
     ],
     //'sep2' => array('class'=>'separator'),
 ];

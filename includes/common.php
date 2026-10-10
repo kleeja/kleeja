@@ -278,7 +278,7 @@ define('ACP_STYLE_NAME', 'Damask');
 $STYLE_PATH =
     $config['siteurl'] .
     'styles/' .
-    (trim($config['style_depend_on']) == '' ? $config['style'] : $config['style_depend_on']) .
+    (trim($config['style_depend_on']) === '' ? $config['style'] : $config['style_depend_on']) .
     '/';
 $THIS_STYLE_PATH = $config['siteurl'] . 'styles/' . $config['style'] . '/';
 $THIS_STYLE_PATH_ABS = PATH . 'styles/' . $config['style'] . '/';
@@ -294,7 +294,7 @@ get_olang($config['language']);
 //run ban system
 get_ban();
 
-if (isset($_GET['go']) && $_GET['go'] == 'login') {
+if (isset($_GET['go']) && $_GET['go'] === 'login') {
     define('IN_LOGIN', true);
 }
 
@@ -318,7 +318,7 @@ if (
 $login_page = '';
 
 if (
-    $config['siteclose'] == '1' &&
+    (int) $config['siteclose'] === 1 &&
     !user_can('enter_acp') &&
     !defined('IN_LOGIN') &&
     !defined('IN_ADMIN') &&
@@ -328,7 +328,7 @@ if (
     //if download, images ?
     if (
         (defined('IN_DOWNLOAD') && (ig('img') || ig('thmb') || ig('thmbf') || ig('imgf'))) ||
-        g('go', 'str', '') == 'queue'
+        g('go', 'str', '') === 'queue'
     ) {
         @$SQL->close();
         $fullname = 'images/site_closed.jpg';
@@ -357,7 +357,7 @@ if ($stat_sizes >= $config['total_size'] * 1048576 && !defined('IN_LOGIN') && !d
 kleeja_detecting_bots();
 
 //check for page number
-if (empty($perpage) || intval($perpage) == 0) {
+if (empty($perpage) || intval($perpage) === 0) {
     $perpage = 14;
 }
 

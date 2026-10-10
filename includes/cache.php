@@ -202,7 +202,7 @@ if (!($banss = $cache->get('data_ban'))) {
 
     $banss = [];
 
-    if (!empty($ban1) || $ban1 != ' ' || $ban1 != '  ') {
+    if (!empty($ban1) || $ban1 !== ' ' || $ban1 !== '  ') {
         //seperate ips ..
         $ban2 = explode('|', $ban1);
 

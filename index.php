@@ -57,11 +57,11 @@ if (ip('submitr')) {
 $FILES_NUM_LOOP = [];
 
 if ($config['filesnum'] > 0) {
-    foreach (range(1, $config['filesnum']) as $i) {
+    foreach (range(1, (int) $config['filesnum']) as $i) {
         $FILES_NUM_LOOP[] = [
             'i' => $i,
             'show' =>
-                $i == 1 || (!empty($config['filesnum_show']) && (int) $config['filesnum_show'] == 1)
+                $i === 1 || (!empty($config['filesnum_show']) && (int) $config['filesnum_show'] === 1)
                     ? ''
                     : 'display: none',
         ];
@@ -75,7 +75,7 @@ $info = [];
 
 foreach ($uploader->getMessages() as $t => $s) {
     $info[] = [
-        't' => $s[1] == 'error' ? 'index_err' : 'index_info', //for old Kleeja versions
+        't' => $s[1] === 'error' ? 'index_err' : 'index_info', //for old Kleeja versions
         'i' => $s[0], //#for old Kleeja versions
 
         'message_content' => $s[0],
@@ -102,7 +102,7 @@ $js_allowed_extensions_sizes = '[' . implode(', ', array_values($d_groups[$useri
 //who's online right now..
 //I don't like this feature and I prefer that you disable it
 //
-$show_online = $config['allow_online'] == 1 ? true : false;
+$show_online = (int) $config['allow_online'] === 1 ? true : false;
 
 if ($show_online) {
     $current_online_users = 0;
@@ -145,7 +145,7 @@ if ($show_online) {
     unset($online_names, $timeout, $timeout2);
 
     //check & update most ever users and visitors were online
-    if (empty($config['most_user_online_ever']) || trim($config['most_user_online_ever']) == '') {
+    if (empty($config['most_user_online_ever']) || trim($config['most_user_online_ever']) === '') {
         $most_online = $current_online_users;
         $online_time = time();
     } else {

@@ -51,7 +51,7 @@ if (in_array($current_smt, ['update1', 'update2', 'update3'])) {
 }
 
 //check latest version
-if ($current_smt == 'check') {
+if ($current_smt === 'check') {
     //get data from kleeja github repo
     if (!($version_data = $cache->get('kleeja_repo_version'))) {
         $version_data = [];
@@ -108,7 +108,7 @@ if ($current_smt == 'check') {
     $adminAjaxContent = $error . ':::' . $text;
 }
 // home of update page
-elseif ($current_smt == 'general') {
+elseif ($current_smt === 'general') {
     $showMessage = ig('show_msg');
 
     //start.php sends the admin here when the last check is old, and the check is saved in this config,
@@ -118,7 +118,7 @@ elseif ($current_smt == 'general') {
     }
 }
 //1. download latest kleeja version
-elseif ($current_smt == 'update1') {
+elseif ($current_smt === 'update1') {
     if (!class_exists('ZipArchive')) {
         $adminAjaxContent = '930:::' . $lang['NO_ZIP_ARCHIVE'];
     } elseif (!version_compare(strtolower($current_version), strtolower($new_version), '<')) {
@@ -147,7 +147,7 @@ elseif ($current_smt == 'update1') {
     }
 }
 //2. extract new kleeja package
-elseif ($current_smt == 'update2') {
+elseif ($current_smt === 'update2') {
     if (!file_exists(PATH . 'cache/step1.done')) {
         http_response_code(401);
         kleeja_admin_err($lang['HV_NOT_PRVLG_ACCESS']);
@@ -223,7 +223,7 @@ elseif ($current_smt == 'update2') {
     }
 }
 //3. update, or rollback on failure
-elseif ($current_smt == 'update3') {
+elseif ($current_smt === 'update3') {
     if (!file_exists(PATH . 'cache/step2.done')) {
         http_response_code(401);
         kleeja_admin_err($lang['HV_NOT_PRVLG_ACCESS']);

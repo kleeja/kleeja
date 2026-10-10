@@ -34,7 +34,7 @@ if (!empty($case) && in_array($case, ['select', 'download', 'dfolder'])) {
 }
 
 //check _POST Csrf token, the upload form sends newstyle, and ?case=upload without it is checked too
-if (ip('newstyle') || $case == 'upload') {
+if (ip('newstyle') || $case === 'upload') {
     if (!kleeja_check_form_key('adm_styles')) {
         http_response_code(401);
         kleeja_admin_err($lang['INVALID_FORM_KEY'], title: $lang['ERROR'], redirect: $action);
@@ -61,7 +61,7 @@ switch ($case):
                         'version' => '',
                     ];
 
-                    if (($style_info = kleeja_style_info($folder_name)) != false) {
+                    if (($style_info = kleeja_style_info($folder_name)) !== false) {
                         foreach (['name', 'desc', 'copyright', 'version'] as $InfoKey) {
                             if (array_key_exists($InfoKey, $style_info)) {
                                 if (is_array($style_info[$InfoKey])) {
@@ -77,7 +77,7 @@ switch ($case):
 
                     $available_styles[$folder_name] = [
                         'name' => $folder_name,
-                        'is_default' => $config['style'] == $folder_name ? true : false,
+                        'is_default' => $config['style'] === $folder_name ? true : false,
                         'link_mk_default' =>
                             basename(ADMIN_PATH) .
                             '?cp=' .
@@ -107,7 +107,7 @@ switch ($case):
             $store_catalog = FetchFile::make($store_link)->get();
             $store_catalog = json_decode($store_catalog, true);
 
-            if (json_last_error() == JSON_ERROR_NONE) {
+            if (json_last_error() === JSON_ERROR_NONE) {
                 $cache->save('store_catalog', $store_catalog);
             }
         }
@@ -118,17 +118,17 @@ switch ($case):
         $available_styles_names = array_column($available_styles, 'name');
 
         foreach ($store_catalog as $style_info) {
-            if ($style_info['type'] != 'style') {
+            if ($style_info['type'] !== 'style') {
                 continue;
             }
 
-            if ($case == 'store' && !empty($available_styles[$style_info['name']])) {
+            if ($case === 'store' && !empty($available_styles[$style_info['name']])) {
                 continue;
             }
 
             // is there a new version of this in the store
             elseif (
-                $case == 'check' &&
+                $case === 'check' &&
                 ((!empty($available_styles[$style_info['name']]['info']['version']) &&
                     version_compare(
                         strtolower($available_styles[$style_info['name']]['info']['version']),
@@ -189,7 +189,7 @@ switch ($case):
         //check if this style depend on other style and
         //check kleeja version that required by this style
         //
-        if (($style_info = kleeja_style_info($style_name)) != false) {
+        if (($style_info = kleeja_style_info($style_name)) !== false) {
             if (isset($style_info['depend_on']) && !is_dir(PATH . 'styles/' . $style_info['depend_on'])) {
                 kleeja_admin_err(sprintf($lang['DEPEND_ON_NO_STYLE_ERR'], $style_info['depend_on']));
             }
@@ -213,10 +213,10 @@ switch ($case):
 
                 $result = $SQL->build($query);
 
-                if ($SQL->num_rows($result) != 0) {
+                if ($SQL->num_rows($result) !== 0) {
                     $plugins_required = array_flip($plugins_required);
                     while ($row = $SQL->fetch_array($result)) {
-                        if (in_array($row['plg_name'], $plugins_required) and $row['plg_disabled'] != 1) {
+                        if (in_array($row['plg_name'], $plugins_required) and (int) $row['plg_disabled'] !== 1) {
                             unset($plugins_required[$row['plg_name']]);
                         }
                     }
@@ -349,7 +349,7 @@ switch ($case):
 
             // make an arry for all plugins in kleeja store that not included in our server
             foreach ($catalog_styles as $style_info) {
-                if ($style_info['type'] != 'style') {
+                if ($style_info['type'] !== 'style') {
                     continue;
                 }
 

@@ -16,7 +16,7 @@ if (!defined('IN_ADMIN')) {
 get_lang('help');
 
 //a translation that misses some words shows them in English
-if ($config['language'] != 'en') {
+if ($config['language'] !== 'en') {
     $lang += (array) include PATH . 'lang/en/help.php';
 }
 
@@ -212,7 +212,7 @@ while ($row = $SQL->fetch($result)) {
         'image' => $help_plugin_icon,
         'badge' => $lang['HELP_PLUGIN_BADGE'],
         'link' =>
-            $help_settings_page != '' && !preg_match('/^https?:\/\//', $help_settings_page)
+            $help_settings_page !== '' && !preg_match('/^https?:\/\//', $help_settings_page)
                 ? './?' . kleeja_html_encode($help_settings_page)
                 : '',
         'link_title' => $lang['HELP_PLUGIN_SETTINGS'],
@@ -283,11 +283,11 @@ $help_focus = '';
 
 foreach ($help_rows as $help_n => $help_row) {
     $help_rows[$help_n]['group_title'] = $help_groups[$help_row['group']];
-    $help_rows[$help_n]['group_first'] = $help_n == 0 || $help_rows[$help_n - 1]['group'] != $help_row['group'];
+    $help_rows[$help_n]['group_first'] = $help_n === 0 || $help_rows[$help_n - 1]['group'] !== $help_row['group'];
     $help_rows[$help_n]['group_last'] =
-        !isset($help_rows[$help_n + 1]) || $help_rows[$help_n + 1]['group'] != $help_row['group'];
+        !isset($help_rows[$help_n + 1]) || $help_rows[$help_n + 1]['group'] !== $help_row['group'];
 
-    if ($help_focus == '' && $help_from != '' && $help_row['page'] == $help_from) {
+    if ($help_focus === '' && $help_from !== '' && $help_row['page'] === $help_from) {
         $help_focus = $help_row['id'];
     }
 
@@ -299,7 +299,7 @@ foreach ($help_rows as $help_n => $help_row) {
         $help_rows[$help_n][$help_section['aside'] ? 'aside' : 'body'] .= $tpl->display('admin_help_section');
     }
 
-    if ($help_rows[$help_n]['body'] == '') {
+    if ($help_rows[$help_n]['body'] === '') {
         $help_rows[$help_n]['body'] = $help_rows[$help_n]['aside'];
         $help_rows[$help_n]['aside'] = '';
     }

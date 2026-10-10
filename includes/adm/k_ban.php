@@ -44,7 +44,7 @@ $banned_items = array_values(array_filter(explode('|', (string) $current_ban_dat
 
 $show_message = false;
 
-if ($case == 'del' && ig('k')) {
+if ($case === 'del' && ig('k')) {
     if (!kleeja_check_form_key_get('adm_ban_get')) {
         http_response_code(401);
         kleeja_admin_err($lang['INVALID_GET_KEY'], $action);
@@ -53,7 +53,7 @@ if ($case == 'del' && ig('k')) {
     $to_delete = g('k');
 
     $banned_items = array_filter($banned_items, function (string $item) use ($to_delete, $lang, &$show_message): bool {
-        if (md5($item) == $to_delete) {
+        if (md5($item) === $to_delete) {
             $show_message = sprintf($lang['ITEM_DELETED'], kleeja_html_display($item));
 
             return false;
@@ -65,7 +65,7 @@ if ($case == 'del' && ig('k')) {
     $update_ban_content = $show_message;
 }
 
-if ($case == 'new') {
+if ($case === 'new') {
     if (!kleeja_check_form_key('adm_ban')) {
         kleeja_admin_err($lang['INVALID_FORM_KEY'], title: $lang['ERROR'], redirect: $action, rs: 1);
     }

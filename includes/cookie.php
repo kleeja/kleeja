@@ -45,7 +45,7 @@ class KleejaCookie
                 substr($config['cookie_domain'], 0, strpos($config['cookie_domain'], ':')),
             );
             $config['cookie_path'] = '/';
-            $config['cookie_secure'] = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] == 'on';
+            $config['cookie_secure'] = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on';
         }
 
         // Enable sending of a P3P header
@@ -55,8 +55,8 @@ class KleejaCookie
         $rexpire = gmdate('D, d-M-Y H:i:s \\G\\M\\T', $expire);
         $domain =
             !$config['cookie_domain'] ||
-            $config['cookie_domain'] == 'localhost' ||
-            $config['cookie_domain'] == '127.0.0.1'
+            $config['cookie_domain'] === 'localhost' ||
+            $config['cookie_domain'] === '127.0.0.1'
                 ? ''
                 : '; domain=' . $config['cookie_domain'];
 

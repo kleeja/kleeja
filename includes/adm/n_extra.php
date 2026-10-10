@@ -43,7 +43,7 @@ $extras = $SQL->fetch_array($result);
 if (ip('submit')) {
     $update_sql = '';
 
-    if (g('smt') == 'fe') {
+    if (g('smt') === 'fe') {
         $ex_footer = p('ex_footer', 'str');
         $update_sql = 'ex_footer = :value';
         $update_value = htmlspecialchars_decode($ex_footer);
@@ -88,12 +88,12 @@ $go_menu = [
         'name' => $lang['ADD_HEADER_EXTRA'],
         'link' => basename(ADMIN_PATH) . '?cp=n_extra&amp;smt=he',
         'goto' => 'he',
-        'current' => $current_smt == 'he',
+        'current' => $current_smt === 'he',
     ],
     'fe' => [
         'name' => $lang['ADD_FOOTER_EXTRA'],
         'link' => basename(ADMIN_PATH) . '?cp=n_extra&amp;smt=fe',
         'goto' => 'fe',
-        'current' => $current_smt == 'fe',
+        'current' => $current_smt === 'fe',
     ],
 ];

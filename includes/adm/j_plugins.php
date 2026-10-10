@@ -70,7 +70,7 @@ switch ($case):
                 continue;
             }
 
-            if ($case == 'check' && $row['plg_disabled'] == 1) {
+            if ($case === 'check' && (int) $row['plg_disabled'] === 1) {
                 continue;
             }
 
@@ -138,8 +138,8 @@ switch ($case):
         }
         @closedir($dh);
 
-        $no_plugins = sizeof($available_plugins) == 0 && sizeof($installed_plugins) == 0;
-        $no_installed_plugins = sizeof($installed_plugins) == 0;
+        $no_plugins = sizeof($available_plugins) === 0 && sizeof($installed_plugins) === 0;
+        $no_installed_plugins = sizeof($installed_plugins) === 0;
 
         $stylee = 'admin_plugins';
 
@@ -155,7 +155,7 @@ switch ($case):
             $store_catalog = FetchFile::make($store_link)->get();
             $store_catalog = json_decode($store_catalog, true);
 
-            if (json_last_error() == JSON_ERROR_NONE) {
+            if (json_last_error() === JSON_ERROR_NONE) {
                 $cache->save('store_catalog', $store_catalog);
             }
         }
@@ -166,7 +166,7 @@ switch ($case):
         $available_plugins_names = array_column($available_plugins, 'name');
 
         foreach ($store_catalog as $plugin_info) {
-            if ($plugin_info['type'] != 'plugin') {
+            if ($plugin_info['type'] !== 'plugin') {
                 continue;
             }
 
@@ -179,7 +179,7 @@ switch ($case):
             }
 
             if (
-                $case == 'store' &&
+                $case === 'store' &&
                 (in_array($plugin_info['name'], $available_plugins_names) ||
                     !empty($installed_plugins[$plugin_info['name']]))
             ) {
@@ -188,7 +188,7 @@ switch ($case):
 
             // is there a new version of this in the store
             elseif (
-                $case == 'check' &&
+                $case === 'check' &&
                 ((!empty($installed_plugins[$plugin_info['name']]) &&
                     version_compare(
                         strtolower($installed_plugins[$plugin_info['name']]['extra_info']['plugin_version']),
@@ -547,7 +547,7 @@ switch ($case):
             //update database
             $update_query = [
                 'UPDATE' => "{$dbprefix}plugins",
-                'SET' => 'plg_disabled=' . ($case == 'disable' ? 1 : 0),
+                'SET' => 'plg_disabled=' . ($case === 'disable' ? 1 : 0),
                 'WHERE' => 'plg_name = :name',
                 'BIND' => ['name' => kleeja_html_encode($plg_name)],
             ];
@@ -609,7 +609,7 @@ switch ($case):
 
             // make an arry for all plugins in kleeja store that not included in our server
             foreach ($catalog_plugins as $plugin_info) {
-                if ($plugin_info['type'] != 'plugin') {
+                if ($plugin_info['type'] !== 'plugin') {
                     continue;
                 }
 
