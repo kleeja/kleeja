@@ -75,6 +75,9 @@ class FetchFile
             $fetchType = 'fopen';
         }
 
+        //only a session that was open is opened again, install/update.php has none and its page is printed already
+        $had_session = session_status() === PHP_SESSION_ACTIVE;
+
         session_write_close();
 
         $result = false;
@@ -85,7 +88,9 @@ class FetchFile
             $result = $this->{$fetchType}();
         }
 
-        $this->finishUp();
+        if ($had_session) {
+            $this->finishUp();
+        }
 
         return $result;
     }

@@ -88,4 +88,78 @@ $update_schema[10]['functions'] = [
             ]);
         }
     },
+    //og_default is the new version of the default style, so the folder of the old one is deleted,
+    //and a site that uses it, or a style that depends on it, moves to og_default, or to bootstrap if it can't be downloaded
+    function () {
+        global $SQL, $dbprefix;
+
+        $styles_folder = PATH . 'styles';
+        $og_default_folder = "{$styles_folder}/og_default";
+
+        if (is_dir("{$styles_folder}/default")) {
+            kleeja_unlink("{$styles_folder}/default");
+        }
+
+        $result = $SQL->build([
+            'SELECT' => 'name',
+            'FROM' => "{$dbprefix}config",
+            'WHERE' => "name IN ('style', 'style_depend_on') AND value = :old_style",
+            'BIND' => ['old_style' => 'default'],
+        ]);
+
+        $uses_default = $SQL->fetch($result) !== false;
+
+        $SQL->freeresult($result);
+
+        if (!$uses_default) {
+            return;
+        }
+
+        if (!is_dir($og_default_folder) && class_exists('ZipArchive')) {
+            //install/update.php doesn't load it
+            if (!class_exists('FetchFile')) {
+                require_once PATH . 'includes/FetchFile.php';
+            }
+
+            $archive = PATH . 'cache/og_default.zip';
+
+            $downloaded = FetchFile::make('https://github.com/kleeja/og_default/archive/refs/tags/3.0.zip')
+                ->setDestinationPath($archive)
+                ->isBinaryFile(true)
+                ->get();
+
+            $zip = new ZipArchive();
+
+            //FetchFile doesn't verify the certificate of the server, so only the file of the 3.0 release is extracted
+            if (
+                $downloaded === true &&
+                hash_file('sha256', $archive) === 'eb92b20e0a899f436a1b9a601b0ce60b7ffbd0c2d018fb99bb0074920f60ee99' &&
+                $zip->open($archive) === true
+            ) {
+                //github puts the files in one folder, og_default-3.0/
+                $zip_folder = explode('/', (string) $zip->getNameIndex(0))[0];
+
+                if ($zip->extractTo($styles_folder) && $zip_folder !== 'og_default') {
+                    rename("{$styles_folder}/{$zip_folder}", $og_default_folder);
+                }
+
+                $zip->close();
+            }
+
+            if (file_exists($archive)) {
+                kleeja_unlink($archive);
+            }
+        }
+
+        $new_style = file_exists("{$og_default_folder}/info.txt") ? 'og_default' : 'bootstrap';
+
+        foreach (['style' => $new_style, 'style_depend_on' => ''] as $name => $value) {
+            $SQL->build([
+                'UPDATE' => "{$dbprefix}config",
+                'SET' => 'value = :value',
+                'WHERE' => 'name = :name',
+                'BIND' => ['value' => $value, 'name' => $name],
+            ]);
+        }
+    },
 ];
