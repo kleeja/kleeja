@@ -170,6 +170,9 @@ return [
     'HELP_TROUBLESHOOTING_FAQ_Q_9' => 'The control panel asks me to sign in again.',
     'HELP_TROUBLESHOOTING_FAQ_A_9' =>
         'For your safety, the control panel session ends after a few hours, even while you stay signed in on your site. Sign in again to continue.',
+    'HELP_TROUBLESHOOTING_FAQ_Q_10' => 'The Dashboard says the database needs an update.',
+    'HELP_TROUBLESHOOTING_FAQ_A_10' =>
+        'An update copied the new files but stopped before it updated the database. Click <strong>Update the database</strong> in that notice to finish it. If your server has no <code>install</code> folder, Kleeja downloads the package of your version to get the updates. Only a founder sees the notice.',
 
     //
     // the pages of the control panel

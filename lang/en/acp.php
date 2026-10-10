@@ -303,6 +303,13 @@ return [
         'Plugins and styles may have new versions for this version of Kleeja, check them and update them too.',
     'UPDATE_PLUGINS' => 'Update plugins',
     'UPDATE_STYLES' => 'Update styles',
+    'DB_UPDATE_NEEDED_TITLE' => 'The database needs an update',
+    'DB_UPDATE_NEEDED' =>
+        'The files of Kleeja are newer than its database (database version %1$s, the files need version %2$s). This happens when an update stops before it reaches the database. Update the database to finish it.',
+    'DB_UPDATE_NOW' => 'Update the database',
+    'DB_UPDATE_DONE' => 'The database has been updated to version %s.',
+    'DB_UPDATE_NOT_NEEDED' => 'The database is up to date, there is nothing to update.',
+    'DB_UPDATE_FAILED' => 'The database update has failed: %s',
     'RELEASE_NOTE' => 'Release Notes',
     'UPDATE_ALL' => 'Update All',
     'CANT_DEL_DEFAULT_STYLE' =>

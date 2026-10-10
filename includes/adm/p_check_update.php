@@ -117,6 +117,89 @@ elseif ($current_smt === 'general') {
         add_config('new_version', '');
     }
 }
+//the database is older than the files: an update that stopped after copying the files, or files that were
+//uploaded without running install/update.php after them. start.php shows the button that comes here
+elseif ($current_smt === 'db_update') {
+    if (intval($userinfo['founder']) !== 1) {
+        http_response_code(401);
+        kleeja_admin_err($lang['HV_NOT_PRVLG_ACCESS']);
+    }
+
+    if (!kleeja_check_form_key_get('UPDATER_FORM_KEY')) {
+        http_response_code(401);
+        kleeja_admin_err($lang['INVALID_GET_KEY']);
+    }
+
+    $current_db_version = (int) ($config['db_version'] ?? 0);
+
+    if ($current_db_version >= (int) KLEEJA_DB_VERSION) {
+        kleeja_admin_info($lang['DB_UPDATE_NOT_NEEDED'], './');
+    }
+
+    //the updates of the install folder, if it is there and it has the ones of this version
+    $update_schema = [];
+
+    if (file_exists(PATH . 'install/includes/update_schema.php')) {
+        require PATH . 'install/includes/update_schema.php';
+    }
+
+    //or the ones of the package of this version, a stopped update leaves it in the cache folder,
+    //and some updates take files from it, like the bootstrap style of Kleeja 4
+    $package_file = PATH . 'cache/kleeja-' . KLEEJA_VERSION . '.zip';
+    $db_update_file = PATH . 'cache/update_schema.php';
+
+    if (max(array_keys($update_schema) ?: [0]) < (int) KLEEJA_DB_VERSION) {
+        if (!class_exists('ZipArchive')) {
+            kleeja_admin_err($lang['NO_ZIP_ARCHIVE']);
+        }
+
+        $zip = new ZipArchive();
+
+        if (!file_exists($package_file) || $zip->open($package_file, ZipArchive::CHECKCONS) !== true) {
+            FetchFile::make(KLEEJA_LATEST_PACKAGE_LINK . KLEEJA_VERSION)
+                ->setDestinationPath($package_file)
+                ->isBinaryFile(true)
+                ->get();
+        } else {
+            $zip->close();
+        }
+
+        $update_schema = [];
+
+        if (file_exists($package_file) && $zip->open($package_file, ZipArchive::CHECKCONS) === true) {
+            //github puts the files in one folder, like kleeja-kleeja-0a1b2c3/
+            $package_schema = $zip->getFromName(
+                explode('/', (string) $zip->getNameIndex(0))[0] . '/install/includes/update_schema.php',
+            );
+            $zip->close();
+
+            if ($package_schema !== false && file_put_contents($db_update_file, $package_schema) !== false) {
+                require $db_update_file;
+            }
+        }
+
+        if (max(array_keys($update_schema) ?: [0]) < (int) KLEEJA_DB_VERSION) {
+            foreach ([$package_file, $db_update_file] as $file) {
+                if (file_exists($file)) {
+                    kleeja_unlink($file);
+                }
+            }
+
+            kleeja_admin_err($lang['UPDATE_ERR_FETCH_PACKAGE']);
+        }
+    }
+
+    $db_errors = kleeja_run_db_updates($update_schema, $current_db_version);
+
+    //the package and the update file too
+    delete_cache('', all: true);
+
+    if (sizeof($db_errors)) {
+        kleeja_admin_err(sprintf($lang['DB_UPDATE_FAILED'], implode(', ', $db_errors)));
+    }
+
+    kleeja_admin_info(sprintf($lang['DB_UPDATE_DONE'], KLEEJA_DB_VERSION), './');
+}
 //1. download latest kleeja version
 elseif ($current_smt === 'update1') {
     if (!class_exists('ZipArchive')) {

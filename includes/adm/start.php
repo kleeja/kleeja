@@ -121,6 +121,24 @@ if ($latest_version !== '' && version_compare(strtolower(KLEEJA_VERSION), strtol
     extract(runHook('admin_update_now', get_defined_vars()));
 }
 
+//the database is older than the files, an update stopped before it, the founders can finish it
+if ((int) ($config['db_version'] ?? 0) < (int) KLEEJA_DB_VERSION && (int) $userinfo['founder'] === 1) {
+    $ADM_NOTIFICATIONS['db_update'] = [
+        'id' => 'db_update',
+        'msg_type' => 'error',
+        'title' => $lang['DB_UPDATE_NEEDED_TITLE'],
+        'msg' =>
+            sprintf($lang['DB_UPDATE_NEEDED'], (int) ($config['db_version'] ?? 0), KLEEJA_DB_VERSION) .
+            '<br /><a class="btn btn-sm btn-primary mt-2" href="' .
+            basename(ADMIN_PATH) .
+            '?cp=p_check_update&amp;smt=db_update&amp;' .
+            kleeja_add_form_key_get('UPDATER_FORM_KEY') .
+            '">' .
+            $lang['DB_UPDATE_NOW'] .
+            '</a>',
+    ];
+}
+
 extract(runHook('default_admin_page', get_defined_vars()));
 
 //check upload_max_filesize

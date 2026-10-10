@@ -14,6 +14,14 @@ if (!defined('IN_COMMON')) {
 
 // drop older versions update support after 2 year of release or as appropriate in order to
 // make this file smaller in size.
+//
+// This file runs in two places: in this version (install/update.php, the updater and the database
+// update of the dashboard), and in the updater of the version that is being updated, which copies the
+// new files and runs this file with its own functions and database class still loaded.
+// So the functions here use only what the older versions have too: no BIND (the database class of
+// Kleeja 3 doesn't know it), the result of a query is given to fetch() and freeresult() (Kleeja 3 takes
+// the last result when it gets false), and nothing of includes/ that is new in this version.
+// A failed query of Kleeja 3 on MySQL throws an exception and stops its updater, with the site closed.
 $update_schema = [];
 
 $update_schema[9]['sql'] = [
@@ -63,59 +71,137 @@ $update_schema[10]['functions'] = [
         global $SQL, $dbprefix;
 
         $old_id = 'id="kj_meta_seo_home_meta_keywords"';
+        $names = [];
 
-        $result = $SQL->build([
-            'SELECT' => 'name, `option`',
-            'FROM' => "{$dbprefix}config",
-            'WHERE' => '`option` LIKE :old_id',
-            'BIND' => ['old_id' => '%' . $old_id . '%'],
-        ]);
+        if ($result = $SQL->query("SELECT name, `option` FROM `{$dbprefix}config`")) {
+            while ($row = $SQL->fetch($result)) {
+                //the name goes into the query below, the names of the settings are words, so the others are skipped
+                if (str_contains((string) $row['option'], $old_id) && preg_match('/^[a-z0-9_]+$/i', $row['name'])) {
+                    $names[] = $row['name'];
+                }
+            }
 
-        $fields = [];
-
-        while ($row = $SQL->fetch($result)) {
-            $fields[$row['name']] = str_replace($old_id, 'id="' . $row['name'] . '"', $row['option']);
+            $SQL->freeresult($result);
         }
 
-        $SQL->freeresult($result);
-
-        foreach ($fields as $name => $option) {
-            $SQL->build([
-                'UPDATE' => "{$dbprefix}config",
-                'SET' => '`option` = :option',
-                'WHERE' => 'name = :name',
-                'BIND' => ['option' => $option, 'name' => $name],
-            ]);
+        foreach ($names as $name) {
+            $SQL->query(
+                "UPDATE `{$dbprefix}config` SET `option` = REPLACE(`option`, '{$old_id}', 'id=\"{$name}\"')" .
+                    " WHERE name = '{$name}'",
+            );
         }
     },
-    //og_default is the new version of the default style, so the folder of the old one is deleted,
-    //and a site that uses it, or a style that depends on it, moves to og_default, or to bootstrap if it can't be downloaded
+    //the updater of Kleeja 3 doesn't update the styles folder, so the bootstrap style of this version is
+    //taken from the package that the updater keeps in the cache folder while it runs this file.
+    //the old files are kept, like an upload over them, the styles built on bootstrap may still load them
+    function () {
+        $folder = PATH . 'styles/bootstrap';
+
+        if (!class_exists('ZipArchive') || !is_dir($folder)) {
+            return;
+        }
+
+        $style_version = function (string|false $info): string {
+            return $info !== false && preg_match('/^\s*version\s*=\s*([0-9][0-9a-z.\-]*)/mi', $info, $m) ? $m[1] : '0';
+        };
+
+        $installed_version = $style_version(@file_get_contents("{$folder}/info.txt"));
+        $newest = null;
+
+        //cache/kleeja-<version>.zip, github puts its files in one folder, like kleeja-kleeja-0a1b2c3/
+        foreach (glob(PATH . 'cache/kleeja-*.zip') ?: [] as $archive) {
+            $zip = new ZipArchive();
+
+            if ($zip->open($archive) !== true) {
+                continue;
+            }
+
+            $prefix = explode('/', (string) $zip->getNameIndex(0))[0] . '/styles/bootstrap/';
+            $version = $style_version($zip->getFromName($prefix . 'info.txt'));
+            $zip->close();
+
+            if (version_compare($version, $newest['version'] ?? $installed_version, '>')) {
+                $newest = ['archive' => $archive, 'prefix' => $prefix, 'version' => $version];
+            }
+        }
+
+        if ($newest === null) {
+            return;
+        }
+
+        $zip = new ZipArchive();
+
+        if ($zip->open($newest['archive']) !== true) {
+            return;
+        }
+
+        $files = [];
+
+        for ($i = 0; $i < $zip->numFiles; $i++) {
+            $name = (string) $zip->getNameIndex($i);
+            $relative_path = substr($name, strlen($newest['prefix']));
+
+            if (
+                !str_starts_with($name, $newest['prefix']) ||
+                $relative_path === '' ||
+                str_ends_with($name, '/') ||
+                str_contains($relative_path, '..')
+            ) {
+                continue;
+            }
+
+            //the folder that has to be writable, the closest one that is there for a new folder
+            $target = "{$folder}/{$relative_path}";
+            $writable_path = file_exists($target) ? $target : dirname($target);
+
+            while (!file_exists($writable_path)) {
+                $writable_path = dirname($writable_path);
+            }
+
+            //one file that can't be written, and nothing is changed, half of a style is worse than the old one
+            if (!is_writable($writable_path)) {
+                $zip->close();
+
+                return;
+            }
+
+            $files[$i] = $target;
+        }
+
+        foreach ($files as $i => $target) {
+            if (!is_dir(dirname($target))) {
+                mkdir(dirname($target), defined('K_DIR_CHMOD') ? K_DIR_CHMOD : 0755, true);
+            }
+
+            file_put_contents($target, $zip->getFromIndex($i));
+        }
+
+        $zip->close();
+    },
+    //og_default is the new version of the default style, a site that uses it, or a style that depends on it,
+    //moves to og_default, or to bootstrap if it can't be downloaded, then the folder of the old one is deleted
     function () {
         global $SQL, $dbprefix;
 
         $styles_folder = PATH . 'styles';
         $og_default_folder = "{$styles_folder}/og_default";
 
-        if (is_dir("{$styles_folder}/default")) {
-            kleeja_unlink("{$styles_folder}/default");
-        }
-
-        $result = $SQL->build([
-            'SELECT' => 'name',
-            'FROM' => "{$dbprefix}config",
-            'WHERE' => "name IN ('style', 'style_depend_on') AND value = :old_style",
-            'BIND' => ['old_style' => 'default'],
-        ]);
-
-        $uses_default = $SQL->fetch($result) !== false;
-
-        $SQL->freeresult($result);
-
-        if (!$uses_default) {
+        if (
+            !($result = $SQL->query("SELECT value FROM `{$dbprefix}config` WHERE name IN ('style', 'style_depend_on')"))
+        ) {
+            //it isn't known whether the site uses it, so its folder stays
             return;
         }
 
-        if (!is_dir($og_default_folder) && class_exists('ZipArchive')) {
+        $uses_default = false;
+
+        while ($row = $SQL->fetch($result)) {
+            $uses_default = $uses_default || $row['value'] === 'default';
+        }
+
+        $SQL->freeresult($result);
+
+        if ($uses_default && !is_dir($og_default_folder) && class_exists('ZipArchive')) {
             //install/update.php doesn't load it
             if (!class_exists('FetchFile')) {
                 require_once PATH . 'includes/FetchFile.php';
@@ -151,15 +237,22 @@ $update_schema[10]['functions'] = [
             }
         }
 
-        $new_style = file_exists("{$og_default_folder}/info.txt") ? 'og_default' : 'bootstrap';
+        if ($uses_default) {
+            //neither of them depends on another style
+            $new_style = file_exists("{$og_default_folder}/info.txt") ? 'og_default' : 'bootstrap';
 
-        foreach (['style' => $new_style, 'style_depend_on' => ''] as $name => $value) {
-            $SQL->build([
-                'UPDATE' => "{$dbprefix}config",
-                'SET' => 'value = :value',
-                'WHERE' => 'name = :name',
-                'BIND' => ['value' => $value, 'name' => $name],
-            ]);
+            $switched =
+                $SQL->query("UPDATE `{$dbprefix}config` SET value = '{$new_style}' WHERE name = 'style'") &&
+                $SQL->query("UPDATE `{$dbprefix}config` SET value = '' WHERE name = 'style_depend_on'");
+
+            //the site would point to a style that is gone
+            if (!$switched) {
+                return;
+            }
+        }
+
+        if (is_dir("{$styles_folder}/default")) {
+            kleeja_unlink("{$styles_folder}/default");
         }
     },
 ];
