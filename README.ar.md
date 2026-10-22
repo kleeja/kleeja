@@ -19,7 +19,7 @@
 [سجل التغييرات](CHANGELOG.md) ·
 [الإبلاغ عن خلل](https://github.com/kleeja/kleeja/issues)
 
-<img src="https://raw.githubusercontent.com/kleeja/website/master/screenshot1.png" width="720" alt="صفحة الرفع في كليجا">
+<img src="https://raw.githubusercontent.com/kleeja/website/refs/heads/main/public/images/docs/ar/home_1.png" width="720" alt="صفحة الرفع في كليجا">
 
 </div>
 
@@ -40,7 +40,7 @@
 للاطلاع على [القائمة الكاملة للمزايا](https://github.com/kleeja/kleeja/wiki/Key-Features-&-Highlights-of-Kleeja)، يُرجى الرجوع إلى الويكي.
 
 <div align="center">
-<img src="https://raw.githubusercontent.com/kleeja/website/master/screenshot2.png" width="720" alt="صفحة مشاركة الملفات في كليجا">
+<img src="https://raw.githubusercontent.com/kleeja/website/refs/heads/main/public/images/docs/ar/dashboard_1.png" width="720" alt="صفحة مشاركة الملفات في كليجا">
 </div>
 
 ## المتطلبات

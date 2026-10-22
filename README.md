@@ -19,7 +19,7 @@ Self-hosted, PHP-powered, and trusted by webmasters since 2007.
 [Changelog](CHANGELOG.md) ·
 [Report a bug](https://github.com/kleeja/kleeja/issues)
 
-<img src="https://raw.githubusercontent.com/kleeja/website/master/screenshot1.png" width="720" alt="Kleeja upload page">
+<img src="https://raw.githubusercontent.com/kleeja/website/refs/heads/main/public/images/docs/en/home.png" width="720" alt="Kleeja upload page">
 
 </div>
 
@@ -40,7 +40,7 @@ Self-hosted, PHP-powered, and trusted by webmasters since 2007.
 See the [full feature list](https://github.com/kleeja/kleeja/wiki/Key-Features-&-Highlights-of-Kleeja) on the wiki.
 
 <div align="center">
-<img src="https://raw.githubusercontent.com/kleeja/website/master/screenshot2.png" width="720" alt="Kleeja file sharing page">
+<img src="https://raw.githubusercontent.com/kleeja/website/refs/heads/main/public/images/docs/en/dashboard_1.png" width="720" alt="Kleeja file sharing page">
 </div>
 
 ## Requirements
