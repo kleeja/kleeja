@@ -359,6 +359,7 @@ return [
     'ADM_TEAM_PULSE' => 'Recent activity',
     'ADM_TEAM_BY_YEAR' => 'Commits per year',
     'ADM_TEAM_BY_WEEK' => 'The last 12 months, week by week',
+    'ADM_TEAM_NO_RECENT' => 'No commits in the last 12 months.',
     'ADM_TEAM_LINES' => 'Lines added and removed',
     'ADM_TEAM_OTHERS' => 'Others',
     'ADM_TEAM_TOTAL' => 'Total',

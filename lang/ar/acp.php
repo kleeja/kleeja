@@ -361,6 +361,7 @@ return [
     'ADM_TEAM_PULSE' => 'النشاط الأخير',
     'ADM_TEAM_BY_YEAR' => 'الإيداعات في كل سنة',
     'ADM_TEAM_BY_WEEK' => 'آخر 12 شهرًا، أسبوعًا بأسبوع',
+    'ADM_TEAM_NO_RECENT' => 'لا إيداعات في آخر 12 شهرًا.',
     'ADM_TEAM_LINES' => 'الأسطر المضافة والمحذوفة',
     'ADM_TEAM_OTHERS' => 'آخرون',
     'ADM_TEAM_TOTAL' => 'المجموع',
