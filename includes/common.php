@@ -123,7 +123,7 @@ if (!is_bot() && PHP_SESSION_ACTIVE !== session_status() && !headers_sent()) {
 }
 
 //no enough data
-if ((empty($dbname) || empty($dbuser)) && $dbtype !== 'sqlite') {
+if ((empty($dbname) || empty($dbuser)) && isset($dbtype) && $dbtype !== 'sqlite') {
     header('Location: ./install/index.php');
 
     exit();
