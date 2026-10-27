@@ -1064,6 +1064,10 @@ h6 {
 }
 
 .kj-swatch-team-4 {
+    background: var(--kj-coral-300);
+}
+
+.kj-swatch-team-5 {
     background: var(--kj-navy-400);
 }
 
@@ -1073,10 +1077,6 @@ h6 {
 
 [data-bs-theme="dark"] .kj-swatch-team-3 {
     background: var(--kj-coral-700);
-}
-
-[data-bs-theme="dark"] .kj-swatch-team-4 {
-    background: var(--kj-navy-300);
 }
 
 /* ECharts anchors its SVG labels for left-to-right text; under dir="rtl" every anchor flips and

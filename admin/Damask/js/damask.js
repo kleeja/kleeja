@@ -556,15 +556,16 @@
     }
 
     // brand chart palette (kleeja.net/branding): coral first, then navy, lighter navy on dark surfaces.
-    // team: the four contributor slots, the last one for everyone else; any two of them can meet
-    // in a stacked column, so every pair stays apart for colour-blind readers too.
+    // team: one slot per contributor, the last one shared by everyone else when they outnumber the
+    // slots; any two of them can meet in a stacked column, so every pair stays apart for
+    // colour-blind readers too. Both modes need the same number of slots.
     function chartColors() {
         var dark = document.documentElement.getAttribute("data-bs-theme") === "dark";
 
         return dark
             ? {
                   series: ["#F45B69", "#BBC0C8"],
-                  team: ["#F45B69", "#FFFFFF", "#A63E47", "#BBC0C8"],
+                  team: ["#F45B69", "#FFFFFF", "#A63E47", "#FAB7BD", "#949CA8"],
                   stripe: "rgba(35, 53, 78, 0.6)",
                   grid: "#3C4C61",
                   axis: "#BBC0C8",
@@ -575,7 +576,7 @@
               }
             : {
                   series: ["#F45B69", "#0B1F3A"],
-                  team: ["#F45B69", "#0B1F3A", "#7F2F37", "#949CA8"],
+                  team: ["#F45B69", "#0B1F3A", "#7F2F37", "#FAB7BD", "#949CA8"],
                   stripe: "rgba(255, 255, 255, 0.6)",
                   grid: "#EDEEF0",
                   axis: "#546275",
@@ -896,9 +897,16 @@
         }
     }
 
-    // the three who lead the contributors list keep a colour of their own in every chart, in the
-    // same order as their cards; everyone after them shares the last slot
-    function teamGroups(stats, logins, othersLabel) {
+    function teamRecent(entry) {
+        return entry.weeks.slice(-52).reduce(function (sum, week) {
+            return sum + Math.max(0, parseInt(week.c, 10) || 0);
+        }, 0);
+    }
+
+    // every contributor keeps one colour of their own across the charts, in the same order as their
+    // cards. When they outnumber the slots, the named slots go in turn to the most commits of all
+    // time and of the last 52 weeks, so newcomers get one too; the rest share the last slot.
+    function teamGroups(stats, logins, othersLabel, slots) {
         var authors = (Array.isArray(stats) ? stats : []).filter(function (entry) {
             return (
                 entry && entry.author && entry.author.login && entry.author.type !== "Bot" && Array.isArray(entry.weeks)
@@ -914,12 +922,40 @@
             return place(a) - place(b) || (b.total || 0) - (a.total || 0);
         });
 
-        var groups = authors.slice(0, 3).map(function (entry, index) {
-            return { name: String(entry.author.login), slot: index, authors: [entry] };
-        });
+        var named = authors;
 
-        if (authors.length > 3) {
-            groups.push({ name: othersLabel, slot: 3, authors: authors.slice(3) });
+        if (authors.length > slots) {
+            var active = authors.slice().sort(function (a, b) {
+                return teamRecent(b) - teamRecent(a) || authors.indexOf(a) - authors.indexOf(b);
+            });
+
+            named = [];
+
+            for (var index = 0; named.length < slots - 1; index++) {
+                [authors[index], active[index]].forEach(function (entry) {
+                    if (named.length < slots - 1 && named.indexOf(entry) === -1) {
+                        named.push(entry);
+                    }
+                });
+            }
+        }
+
+        var groups = authors
+            .filter(function (entry) {
+                return named.indexOf(entry) !== -1;
+            })
+            .map(function (entry, index) {
+                return { name: String(entry.author.login), slot: index, authors: [entry] };
+            });
+
+        if (named.length < authors.length) {
+            groups.push({
+                name: othersLabel,
+                slot: slots - 1,
+                authors: authors.filter(function (entry) {
+                    return named.indexOf(entry) === -1;
+                }),
+            });
         }
 
         return groups;
@@ -962,19 +998,45 @@
         return group.weeks[start] ? group.weeks[start].c : 0;
     }
 
-    function teamLegend(root, groups) {
-        $$("[data-kj-team-legend]", root).forEach(function (list) {
-            list.innerHTML = "";
+    // a chart draws only the groups with something to show in it; values(group) gives a group's
+    // counts in that chart, as a list or as an object
+    function teamDrawn(groups, values) {
+        var drawn = { groups: [], values: [] };
 
-            groups.forEach(function (group) {
-                var item = document.createElement("li");
-                var name = document.createElement("bdi");
-
-                name.textContent = group.name;
-                item.appendChild(icon("kj-swatch-team-" + (group.slot + 1)));
-                item.appendChild(name);
-                list.appendChild(item);
+        groups.forEach(function (group) {
+            var counts = values(group);
+            var shown = Object.keys(counts).some(function (key) {
+                return counts[key] > 0;
             });
+
+            if (shown) {
+                drawn.groups.push(group);
+                drawn.values.push(counts);
+            }
+        });
+
+        return drawn;
+    }
+
+    // the legend in the chart's card, listing the groups drawn in that chart
+    function teamLegend(element, groups) {
+        var card = element.closest(".card");
+        var list = card ? $("[data-kj-team-legend]", card) : null;
+
+        if (!list) {
+            return;
+        }
+
+        list.innerHTML = "";
+
+        groups.forEach(function (group) {
+            var item = document.createElement("li");
+            var name = document.createElement("bdi");
+
+            name.textContent = group.name;
+            item.appendChild(icon("kj-swatch-team-" + (group.slot + 1)));
+            item.appendChild(name);
+            list.appendChild(item);
         });
     }
 
@@ -1127,7 +1189,7 @@
             years.push(String(year));
         }
 
-        var values = groups.map(function (group) {
+        var drawn = teamDrawn(groups, function (group) {
             var perYear = years.map(function () {
                 return 0;
             });
@@ -1143,11 +1205,12 @@
             return perYear;
         });
         var totals = years.map(function (year, index) {
-            return values.reduce(function (sum, perYear) {
+            return drawn.values.reduce(function (sum, perYear) {
                 return sum + perYear[index];
             }, 0);
         });
 
+        teamLegend(element, drawn.groups);
         chartReady(element);
         mountChart(element, function (colors, rtl) {
             return {
@@ -1165,7 +1228,7 @@
                 }),
                 xAxis: categoryAxis(colors, years, rtl),
                 yAxis: countAxis(colors, rtl),
-                series: stackedColumns(groups, values, colors, true).concat({
+                series: stackedColumns(drawn.groups, drawn.values, colors, true).concat({
                     // the totals ride on an invisible point at the top of each column
                     name: labels.kjLabelTotal,
                     type: "scatter",
@@ -1196,12 +1259,18 @@
         var monthOf = function (index) {
             return new Date(recent[index] * 1000).getUTCMonth();
         };
-        var values = groups.map(function (group) {
+        var drawn = teamDrawn(groups, function (group) {
             return recent.map(function (start) {
                 return teamCommits(group, start);
             });
         });
 
+        if (!drawn.groups.length) {
+            chartNotice(element, labels.kjLabelNoRecent);
+            return;
+        }
+
+        teamLegend(element, drawn.groups);
         chartReady(element);
         mountChart(element, function (colors, rtl) {
             return {
@@ -1227,7 +1296,7 @@
                 }),
                 yAxis: countAxis(colors, rtl),
                 // on a phone a week is a few pixels wide, too thin to give two of them to the gap
-                series: stackedColumns(groups, values, colors, element.clientWidth / recent.length >= 12),
+                series: stackedColumns(drawn.groups, drawn.values, colors, element.clientWidth / recent.length >= 12),
             };
         });
     }
@@ -1235,10 +1304,10 @@
     // lines added grow toward the end of the line, lines removed toward its start, both from
     // zero; both wear the contributor's colour and the removed side is striped, as a lighter
     // tint could pass for another contributor's colour
-    function teamLinesChart(element, groups, labels, count) {
+    function teamLinesChart(element, allGroups, labels, count) {
         var compact = numberFormat({ notation: "compact", maximumFractionDigits: 1 });
         var encode = window.echarts.format.encodeHTML;
-        var sums = groups.map(function (group) {
+        var drawn = teamDrawn(allGroups, function (group) {
             var sum = { a: 0, d: 0 };
 
             Object.keys(group.weeks).forEach(function (start) {
@@ -1248,6 +1317,13 @@
 
             return sum;
         });
+        var groups = drawn.groups;
+        var sums = drawn.values;
+
+        if (!groups.length) {
+            chartNotice(element, labels.kjLabelError);
+            return;
+        }
 
         chartReady(element);
         mountChart(element, function (colors, rtl) {
@@ -1387,7 +1463,7 @@
 
         Promise.all([githubJSON(labels.kjTeamActivity + "contributors"), ranking])
             .then(function (results) {
-                var groups = teamGroups(results[0], results[1] || [], labels.kjLabelOthers);
+                var groups = teamGroups(results[0], results[1] || [], labels.kjLabelOthers, chartColors().team.length);
 
                 if (!groups.length) {
                     throw new Error("GitHub");
@@ -1395,7 +1471,6 @@
 
                 var weeks = teamHistory(groups);
 
-                teamLegend(root, groups);
                 teamYearsChart(charts.years, groups, weeks, labels, count);
                 teamWeeksChart(charts.weeks, groups, weeks, labels, count);
                 teamLinesChart(charts.lines, groups, labels, count);
