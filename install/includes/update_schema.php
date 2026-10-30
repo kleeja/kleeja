@@ -255,4 +255,11 @@ $update_schema[10]['functions'] = [
             kleeja_unlink("{$styles_folder}/default");
         }
     },
+    //the updater of Kleeja 3 doesn't reset OPcache, with opcache.validate_timestamps off the old code stays in it
+    //and runs with the new database until PHP restarts, so it is reset here, after all the files are changed
+    function () {
+        if (function_exists('opcache_reset') && !ini_get('opcache.restrict_api')) {
+            opcache_reset();
+        }
+    },
 ];
