@@ -1,0 +1,31 @@
+<section class="kj-help-block is-{help_section.type}">
+    <IF NAME="help_section.title">
+    <h4 class="kj-help-block-title"><IF NAME="help_section.icon"><i class="fa-solid fa-{help_section.icon}" aria-hidden="true"></i></IF><span>{help_section.title}</span></h4>
+    </IF>
+    <IF NAME="help_section.type == steps">
+    <ol class="kj-help-steps">
+        <LOOP NAME="help_section_items">
+        <li>{{text}}</li>
+        </LOOP>
+    </ol>
+    <ELSEIF NAME="help_section.type == faq">
+    <div class="kj-help-faq">
+        <LOOP NAME="help_section_items">
+        <details>
+            <summary>{{q}}</summary>
+            <div class="kj-help-answer">{{a}}</div>
+        </details>
+        </LOOP>
+    </div>
+    <ELSEIF NAME="help_section.type == code">
+    <pre class="kj-help-code" dir="ltr"><code>{help_section.code}</code></pre>
+    <ELSEIF NAME="help_section.type == text">
+    <div class="kj-help-text">{help_section.text}</div>
+    <ELSE>
+    <ul class="kj-help-list">
+        <LOOP NAME="help_section_items">
+        <li>{{text}}</li>
+        </LOOP>
+    </ul>
+    </IF>
+</section>

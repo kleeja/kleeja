@@ -1,0 +1,118 @@
+<div class="kj-page-header">
+    <div>
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="./">{lang.R_CPINDEX}</a></li>
+                <li class="breadcrumb-item active" aria-current="page">{lang.R_IMG_CTRL}</li>
+            </ol>
+        </nav>
+        <h1 class="kj-page-title">{lang.R_IMG_CTRL}</h1>
+    </div>
+    <div class="kj-page-actions">
+        <IF NAME="no_results"><ELSE><span class="kj-badge is-neutral" dir="ltr">{current_page} / {total_pages}</span></IF>
+    </div>
+</div>
+
+<IF NAME="config.thumbs_imgs"><ELSE>
+<div class="alert alert-warning d-flex align-items-start gap-2" role="alert">
+    <i class="fa-solid fa-triangle-exclamation kj-alert-icon" aria-hidden="true"></i>
+    <div>{lang.THUMB_DIS_LONGTIME}</div>
+</div>
+</IF>
+
+<form method="post" name="imgform" action="{action}" id="imgs_form">
+
+<IF NAME="no_results">
+
+<div class="card">
+    <div class="card-body text-center py-5">
+        <span class="kj-icon-tile is-lg is-secondary mb-3"><i class="fa-solid fa-images" aria-hidden="true"></i></span>
+        <p class="text-body-secondary mb-0">{lang.NO_RESULT_USE_SYNC}</p>
+    </div>
+</div>
+
+<ELSE>
+
+<div class="card mb-3">
+    <div class="card-body py-2 kj-bulkbar">
+        <div class="form-check">
+            <input class="form-check-input" type="checkbox" id="kjCheckAll" data-kj-check-all="del">
+            <label class="form-check-label" for="kjCheckAll">{lang.CHECK_ALL}</label>
+        </div>
+        <div class="d-flex flex-wrap align-items-center gap-2 ms-auto">
+            <div class="d-none" data-kj-search-one="{action_search}">
+                <select class="form-select form-select-sm" aria-label="{lang.SEARCH_SUBMIT}">
+                    <option value="0">{lang.SEARCH_SUBMIT}…</option>
+                    <option value="1">{lang.SEARCH4FILES_BYIP}</option>
+                    <option value="2">{lang.SEARCH4FILES_BYUSER}</option>
+                </select>
+            </div>
+            <button type="submit" class="btn btn-sm btn-outline-danger" name="submit" value="1" data-kj-bulk="del" data-kj-confirm disabled>
+                <i class="fa-solid fa-trash-can" aria-hidden="true"></i><span>{lang.DEL_SELECTED} <span data-kj-count></span></span>
+            </button>
+        </div>
+    </div>
+</div>
+
+<div class="row row-cols-2 row-cols-md-3 row-cols-xl-4 row-cols-xxl-5 g-3">
+    <LOOP NAME="arr">
+    <div class="col">
+        <div class="card kj-thumb h-100" data-kj-row>
+            <div class="kj-thumb-media ratio ratio-4x3">
+                <a href="{{href}}" target="_blank" rel="noopener" data-bs-toggle="modal" data-bs-target="#kjImagePreview" data-kj-preview-title="{{name}}">
+                    <img src="{{thumb_link}}" alt="{{name}}" loading="lazy" onerror="this.onerror=null;this.src='{STYLE_PATH_ADMIN}images/image-not-found.png';">
+                </a>
+            </div>
+            <div class="form-check kj-thumb-check">
+                <input class="form-check-input" type="checkbox" id="del_{{id}}" name="del_{{id}}" value="{{id}}" rel="_del" data-kj-check="del" aria-label="{lang.DELETE}: {{name}}">
+            </div>
+            <div class="card-body p-2">
+                <div class="small fw-semibold text-truncate" title="{{name}}">{{name}}</div>
+                <div class="d-flex justify-content-between gap-2 small text-body-secondary">
+                    <span dir="ltr">{{size}}</span>
+                    <span title="{lang.FILEUPS}"><i class="fa-solid fa-download" aria-hidden="true"></i> {{ups}}</span>
+                </div>
+            </div>
+            <template data-kj-meta>
+                <dt>{lang.FILENAME}</dt><dd>{{name}}</dd>
+                <dt>{lang.FILESIZE}</dt><dd>{{size}}</dd>
+                <dt>{lang.FILEUPS}</dt><dd>{{ups}}</dd>
+                <dt>{lang.FILEDATE}</dt><dd>{{time}}</dd>
+                <dt>{lang.BY}</dt><dd>{{user}}</dd>
+                <dt>{lang.IP}</dt><dd dir="ltr" style="text-align: start">{{ip}}</dd>
+            </template>
+            <span class="d-none" id="user_{{id}}">{{user}}</span>
+            <span class="d-none" id="ip_{{id}}">{{ip}}</span>
+        </div>
+    </div>
+    </LOOP>
+</div>
+
+<div class="kj-pager mt-4">{page_nums}</div>
+
+</IF>
+
+{H_FORM_KEYS}
+</form>
+
+<!-- image preview -->
+<div class="modal fade" id="kjImagePreview" tabindex="-1" aria-labelledby="kjImagePreviewLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title text-truncate" id="kjImagePreviewLabel" data-kj-preview-title></h2>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="{lang.CLOSE}"></button>
+            </div>
+            <div class="modal-body">
+                <img class="kj-preview-img mb-3" alt="" data-kj-preview-img>
+                <dl class="kj-meta" data-kj-preview-meta></dl>
+            </div>
+            <div class="modal-footer">
+                <a class="btn btn-outline-secondary" href="#" target="_blank" rel="noopener" data-kj-preview-open>
+                    <i class="fa-solid fa-arrow-up-right-from-square" aria-hidden="true"></i><span>{lang.VIEW}</span>
+                </a>
+                <button type="button" class="btn btn-primary" data-bs-dismiss="modal">{lang.CLOSE}</button>
+            </div>
+        </div>
+    </div>
+</div>

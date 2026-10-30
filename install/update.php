@@ -73,28 +73,7 @@ if (!sizeof($available_db_updates)) {
         $SQL->query("INSERT INTO `{$dbprefix}config` (`name`, `value`) VALUES ('db_version', '')");
     }
 
-    foreach ($available_db_updates as $db_update_version) {
-        foreach ($update_schema[$db_update_version]['sql'] ?? [] as $name => $sql_content) {
-            if (!$SQL->query($sql_content) && !inst_update_done_before($SQL->get_error())) {
-                $update_errors[] = $db_update_version . ' - ' . $name . ' : ' . implode(':', $SQL->get_error());
-            }
-        }
-
-        //stop here, so this version is applied again on the next try
-        if (sizeof($update_errors)) {
-            break;
-        }
-
-        foreach ($update_schema[$db_update_version]['functions'] ?? [] as $n) {
-            if (is_callable($n)) {
-                $n();
-            }
-        }
-
-        $SQL->query("UPDATE `{$dbprefix}config` SET `value` = :version WHERE `name` = 'db_version'", [
-            'version' => $db_update_version,
-        ]);
-    }
+    $update_errors = kleeja_run_db_updates($update_schema, $current_db_version);
 
     delete_cache('', all: true);
     echo gettpl('update_end.html');

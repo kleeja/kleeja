@@ -84,8 +84,12 @@ function get_ban(): void
                 $replace_it = str_replace('*', '([0-9]{1,3})', $banned_item);
                 $replace_it = str_replace('.', '\.', $replace_it);
 
-                $is_banned = $ip == $banned_item || @preg_match('/' . preg_quote($replace_it, '/') . '/i', $ip);
-            } elseif (!empty($username) && $banned_item == $username) {
+                $is_banned = $ip === $banned_item || @preg_match('/' . preg_quote($replace_it, '/') . '/i', $ip);
+            } elseif (
+                //both are saved encoded, but not always the same times (older lists encoded every item again at each change)
+                !empty($username) &&
+                kleeja_html_decode($banned_item) === kleeja_html_decode($username)
+            ) {
                 $is_banned = true;
             }
 
@@ -97,7 +101,7 @@ function get_ban(): void
                 //
                 if (
                     (defined('IN_DOWNLOAD') && (ig('img') || ig('thmb') || ig('thmbf') || ig('imgf'))) ||
-                    g('go', 'str', '') == 'queue'
+                    g('go', 'str', '') === 'queue'
                 ) {
                     @$SQL->close();
                     $fullname = 'images/banned_user.jpg';
@@ -189,18 +193,18 @@ function _sm_mk_utf8(string $text): string
 }
 
 /**
- * Send an email message
- * @param  string $to
- * @param  string $body
- * @param  string $subject
- * @param  string $fromAddress
- * @param  string $fromName
- * @param  string $bcc
+ * Send an email message, the HTML of includes/mail_template.html with a plain text copy
+ * @param  string       $to
+ * @param  string|array $body        the blocks of kleeja_mail_template(), or a plain text
+ * @param  string       $subject
+ * @param  string       $fromAddress
+ * @param  string       $fromName
+ * @param  string       $bcc
  * @return bool
  */
 function send_mail(
     string $to,
-    string $body,
+    string|array $body,
     string $subject,
     string $fromAddress,
     string $fromName,
@@ -208,6 +212,15 @@ function send_mail(
 ): bool {
     $sending_mail_handled = false;
     $mail_sent = false;
+
+    //the headers are plain text, but the names come from the database encoded, like the site name
+    $subject = kleeja_html_decode($subject);
+    $fromName = kleeja_html_decode($fromName);
+
+    //a plain text is one text block, and the hooks get $body as a plain text, like before, and $html_body
+    $blocks = is_array($body) ? $body : [['type' => 'text', 'content' => $body]];
+    $html_body = kleeja_mail_template($blocks);
+    $body = kleeja_mail_text($blocks);
 
     extract(runHook('kleeja_begin_send_mail_func', get_defined_vars()));
 
@@ -217,6 +230,7 @@ function send_mail(
     }
 
     $eol = "\r\n";
+    $boundary = 'kleeja-' . bin2hex(random_bytes(16));
     $headers = '';
     $headers .=
         'From: ' .
@@ -226,8 +240,7 @@ function send_mail(
         '>' .
         $eol;
     $headers .= 'MIME-Version: 1.0' . $eol;
-    $headers .= 'Content-transfer-encoding: 8bit' . $eol; // 7bit
-    $headers .= 'Content-Type: text/plain; charset=utf-8' . $eol; // format=flowed
+    $headers .= 'Content-Type: multipart/alternative; boundary="' . $boundary . '"' . $eol;
     $headers .= 'X-Mailer: Kleeja Mailer' . $eol;
     $headers .=
         'Reply-To: ' .
@@ -243,13 +256,36 @@ function send_mail(
 
     extract(runHook('kleeja_send_mail', get_defined_vars()));
 
-    $body = str_replace(["\n", "\0"], ["\r\n", ''], $body);
+    //the plain text goes first, a mail app shows the last part it can read
+    $message = '';
 
-    // Change the line breaks used in the headers according to OS
-    if (strtoupper(substr(PHP_OS, 0, 3)) == 'MAC') {
+    foreach (['text/plain' => $body, 'text/html' => $html_body] as $content_type => $part) {
+        $part = preg_replace('#\r\n|\r|\n#', $eol, str_replace("\0", '', $part));
+
+        $message .=
+            '--' .
+            $boundary .
+            $eol .
+            'Content-Type: ' .
+            $content_type .
+            '; charset=utf-8' .
+            $eol .
+            'Content-Transfer-Encoding: quoted-printable' .
+            $eol .
+            $eol .
+            quoted_printable_encode($part) .
+            $eol;
+    }
+
+    $message .= '--' . $boundary . '--' . $eol;
+
+    // Change the line breaks used in the headers and the message according to OS
+    if (strtoupper(substr(PHP_OS, 0, 3)) === 'MAC') {
         $headers = str_replace("\r\n", "\r", $headers);
-    } elseif (strtoupper(substr(PHP_OS, 0, 3)) != 'WIN') {
+        $message = str_replace("\r\n", "\r", $message);
+    } elseif (strtoupper(substr(PHP_OS, 0, 3)) !== 'WIN') {
         $headers = str_replace("\r\n", "\n", $headers);
+        $message = str_replace("\r\n", "\n", $message);
     }
 
     extract(runHook('kleeja_send_mail_handle', get_defined_vars()));
@@ -261,11 +297,126 @@ function send_mail(
     $mail_sent = @mail(
         trim(preg_replace('#[\n\r]+#s', '', $to)),
         _sm_mk_utf8(trim(preg_replace('#[\n\r]+#s', '', $subject))),
-        $body,
+        $message,
         $headers,
     );
 
     return $mail_sent;
+}
+
+/**
+ * The blocks of an email that can be sent, see kleeja_mail_template()
+ *
+ * A block of another type, or one with an empty text, is skipped.
+ * @param  array $blocks
+ * @return array
+ */
+function kleeja_mail_blocks(array $blocks): array
+{
+    $mail_blocks = [];
+
+    foreach ($blocks as $block) {
+        $type = $block['type'] ?? '';
+
+        if ($type === 'text' || $type === 'alert') {
+            $content = trim((string) ($block['content'] ?? ''));
+
+            if ($content === '') {
+                continue;
+            }
+
+            $mail_block = ['type' => $type, 'content' => $content];
+
+            if ($type === 'alert') {
+                $level = $block['level'] ?? 'info';
+                $mail_block['level'] = in_array($level, ['info', 'success', 'warning', 'error'], true)
+                    ? $level
+                    : 'info';
+            }
+
+            $mail_blocks[] = $mail_block;
+        } elseif ($type === 'button') {
+            $link = trim((string) ($block['link'] ?? ''));
+            $label = trim((string) ($block['label'] ?? ''));
+
+            if ($link === '' || $label === '') {
+                continue;
+            }
+
+            //a link without a scheme, like example.com, is a website
+            if (!preg_match('#^[a-z][a-z0-9+.-]*:#i', $link)) {
+                $link = 'https://' . ltrim($link, '/');
+            }
+
+            //no javascript: or data: links
+            if (!preg_match('#^(https?|mailto):#i', $link)) {
+                continue;
+            }
+
+            $mail_blocks[] = ['type' => 'button', 'link' => $link, 'label' => $label];
+        }
+    }
+
+    return $mail_blocks;
+}
+
+/**
+ * Render the HTML of an email with includes/mail_template.html, from a list of blocks
+ *
+ *     ['type' => 'text', 'content' => 'Hello']
+ *     ['type' => 'button', 'link' => 'https://example.com', 'label' => 'Visit']
+ *     ['type' => 'alert', 'content' => 'Careful', 'level' => 'warning']   info (the default), success, warning, error
+ *
+ * The texts are printed as text, not HTML, and their line breaks are kept.
+ * @param  array  $blocks
+ * @return string
+ */
+function kleeja_mail_template(array $blocks): string
+{
+    global $tpl;
+
+    $mail_blocks = [];
+
+    foreach (kleeja_mail_blocks($blocks) as $block) {
+        //the texts may be HTML encoded already, once or twice as Kleeja saves them, so they are decoded first,
+        //and the other entities of the language texts, like &raquo;, are kept
+        $block = array_map(
+            fn($value) => htmlspecialchars(kleeja_html_decode($value), ENT_QUOTES, 'UTF-8', false),
+            $block,
+        );
+
+        if (isset($block['content'])) {
+            $block['content'] = nl2br($block['content']);
+        }
+
+        $mail_blocks[] = $block;
+    }
+
+    $template_name = 'mail_template';
+    $template_path = PATH . 'includes/';
+
+    extract(runHook('kleeja_mail_template_func', get_defined_vars()));
+
+    $tpl->assign('mail_blocks', $mail_blocks);
+
+    return $tpl->display($template_name, $template_path);
+}
+
+/**
+ * The plain text of an email, from the blocks of kleeja_mail_template()
+ * @param  array  $blocks
+ * @return string
+ */
+function kleeja_mail_text(array $blocks): string
+{
+    $texts = [];
+
+    foreach (kleeja_mail_blocks($blocks) as $block) {
+        $text = $block['type'] === 'button' ? $block['label'] . ': ' . $block['link'] : $block['content'];
+        $texts[] = html_entity_decode(kleeja_html_decode($text), ENT_QUOTES, 'UTF-8');
+    }
+
+    return implode("\n\n", $texts);
 }
 
 /**
@@ -277,7 +428,8 @@ function send_mail(
 function delete_cache(string|array $name, bool $all = false): bool
 {
     //Those files are exceptions and not for deletion
-    $exceptions = ['.htaccess', 'index.html', 'php.ini', 'web.config'];
+    //backup.zip is the backup of the last update, it is kept until the next update
+    $exceptions = ['.htaccess', 'index.html', 'php.ini', 'web.config', 'backup.zip'];
 
     //ignore kleeja_log in dev stage.
     if (defined('DEV_STAGE')) {
@@ -302,7 +454,7 @@ function delete_cache(string|array $name, bool $all = false): bool
 
         if ($dh = @opendir($path_to_cache)) {
             while (($file = @readdir($dh)) !== false) {
-                if ($file != '.' && $file != '..' && !in_array($file, $exceptions)) {
+                if ($file !== '.' && $file !== '..' && !in_array($file, $exceptions)) {
                     kleeja_unlink($path_to_cache . '/' . $file, cache_file: true);
                 }
             }
@@ -456,7 +608,6 @@ function get_mime_for_header(string $ext): string
         'lzh' => 'application/octet-stream',
         'm13' => 'application/x-msmediaview',
         'm14' => 'application/x-msmediaview',
-        'm3u' => 'audio/x-mpegurl',
         'man' => 'application/x-troff-man',
         'mdb' => 'application/x-msaccess',
         'me' => 'application/x-troff-me',
@@ -618,7 +769,7 @@ function get_lang(string $name, string $folder = ''): bool
 
     $name = str_replace('..', '', $name);
 
-    if ($folder != '') {
+    if ($folder !== '') {
         $folder = str_replace(['..', '/'], '', $folder);
         $name = $folder . '/' . $name;
     }
@@ -659,8 +810,9 @@ function get_olang(string $name): bool
     if (is_null($olang) || !is_array($olang)) {
         $olang = [];
     }
-    $lang_to_add = [];
     if (!($lang_to_add = cache()->get('data_lang' . $name))) {
+        $lang_to_add = [];
+
         $query = [
             'SELECT' => 'l.word, l.trans',
             'FROM' => "{$dbprefix}lang l",
@@ -746,11 +898,11 @@ function add_config(
         return true;
     }
 
-    if ($html != '' && $type == '0') {
+    if ($html !== '' && $type === '0') {
         $type = 'other';
     }
 
-    if ($type == 'groups') {
+    if ($type === 'groups') {
         //add this option to all groups
         $group_ids = array_keys($d_groups);
 
@@ -845,10 +997,10 @@ function update_config(string $name, string $value, bool $escape = true, int $gr
     //what if this config is a group-configs related ?
     $group_id_sql = '';
 
-    if (array_key_exists($name, $d_groups[$userinfo['group_id']]['configs']) && $group != false) {
+    if (array_key_exists($name, $d_groups[$userinfo['group_id']]['configs']) && $group !== 0) {
         $table = "{$dbprefix}groups_data";
         $group_id_sql = ' AND group_id = :group_id';
-        $bind['group_id'] = $group == -1 ? $userinfo['group_id'] : $group;
+        $bind['group_id'] = $group === -1 ? $userinfo['group_id'] : $group;
     }
 
     $update_query = [
@@ -863,7 +1015,7 @@ function update_config(string $name, string $value, bool $escape = true, int $gr
     $SQL->build($update_query);
 
     if ($SQL->affected()) {
-        if ($table == "{$dbprefix}groups_data") {
+        if ($table === "{$dbprefix}groups_data") {
             $d_groups[$userinfo['group_id']]['configs'][$name] = $value;
             delete_cache('data_groups');
 
@@ -877,6 +1029,67 @@ function update_config(string $name, string $value, bool $escape = true, int $gr
     }
 
     return false;
+}
+
+/**
+ * run the database updates that are newer than the current db version, in order,
+ * it stops at the first failed update and keeps db_version before it, so it runs again on the next try
+ *
+ * @param  array $update_schema      [db version => ['sql' => [name => query], 'functions' => [callables]]]
+ * @param  int   $current_db_version
+ * @return array the errors, empty if all the updates are done
+ */
+function kleeja_run_db_updates(array $update_schema, int $current_db_version): array
+{
+    global $SQL, $dbprefix;
+
+    //the failed queries are collected below, not shown in the error page
+    if (!defined('SQL_NO_ERRORS')) {
+        define('SQL_NO_ERRORS', true);
+    }
+
+    $available_db_updates = array_filter(array_keys($update_schema), function (int $v) use ($current_db_version): bool {
+        return $v > $current_db_version;
+    });
+
+    sort($available_db_updates);
+
+    //an update that was applied before, but its version was not saved, is not an error
+    $done_before = function (array $error, string $sql_content): bool {
+        //MySQL: 1060 duplicate column, 1061 duplicate key, 1062 duplicate entry, 1091 dropped column or key
+        return in_array((int) ($error[0] ?? 0), [1060, 1061, 1062, 1091], true) ||
+            preg_match('/duplicate|already exists|UNIQUE constraint failed/i', (string) ($error[1] ?? '')) === 1 ||
+            //SQLite: the column of a DROP COLUMN is gone already
+            (preg_match('/\bDROP\s+COLUMN\b/i', $sql_content) === 1 &&
+                str_contains((string) ($error[1] ?? ''), 'no such column'));
+    };
+
+    $errors = [];
+
+    foreach ($available_db_updates as $db_update_version) {
+        foreach ($update_schema[$db_update_version]['sql'] ?? [] as $name => $sql_content) {
+            if (!$SQL->query($sql_content) && !$done_before($SQL->get_error(), $sql_content)) {
+                $errors[] = $db_update_version . ' - ' . $name . ' : ' . implode(':', $SQL->get_error());
+            }
+        }
+
+        //stop here, so this version is applied again on the next try
+        if (sizeof($errors)) {
+            break;
+        }
+
+        foreach ($update_schema[$db_update_version]['functions'] ?? [] as $n) {
+            if (is_callable($n)) {
+                $n();
+            }
+        }
+
+        $SQL->query("UPDATE `{$dbprefix}config` SET `value` = :version WHERE `name` = 'db_version'", [
+            'version' => $db_update_version,
+        ]);
+    }
+
+    return $errors;
 }
 
 // Delete config
@@ -1077,7 +1290,7 @@ function klj_clean_old_files(int $from = 0): void
 
         $num_of_files_to_delete = $SQL->num_rows($result);
 
-        if ($num_of_files_to_delete == 0) {
+        if ($num_of_files_to_delete === 0) {
             //update $stat_last_f_del !!
             $update_query = [
                 'UPDATE' => "{$dbprefix}stats",
@@ -1210,7 +1423,7 @@ function klj_clean_old(string $table, string $for = 'all'): void
         'LIMIT' => '30',
     ];
 
-    if ($for != 'all') {
+    if ($for !== 'all') {
         $query['WHERE'] = 'f.time < :time';
         $query['BIND'] = ['time' => $days];
     }
@@ -1220,8 +1433,8 @@ function klj_clean_old(string $table, string $for = 'all'): void
     $result = $SQL->build($query);
     $num_to_delete = $SQL->num_rows($result);
 
-    if ($num_to_delete == 0) {
-        $t = $table == 'call' ? 'calls' : $table;
+    if ($num_to_delete === 0) {
+        $t = $table === 'call' ? 'calls' : $table;
         update_config('queue', preg_match('/:del_' . $for . $t . ':/i', '', $config['queue']));
         $SQL->freeresult($result);
 
@@ -1289,14 +1502,14 @@ function kleeja_check_captcha(): bool
 {
     global $config;
 
-    if ((int) $config['enable_captcha'] == 0 && !defined('IN_REAL_INDEX') && !defined('IN_ADMIN')) {
+    if ((int) $config['enable_captcha'] === 0 && !defined('IN_REAL_INDEX') && !defined('IN_ADMIN')) {
         return true;
     }
 
     $return = false;
 
     if (!empty($_SESSION['klj_sec_code']) && ip('kleeja_code_answer')) {
-        if ($_SESSION['klj_sec_code'] == trim(p('kleeja_code_answer'))) {
+        if ($_SESSION['klj_sec_code'] === trim(p('kleeja_code_answer'))) {
             unset($_SESSION['klj_sec_code']);
             $return = true;
         }
@@ -1396,7 +1609,7 @@ function user_can(string $acl_name, int $group_id = 0): bool
 {
     global $d_groups, $userinfo;
 
-    if ($group_id == 0) {
+    if ($group_id === 0) {
         $group_id = $userinfo['group_id'];
     }
 
@@ -1417,22 +1630,22 @@ function ip(string $name): bool
 function g(string $name, string $type = 'str', string $default = ''): string|int
 {
     if (isset($_GET[$name]) && is_string($_GET[$name])) {
-        return $type == 'str' ? htmlspecialchars($_GET[$name], ENT_QUOTES) : intval($_GET[$name]);
+        return $type === 'str' ? htmlspecialchars($_GET[$name], ENT_QUOTES) : intval($_GET[$name]);
     }
 
-    return $type == 'str' ? htmlspecialchars($default, ENT_QUOTES) : intval($default);
+    return $type === 'str' ? htmlspecialchars($default, ENT_QUOTES) : intval($default);
 }
 
 //an array given instead of a single value (name[]=...) is treated as not sent, so $default is returned
 function p(string $name, string $type = 'str', string $default = ''): string|int
 {
     if (isset($_POST[$name]) && is_string($_POST[$name])) {
-        return $type == 'str'
+        return $type === 'str'
             ? str_replace(["\r\n", "\r", "\0"], ["\n", "\n", ''], htmlspecialchars(trim($_POST[$name]), ENT_QUOTES))
             : intval($_POST[$name]);
     }
 
-    return $type == 'str' ? htmlspecialchars($default) : intval($default);
+    return $type === 'str' ? htmlspecialchars($default) : intval($default);
 }
 
 /**
@@ -1445,6 +1658,38 @@ function p(string $name, string $type = 'str', string $default = ''): string|int
 function kleeja_html_encode(?string $text): string
 {
     return htmlspecialchars($text ?? '', ENT_QUOTES);
+}
+
+/**
+ * the text as it was typed, from a text that is HTML encoded once or more.
+ * p() encodes what it reads, and the text is encoded again when it is saved, so some texts
+ * are kept encoded twice in the database and others once. It decodes until nothing is left to decode
+ *
+ * @param  string|null $text
+ * @return string
+ */
+function kleeja_html_decode(?string $text): string
+{
+    $text ??= '';
+
+    //every decoding makes the text shorter, so it ends
+    while (($decoded = htmlspecialchars_decode($text, ENT_QUOTES)) !== $text) {
+        $text = $decoded;
+    }
+
+    return $text;
+}
+
+/**
+ * a text from the database, encoded once to be printed in HTML, whatever times it was encoded when it was saved.
+ * the database is not changed, it is fixed when it is shown
+ *
+ * @param  string|null $text
+ * @return string
+ */
+function kleeja_html_display(?string $text): string
+{
+    return kleeja_html_encode(kleeja_html_decode($text));
 }
 
 /**

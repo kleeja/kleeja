@@ -34,7 +34,7 @@ $plugin_delete_folder_link = $action . '&amp;case=dfolder&amp;' . $GET_FORM_KEY 
 //check _GET Csrf token
 if (!empty($case) && in_array($case, ['install', 'uninstall', 'enable', 'disable', 'download', 'dfolder'])) {
     if (!kleeja_check_form_key_get('adm_plugins_get')) {
-        header('HTTP/1.0 401 Unauthorized');
+        http_response_code(401);
         kleeja_admin_err($lang['INVALID_GET_KEY']);
     }
 }
@@ -42,7 +42,7 @@ if (!empty($case) && in_array($case, ['install', 'uninstall', 'enable', 'disable
 //check _POST Csrf token
 if (ip('newplugin')) {
     if (!kleeja_check_form_key('adm_plugins')) {
-        header('HTTP/1.0 401 Unauthorized');
+        http_response_code(401);
         kleeja_admin_err($lang['INVALID_FORM_KEY'], title: $lang['ERROR'], redirect: $action);
     }
 
@@ -70,7 +70,7 @@ switch ($case):
                 continue;
             }
 
-            if ($case == 'check' && $row['plg_disabled'] == 1) {
+            if ($case === 'check' && (int) $row['plg_disabled'] === 1) {
                 continue;
             }
 
@@ -138,8 +138,8 @@ switch ($case):
         }
         @closedir($dh);
 
-        $no_plugins = sizeof($available_plugins) == 0 && sizeof($installed_plugins) == 0;
-        $no_installed_plugins = sizeof($installed_plugins) == 0;
+        $no_plugins = sizeof($available_plugins) === 0 && sizeof($installed_plugins) === 0;
+        $no_installed_plugins = sizeof($installed_plugins) === 0;
 
         $stylee = 'admin_plugins';
 
@@ -150,12 +150,12 @@ switch ($case):
 
         // plugins avilable in kleeja remote catalog
         if (!($store_catalog = $cache->get('store_catalog'))) {
-            $store_link = 'https://raw.githubusercontent.com/kleeja/store-catalog/master/catalog.json';
+            $store_link = Plugins::STORE_CATALOG_LINK;
 
             $store_catalog = FetchFile::make($store_link)->get();
             $store_catalog = json_decode($store_catalog, true);
 
-            if (json_last_error() == JSON_ERROR_NONE) {
+            if (json_last_error() === JSON_ERROR_NONE) {
                 $cache->save('store_catalog', $store_catalog);
             }
         }
@@ -166,7 +166,7 @@ switch ($case):
         $available_plugins_names = array_column($available_plugins, 'name');
 
         foreach ($store_catalog as $plugin_info) {
-            if ($plugin_info['type'] != 'plugin') {
+            if ($plugin_info['type'] !== 'plugin') {
                 continue;
             }
 
@@ -179,7 +179,7 @@ switch ($case):
             }
 
             if (
-                $case == 'store' &&
+                $case === 'store' &&
                 (in_array($plugin_info['name'], $available_plugins_names) ||
                     !empty($installed_plugins[$plugin_info['name']]))
             ) {
@@ -188,7 +188,7 @@ switch ($case):
 
             // is there a new version of this in the store
             elseif (
-                $case == 'check' &&
+                $case === 'check' &&
                 ((!empty($installed_plugins[$plugin_info['name']]) &&
                     version_compare(
                         strtolower($installed_plugins[$plugin_info['name']]['extra_info']['plugin_version']),
@@ -197,6 +197,16 @@ switch ($case):
                     )) ||
                     empty($installed_plugins[$plugin_info['name']]))
             ) {
+                continue;
+            }
+
+            $not_compatible = !(
+                version_compare(strtolower($plugin_info['kleeja_version']['min']), KLEEJA_VERSION, '<=') &&
+                version_compare(strtolower($plugin_info['kleeja_version']['max']), KLEEJA_VERSION, '>=')
+            );
+
+            // hide plugins that are not compatible with this version of kleeja
+            if ($not_compatible && !(defined('IGNORE_STORE_COMPATIBILITY') && IGNORE_STORE_COMPATIBILITY)) {
                 continue;
             }
 
@@ -222,11 +232,7 @@ switch ($case):
                     $plugin_info['kleeja_version']['max'],
                 ),
                 'icon' => $plugin_info['icon'],
-                'NotCompatible' =>
-                    version_compare(strtolower($plugin_info['kleeja_version']['min']), KLEEJA_VERSION, '<=') &&
-                    version_compare(strtolower($plugin_info['kleeja_version']['max']), KLEEJA_VERSION, '>=')
-                        ? false
-                        : true,
+                'NotCompatible' => $not_compatible,
             ];
         }
 
@@ -295,7 +301,7 @@ switch ($case):
     //
     case 'install':
         if (intval($userinfo['founder']) !== 1) {
-            header('HTTP/1.0 401 Unauthorized');
+            http_response_code(401);
             kleeja_admin_err($lang['HV_NOT_PRVLG_ACCESS'], $action);
         }
 
@@ -395,10 +401,9 @@ switch ($case):
 
         //add to database
         $insert_query = [
-            'INSERT' =>
-                '`plg_name` ,`plg_ver`, `plg_author`, `plg_dsc`, `plg_icon`, `plg_uninstall`, `plg_instructions`, `plg_store`, `plg_files`',
+            'INSERT' => '`plg_name` ,`plg_ver`, `plg_author`, `plg_dsc`',
             'INTO' => "{$dbprefix}plugins",
-            'VALUES' => ":name, :version, :author, :description, '', '', '', '', ''",
+            'VALUES' => ':name, :version, :author, :description',
             'BIND' => [
                 'name' => kleeja_html_encode($plg_name),
                 'version' => kleeja_html_encode($plugin_info['plugin_version']),
@@ -445,7 +450,7 @@ switch ($case):
     //
     case 'uninstall':
         if (intval($userinfo['founder']) !== 1) {
-            header('HTTP/1.0 401 Unauthorized');
+            http_response_code(401);
             kleeja_admin_err($lang['HV_NOT_PRVLG_ACCESS'], $action);
         }
 
@@ -526,7 +531,7 @@ switch ($case):
     case 'disable':
     case 'enable':
         if (intval($userinfo['founder']) !== 1) {
-            header('HTTP/1.0 401 Unauthorized');
+            http_response_code(401);
             kleeja_admin_err($lang['HV_NOT_PRVLG_ACCESS'], $action);
         }
 
@@ -542,7 +547,7 @@ switch ($case):
             //update database
             $update_query = [
                 'UPDATE' => "{$dbprefix}plugins",
-                'SET' => 'plg_disabled=' . ($case == 'disable' ? 1 : 0),
+                'SET' => 'plg_disabled=' . ($case === 'disable' ? 1 : 0),
                 'WHERE' => 'plg_name = :name',
                 'BIND' => ['name' => kleeja_html_encode($plg_name)],
             ];
@@ -568,7 +573,7 @@ switch ($case):
 
     case 'download':
         if (intval($userinfo['founder']) !== 1) {
-            header('HTTP/1.0 401 Unauthorized');
+            http_response_code(401);
             kleeja_admin_err($lang['HV_NOT_PRVLG_ACCESS']);
         }
 
@@ -593,7 +598,7 @@ switch ($case):
         }
 
         // plugins avilable in kleeja store
-        $store_link = 'https://raw.githubusercontent.com/kleeja/store-catalog/master/catalog.json';
+        $store_link = Plugins::STORE_CATALOG_LINK;
 
         $catalog_plugins = FetchFile::make($store_link)->get();
 
@@ -604,7 +609,7 @@ switch ($case):
 
             // make an arry for all plugins in kleeja store that not included in our server
             foreach ($catalog_plugins as $plugin_info) {
-                if ($plugin_info['type'] != 'plugin') {
+                if ($plugin_info['type'] !== 'plugin') {
                     continue;
                 }
 

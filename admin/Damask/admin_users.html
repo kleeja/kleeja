@@ -1,0 +1,643 @@
+<IF NAME="current_smt == general">
+
+<div class="kj-page-header">
+    <div>
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="./">{lang.R_CPINDEX}</a></li>
+                <li class="breadcrumb-item active" aria-current="page">{lang.R_GROUPS}</li>
+            </ol>
+        </nav>
+        <h1 class="kj-page-title">{lang.R_GROUPS}</h1>
+    </div>
+    <div class="kj-page-actions">
+        <a class="btn btn-outline-secondary btn-sm" href="./?cp=h_search&amp;smt=users">
+            <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i><span>{lang.SEARCH_USERS}</span>
+        </a>
+        <UNLESS NAME="user_not_normal">
+        <a class="btn btn-outline-secondary btn-sm" href="{cp_users_url}&amp;smt=new_u">
+            <i class="fa-solid fa-user-plus" aria-hidden="true"></i><span>{lang.NEW_USER}</span>
+        </a>
+        <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#group_add_new">
+            <i class="fa-solid fa-plus" aria-hidden="true"></i><span>{lang.ADD_NEW_GROUP}</span>
+        </button>
+        </UNLESS>
+    </div>
+</div>
+
+<IF NAME="user_not_normal">
+<div class="alert alert-info d-flex align-items-start gap-2" role="status">
+    <i class="fa-solid fa-circle-info kj-alert-icon" aria-hidden="true"></i>
+    <div>{lang.USERS_NOT_NORMAL_SYS}</div>
+</div>
+</IF>
+
+<UNLESS NAME="no_results">
+
+<h2 class="kj-section-title mt-0">{lang.ESSENTIAL_GROUPS}</h2>
+
+<div class="row row-cols-1 row-cols-md-2 row-cols-xxl-3 g-3">
+    <LOOP NAME="e_groups">
+    <div class="col">
+        <article class="card h-100">
+            <div class="card-body d-flex align-items-center gap-3">
+                <span class="kj-icon-tile is-{{style.background}}">
+                    <IF LOOP="style.icon"><i class="fa fa-fw {{style.icon}}" aria-hidden="true"></i><ELSE><i class="fa-solid fa-users" aria-hidden="true"></i></IF>
+                </span>
+                <div class="flex-grow-1" style="min-width: 0">
+                    <h3 class="h6 fw-semibold mb-1 text-truncate">{{name}}</h3>
+                    <UNLESS NAME="user_not_normal"><IF LOOP="is_default"><span class="kj-badge" title="{lang.GROUP_IS_DEFAULT}">{lang.DEFAULT_GROUP}</span></IF></UNLESS>
+                </div>
+            </div>
+            <div class="list-group list-group-flush">
+                <a class="list-group-item list-group-item-action d-flex align-items-center gap-2" href="{action}&amp;smt=group_data&amp;qg={{id}}">
+                    <i class="fa-solid fa-pen-to-square fa-fw text-body-secondary" aria-hidden="true"></i> {lang.EDIT_DATA}
+                </a>
+                <a class="list-group-item list-group-item-action d-flex align-items-center gap-2" href="{action}&amp;smt=group_acl&amp;qg={{id}}">
+                    <i class="fa-solid fa-list-check fa-fw text-body-secondary" aria-hidden="true"></i> {lang.EDIT_ACL}
+                </a>
+                <a class="list-group-item list-group-item-action d-flex align-items-center gap-2" href="{action}&amp;smt=group_exts&amp;qg={{id}}">
+                    <i class="fa-solid fa-file-code fa-fw text-body-secondary" aria-hidden="true"></i> {lang.R_EXTS}
+                </a>
+                <IF LOOP="id != 2">
+                <a class="list-group-item list-group-item-action d-flex align-items-center gap-2" href="{action}&amp;smt=show_group&amp;qg={{id}}">
+                    <i class="fa-solid fa-users fa-fw text-body-secondary" aria-hidden="true"></i> {lang.USERS}
+                </a>
+                </IF>
+            </div>
+        </article>
+    </div>
+    </LOOP>
+</div>
+
+<IF NAME="c_groups">
+<h2 class="kj-section-title">{lang.CUSTOM_GROUPS}</h2>
+
+<div class="row row-cols-1 row-cols-md-2 row-cols-xxl-3 g-3">
+    <LOOP NAME="c_groups">
+    <div class="col">
+        <article class="card h-100">
+            <div class="card-body d-flex align-items-center gap-3">
+                <span class="kj-icon-tile"><i class="fa-solid fa-user-group" aria-hidden="true"></i></span>
+                <div class="flex-grow-1" style="min-width: 0">
+                    <h3 class="h6 fw-semibold mb-1 text-truncate">{{name}}</h3>
+                    <UNLESS NAME="user_not_normal"><IF LOOP="is_default"><span class="kj-badge" title="{lang.GROUP_IS_DEFAULT}">{lang.DEFAULT_GROUP}</span></IF></UNLESS>
+                </div>
+                <button type="button" class="btn btn-sm btn-outline-danger" data-bs-toggle="modal" data-bs-target="#delete_group_{{id}}" title="{lang.DELETE_GROUP}">
+                    <i class="fa-solid fa-trash-can" aria-hidden="true"></i><span class="visually-hidden">{lang.DELETE_GROUP}</span>
+                </button>
+            </div>
+            <div class="list-group list-group-flush">
+                <a class="list-group-item list-group-item-action d-flex align-items-center gap-2" href="{action}&amp;smt=group_data&amp;qg={{id}}">
+                    <i class="fa-solid fa-pen-to-square fa-fw text-body-secondary" aria-hidden="true"></i> {lang.EDIT_DATA}
+                </a>
+                <a class="list-group-item list-group-item-action d-flex align-items-center gap-2" href="{action}&amp;smt=group_acl&amp;qg={{id}}">
+                    <i class="fa-solid fa-list-check fa-fw text-body-secondary" aria-hidden="true"></i> {lang.EDIT_ACL}
+                </a>
+                <a class="list-group-item list-group-item-action d-flex align-items-center gap-2" href="{action}&amp;smt=group_exts&amp;qg={{id}}">
+                    <i class="fa-solid fa-file-code fa-fw text-body-secondary" aria-hidden="true"></i> {lang.R_EXTS}
+                </a>
+                <a class="list-group-item list-group-item-action d-flex align-items-center gap-2" href="{action}&amp;smt=show_group&amp;qg={{id}}">
+                    <i class="fa-solid fa-users fa-fw text-body-secondary" aria-hidden="true"></i> {lang.USERS}
+                </a>
+            </div>
+        </article>
+    </div>
+    </LOOP>
+</div>
+</IF>
+
+</UNLESS>
+
+<!-- new group -->
+<div id="group_add_new" class="modal fade" tabindex="-1" aria-labelledby="addNewGroup" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <form method="post" action="{action}" id="add_group_form" class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title" id="addNewGroup">{lang.ADD_NEW_GROUP}</h2>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="{lang.CLOSE}"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label class="form-label" for="gname">{lang.GROUP_NAME}</label>
+                    <input type="text" class="form-control" id="gname" name="gname" required>
+                </div>
+                <div>
+                    <label class="form-label" for="cfrom">{lang.COPY_FROM}</label>
+                    <select class="form-select" id="cfrom" name="cfrom">
+                        <option value="-1">{lang.DEFAULT_GROUP}</option>
+                        <LOOP NAME="e_groups"><IF LOOP="id == 2"><ELSE><option value="{{id}}">{{name}}</option></IF></LOOP>
+                        <IF NAME="c_groups"><LOOP NAME="c_groups"><option value="{{id}}">{{name}}</option></LOOP></IF>
+                    </select>
+                </div>
+                {H_FORM_KEYS3}
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">{lang.CLOSE}</button>
+                <button type="submit" name="newgroup" value="1" class="btn btn-primary">{lang.SUBMIT}</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- delete a custom group -->
+<IF NAME="c_groups">
+<LOOP NAME="c_groups">
+<div id="delete_group_{{id}}" class="modal fade" tabindex="-1" aria-labelledby="delAGroup{{id}}" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <form method="post" action="{action}" id="del_group_form{{id}}" class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title" id="delAGroup{{id}}">{lang.DELETE_GROUP}: {{name}}</h2>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="{lang.CLOSE}"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" name="dgroup" value="{{id}}">
+                <label class="form-label" for="tgroup{{id}}">{lang.G_USERS_MOVE_TO}</label>
+                <select class="form-select" id="tgroup{{id}}" name="tgroup">
+                    <IF LOOP="is_default"><ELSE><option value="-1">{lang.DEFAULT_GROUP}</option></IF>
+                    <LOOP NAME="e_groups"><IF LOOP="id == 2"><ELSE><option value="{{id}}">{{name}}</option></IF></LOOP>
+                    <LOOP NAME="c_groups"><option value="{{id}}">{{name}}</option></LOOP>
+                </select>
+                {H_FORM_KEYS4}
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">{lang.CLOSE}</button>
+                <button type="submit" name="delgroup" value="1" class="btn btn-danger">
+                    <i class="fa-solid fa-trash-can" aria-hidden="true"></i><span>{lang.DELETE_GROUP}</span>
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+</LOOP>
+</IF>
+
+
+<ELSEIF NAME="show_results">
+
+<div class="kj-page-header">
+    <div>
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="./">{lang.R_CPINDEX}</a></li>
+                <li class="breadcrumb-item"><a href="{cp_users_url}&amp;smt=general">{lang.R_GROUPS}</a></li>
+                <li class="breadcrumb-item active" aria-current="page"><IF NAME="current_smt == show_group">{group_name}<ELSE>{lang.SEARCH_USERS}</IF></li>
+            </ol>
+        </nav>
+        <h1 class="kj-page-title d-flex flex-wrap align-items-center gap-2">
+            <IF NAME="current_smt == show_group">{group_name}<ELSE>{lang.SEARCH_USERS}</IF>
+            <IF NAME="is_search"><span class="kj-badge is-neutral fs-6">{nums_rows}</span></IF>
+        </h1>
+    </div>
+    <div class="kj-page-actions">
+        <a class="btn btn-outline-secondary btn-sm" href="./?cp=h_search&amp;smt=users">
+            <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i><span>{lang.SEARCH_USERS}</span>
+        </a>
+        <UNLESS NAME="user_not_normal">
+        <a class="btn btn-primary btn-sm" href="{cp_users_url}&amp;smt=new_u">
+            <i class="fa-solid fa-user-plus" aria-hidden="true"></i><span>{lang.NEW_USER}</span>
+        </a>
+        </UNLESS>
+    </div>
+</div>
+
+<IF NAME="user_not_normal">
+<div class="alert alert-info d-flex align-items-start gap-2" role="status">
+    <i class="fa-solid fa-circle-info kj-alert-icon" aria-hidden="true"></i>
+    <div>{lang.USERS_NOT_NORMAL_SYS}</div>
+</div>
+</IF>
+
+<IF ISSET="GE_INFO">
+<div class="alert alert-info alert-dismissible fade show" role="status" data-kj-autohide>
+    {GE_INFO}
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="{lang.CLOSE}"></button>
+</div>
+</IF>
+
+<IF NAME="arr">
+<div class="card">
+    <ul class="list-group list-group-flush">
+        <LOOP NAME="arr">
+        <li class="list-group-item d-flex flex-wrap align-items-center gap-3 py-3">
+            <span class="kj-avatar" aria-hidden="true"><i class="fa-solid fa-user"></i></span>
+            <div class="flex-grow-1" style="min-width: 0">
+                <div class="fw-semibold text-truncate">
+                    {{name}}
+                    <IF LOOP="founder==1"><i class="fa-solid fa-star kj-founder" title="{lang.FOUNDER}" data-bs-toggle="tooltip" aria-hidden="true"></i><span class="visually-hidden">{lang.FOUNDER}</span></IF>
+                </div>
+                <div class="small text-body-secondary d-flex flex-wrap gap-3">
+                    <span><i class="fa-solid fa-users" aria-hidden="true"></i> {{group}}</span>
+                    <span><i class="fa-solid fa-clock" aria-hidden="true"></i> {lang.LAST_VISIT}: {{last_visit}}</span>
+                </div>
+            </div>
+            <div class="d-flex gap-2">
+                <a class="btn btn-sm btn-outline-secondary" href="{{editusr_link}}">
+                    <i class="fa-solid fa-pen-to-square" aria-hidden="true"></i><span>{lang.EDIT}</span>
+                </a>
+                <div class="dropdown">
+                    <button class="btn btn-sm btn-outline-secondary" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="{lang.ADM_MORE_ACTIONS}" title="{lang.ADM_MORE_ACTIONS}">
+                        <i class="fa-solid fa-ellipsis" aria-hidden="true"></i>
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end">
+                        <li>
+                            <a class="dropdown-item" href="{{userfile_link}}" target="_blank" rel="noopener">
+                                <i class="fa-solid fa-folder-open" aria-hidden="true"></i> {lang.BROSWERF}
+                            </a>
+                        </li>
+                        <IF LOOP="delusrfile_link">
+                        <li>
+                            <a class="dropdown-item" href="{{delusrfile_link}}&amp;{GET_FORM_KEY}" data-kj-confirm>
+                                <i class="fa-solid fa-file-circle-xmark" aria-hidden="true"></i> {lang.ADMIN_DELETE_FILES}
+                            </a>
+                        </li>
+                        </IF>
+                        <IF LOOP="delusr_link">
+                        <li><hr class="dropdown-divider"></li>
+                        <li>
+                            <a class="dropdown-item text-danger" href="{{delusr_link}}&amp;{GET_FORM_KEY}" data-kj-confirm>
+                                <i class="fa-solid fa-user-xmark" aria-hidden="true"></i> {lang.DELETE}
+                            </a>
+                        </li>
+                        </IF>
+                    </ul>
+                </div>
+            </div>
+        </li>
+        </LOOP>
+    </ul>
+</div>
+<ELSE>
+<div class="card">
+    <div class="card-body text-center py-5">
+        <span class="kj-icon-tile is-lg is-secondary mb-3"><i class="fa-solid fa-user-slash" aria-hidden="true"></i></span>
+        <p class="text-body-secondary mb-0">{lang.NOTHING}</p>
+    </div>
+</div>
+</IF>
+
+<div class="kj-pager mt-3">{page_nums}</div>
+
+
+<ELSEIF NAME="current_smt == new_u">
+
+<div class="kj-page-header">
+    <div>
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="./">{lang.R_CPINDEX}</a></li>
+                <li class="breadcrumb-item"><a href="{cp_users_url}&amp;smt=general">{lang.R_GROUPS}</a></li>
+                <li class="breadcrumb-item active" aria-current="page">{lang.NEW_USER}</li>
+            </ol>
+        </nav>
+        <h1 class="kj-page-title">{lang.NEW_USER}</h1>
+    </div>
+</div>
+
+<IF NAME="errs">
+<div class="alert alert-danger d-flex align-items-start gap-2" role="alert">
+    <i class="fa-solid fa-circle-exclamation kj-alert-icon" aria-hidden="true"></i>
+    <div>{errs}</div>
+</div>
+</IF>
+
+<form method="post" action="{action}" id="add_user_form" class="card">
+    <div class="card-body">
+        <div class="row g-3">
+            <div class="col-md-6">
+                <label class="form-label" for="lname">{lang.USERNAME}</label>
+                <input type="text" class="form-control" id="lname" name="lname" value="{uname}" autocomplete="off" required>
+            </div>
+            <div class="col-md-6">
+                <label class="form-label" for="lmail">{lang.EMAIL}</label>
+                <input type="email" class="form-control" id="lmail" name="lmail" value="{umail}" dir="ltr" required>
+            </div>
+            <div class="col-md-6">
+                <label class="form-label" for="lpass">{lang.PASSWORD}</label>
+                <input type="password" class="form-control" id="lpass" name="lpass" autocomplete="new-password" required>
+            </div>
+            <div class="col-md-6">
+                <label class="form-label" for="lgroup">{lang.GROUP}</label>
+                <select class="form-select" id="lgroup" name="lgroup">
+                    <LOOP NAME="u_groups">
+                    <option value="{{id}}"<IF LOOP="selected"> selected</IF>>{{name}}<IF LOOP="default"> ({lang.DEFAULT_GROUP})</IF></option>
+                    </LOOP>
+                </select>
+            </div>
+        </div>
+    </div>
+
+    <div class="card-footer kj-form-actions">
+        <button type="submit" name="newuser" value="1" class="btn btn-primary">
+            <i class="fa-solid fa-user-plus" aria-hidden="true"></i><span>{lang.SUBMIT}</span>
+        </button>
+    </div>
+
+    {H_FORM_KEYS2}
+</form>
+
+
+<ELSEIF NAME="current_smt == edit_user">
+
+<div class="kj-page-header">
+    <div>
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="./">{lang.R_CPINDEX}</a></li>
+                <li class="breadcrumb-item"><a href="{cp_users_url}&amp;smt=general">{lang.R_GROUPS}</a></li>
+                <li class="breadcrumb-item active" aria-current="page">{lang.EDIT}</li>
+            </ol>
+        </nav>
+        <h1 class="kj-page-title">{lang.EDIT}: {title_name}</h1>
+    </div>
+</div>
+
+<IF NAME="errs">
+<div class="alert alert-danger d-flex align-items-start gap-2" role="alert">
+    <i class="fa-solid fa-circle-exclamation kj-alert-icon" aria-hidden="true"></i>
+    <div>{errs}</div>
+</div>
+</IF>
+
+<form method="post" action="{action}&amp;uid={userid}&amp;qg={u_qg}&amp;page={u_page}" id="edit_user_form" class="card">
+    <div class="card-body">
+        <div class="row g-3">
+            <div class="col-md-6">
+                <label class="form-label" for="l_name">{lang.USERNAME}</label>
+                <input type="text" class="form-control" id="l_name" name="l_name" value="{u_name}" required>
+            </div>
+            <div class="col-md-6">
+                <label class="form-label" for="l_mail">{lang.EMAIL}</label>
+                <input type="email" class="form-control" id="l_mail" name="l_mail" value="{u_mail}" dir="ltr" required>
+            </div>
+            <div class="col-md-6">
+                <label class="form-label" for="l_pass">{lang.PASS_ON_CHANGE}</label>
+                <input type="password" class="form-control" id="l_pass" name="l_pass" autocomplete="new-password">
+            </div>
+            <div class="col-md-6">
+                <label class="form-label" for="l_group">{lang.GROUP}</label>
+                <select class="form-select" id="l_group" name="l_group">
+                    <LOOP NAME="u_groups">
+                    <IF LOOP="id == 2"><ELSE>
+                    <option value="{{id}}"<IF LOOP="selected"> selected</IF>>{{name}}<IF LOOP="default"> ({lang.DEFAULT_GROUP})</IF></option>
+                    </IF>
+                    </LOOP>
+                </select>
+            </div>
+            <div class="col-md-6">
+                <label class="form-label" for="l_show_filecp">{lang.SHOW_MY_FILECP}</label>
+                <select class="form-select" id="l_show_filecp" name="l_show_filecp">
+                    <option value="1"<IF NAME="u_show_filecp"> selected</IF>>{lang.YES}</option>
+                    <option value="0"<IF NAME="u_show_filecp"><ELSE> selected</IF>>{lang.NO}</option>
+                </select>
+            </div>
+            <IF NAME="im_founder">
+            <div class="col-md-6">
+                <label class="form-label" for="l_founder">{lang.FOUNDER}</label>
+                <select class="form-select" id="l_founder" name="l_founder">
+                    <option value="1"<IF NAME="u_founder"> selected</IF>>{lang.YES}</option>
+                    <option value="0"<IF NAME="u_founder"><ELSE> selected</IF>>{lang.NO}</option>
+                </select>
+            </div>
+            </IF>
+        </div>
+    </div>
+
+    <input type="hidden" name="l_qg" value="{u_qg}">
+    <input type="hidden" name="l_page" value="{u_page}">
+    <input type="hidden" name="uid" value="{userid}">
+
+    <div class="card-footer kj-form-actions">
+        <button type="submit" name="edituser" value="1" class="btn btn-primary">
+            <i class="fa-solid fa-floppy-disk" aria-hidden="true"></i><span>{lang.SUBMIT}</span>
+        </button>
+    </div>
+
+    {H_FORM_KEYS8}
+</form>
+
+
+<ELSEIF NAME="current_smt == group_acl">
+
+<div class="kj-page-header">
+    <div>
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="./">{lang.R_CPINDEX}</a></li>
+                <li class="breadcrumb-item"><a href="{cp_users_url}&amp;smt=general">{lang.R_GROUPS}</a></li>
+                <li class="breadcrumb-item active" aria-current="page">{group_name}</li>
+            </ol>
+        </nav>
+        <h1 class="kj-page-title">{lang.EDIT_ACL}: {group_name}</h1>
+    </div>
+</div>
+
+<form method="post" action="{action}" id="edit_acl_form" class="card">
+    <ul class="list-group list-group-flush">
+        <LOOP NAME="acls">
+        <li class="list-group-item d-flex align-items-center justify-content-between gap-3 py-3">
+            <label class="form-check-label flex-grow-1" for="acls_{{acl_name}}">{{acl_title}}</label>
+            <div class="form-check form-switch m-0">
+                <input class="form-check-input" type="checkbox" role="switch" id="acls_{{acl_name}}" name="{{acl_name}}" value="1"<IF LOOP="acl_can == 1"> checked</IF>>
+            </div>
+        </li>
+        </LOOP>
+    </ul>
+
+    <div class="card-footer kj-form-actions">
+        <button type="submit" name="editacl" value="1" class="btn btn-primary">
+            <i class="fa-solid fa-floppy-disk" aria-hidden="true"></i><span>{lang.SUBMIT}</span>
+        </button>
+    </div>
+
+    {H_FORM_KEYS5}
+</form>
+
+
+<ELSEIF NAME="current_smt == group_exts">
+
+<div class="kj-page-header">
+    <div>
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="./">{lang.R_CPINDEX}</a></li>
+                <li class="breadcrumb-item"><a href="{cp_users_url}&amp;smt=general">{lang.R_GROUPS}</a></li>
+                <li class="breadcrumb-item active" aria-current="page">{group_name}</li>
+            </ol>
+        </nav>
+        <h1 class="kj-page-title">{lang.R_EXTS}: {group_name}</h1>
+        <p class="kj-page-subtitle">{lang.E_EXTS}</p>
+    </div>
+    <div class="kj-page-actions">
+        <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-toggle="modal" data-bs-target="#converter_modal">
+            <i class="fa-solid fa-calculator" aria-hidden="true"></i><span>{lang.BCONVERTER}</span>
+        </button>
+        <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#new_ext_form">
+            <i class="fa-solid fa-plus" aria-hidden="true"></i><span>{lang.ADD_NEW_EXT}</span>
+        </button>
+    </div>
+</div>
+
+<IF NAME="GE_INFO">
+<div data-kj-autohide class="alert alert-dismissible fade show<IF NAME="DELETED_EXT == 2"> alert-info<ELSEIF NAME="ADDED_EXT == 2"> alert-info<ELSE> alert-danger</IF>" role="status">
+    <IF NAME="DELETED_EXT">
+        <IF NAME="DELETED_EXT == 2">{lang.EXT_DELETED}<ELSE>{lang.DATA_CHANGED_NO}</IF>
+    </IF>
+    <IF NAME="ADDED_EXT">
+        <IF NAME="ADDED_EXT == 2">{lang.NEW_EXT_ADD}<ELSE>{lang.DATA_CHANGED_NO}</IF>
+    </IF>
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="{lang.CLOSE}"></button>
+</div>
+</IF>
+
+<form method="post" action="{action}" id="edit_exts_form" class="card">
+    <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+            <thead>
+                <tr>
+                    <th scope="col">{lang.EXT}</th>
+                    <th scope="col">{lang.SIZE}</th>
+                    <th scope="col" class="text-end"><span class="visually-hidden">{lang.DELETE}</span></th>
+                </tr>
+            </thead>
+            <tbody>
+                <LOOP NAME="exts">
+                <tr>
+                    <td>
+                        <div class="d-flex align-items-center gap-2">
+                            <img src="{{ext_icon}}" alt="" width="20" height="20" loading="lazy">
+                            <span class="fw-semibold" dir="ltr">{{ext_name}}</span>
+                        </div>
+                    </td>
+                    <td>
+                        <div class="input-group input-group-sm" style="max-width: 14rem">
+                            <input type="text" name="size[{{ext_id}}]" value="{{ext_size}}" class="form-control" inputmode="numeric" aria-label="{lang.SIZE}: {{ext_name}}">
+                            <span class="input-group-text">{lang.KILOBYTE}</span>
+                        </div>
+                    </td>
+                    <td class="text-end">
+                        <a href="{action}&amp;del={{ext_id}}&amp;{GET_FORM_KEY}" class="btn btn-sm btn-outline-danger" data-kj-confirm title="{lang.DELETE}">
+                            <i class="fa-solid fa-trash-can" aria-hidden="true"></i><span class="visually-hidden">{lang.DELETE}</span>
+                        </a>
+                    </td>
+                </tr>
+                </LOOP>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="card-footer kj-form-actions">
+        <button type="submit" name="editexts" value="1" class="btn btn-primary">
+            <i class="fa-solid fa-floppy-disk" aria-hidden="true"></i><span>{lang.SUBMIT}</span>
+        </button>
+    </div>
+
+    {H_FORM_KEYS7}
+</form>
+
+<!-- new extension -->
+<div id="new_ext_form" class="modal fade" tabindex="-1" aria-labelledby="addNewExt" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <form method="post" action="{action}" class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title" id="addNewExt">{lang.ADD_NEW_EXT}</h2>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="{lang.CLOSE}"></button>
+            </div>
+            <div class="modal-body">
+                <label class="form-label" for="extisnew">{lang.ADD_NEW_EXT_EXP}</label>
+                <input type="text" class="form-control" id="extisnew" name="extisnew" dir="ltr" required>
+                {H_FORM_KEYS7}
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">{lang.CLOSE}</button>
+                <button type="submit" name="newext" value="1" class="btn btn-primary">{lang.SUBMIT}</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- byte converter: type in any unit -->
+<div id="converter_modal" class="modal fade" tabindex="-1" aria-labelledby="converterBox" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title" id="converterBox">{lang.BCONVERTER}</h2>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="{lang.CLOSE}"></button>
+            </div>
+            <div class="modal-body" data-kj-converter dir="ltr">
+                <div class="row g-3">
+                    <div class="col-6">
+                        <label class="form-label" for="kjBytesB">Byte</label>
+                        <input type="text" class="form-control" id="kjBytesB" value="0" inputmode="decimal" data-kj-bytes="1">
+                    </div>
+                    <div class="col-6">
+                        <label class="form-label" for="kjBytesKB">Kilobyte</label>
+                        <input type="text" class="form-control" id="kjBytesKB" value="0" inputmode="decimal" data-kj-bytes="1024">
+                    </div>
+                    <div class="col-6">
+                        <label class="form-label" for="kjBytesMB">Megabyte</label>
+                        <input type="text" class="form-control" id="kjBytesMB" value="0" inputmode="decimal" data-kj-bytes="1048576">
+                    </div>
+                    <div class="col-6">
+                        <label class="form-label" for="kjBytesGB">Gigabyte</label>
+                        <input type="text" class="form-control" id="kjBytesGB" value="0" inputmode="decimal" data-kj-bytes="1073741824">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<ELSEIF NAME="current_smt == group_data">
+
+<div class="kj-page-header">
+    <div>
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="./">{lang.R_CPINDEX}</a></li>
+                <li class="breadcrumb-item"><a href="{cp_users_url}&amp;smt=general">{lang.R_GROUPS}</a></li>
+                <li class="breadcrumb-item active" aria-current="page">{group_name}</li>
+            </ol>
+        </nav>
+        <h1 class="kj-page-title">{lang.EDIT_DATA}: {group_name}</h1>
+    </div>
+</div>
+
+<form method="post" action="{action}" id="edit_data_form" class="card">
+    <div class="card-body kj-options">
+        <UNLESS NAME="user_not_normal">
+        <div class="form-group">
+            <label for="group_name">{lang.GROUP_NAME}</label>
+            <div class="box">
+                <IF NAME="gdata.group_is_essential">
+                <span class="fw-semibold">{group_name}</span>
+                <ELSE>
+                <input type="text" class="form-control" id="group_name" name="group_name" value="{gdata.group_name}">
+                </IF>
+            </div>
+        </div>
+        <div class="form-group">
+            <span class="kj-label" id="kjGroupDefault">{lang.GROUP_IS_DEFAULT}</span>
+            <div class="box" role="radiogroup" aria-labelledby="kjGroupDefault">
+                <label class="form-check-label">{lang.YES}<input type="radio" name="group_is_default" value="1"<IF NAME="gdata.group_is_default == 1"> checked</IF>></label>
+                <label class="form-check-label">{lang.NO}<input type="radio" name="group_is_default" value="0"<IF NAME="gdata.group_is_default == 0"> checked</IF>></label>
+            </div>
+        </div>
+        </UNLESS>
+
+        <LOOP NAME="data">
+        {{option}}
+        </LOOP>
+    </div>
+
+    <div class="card-footer kj-form-actions">
+        <button type="submit" name="editdata" value="1" class="btn btn-primary">
+            <i class="fa-solid fa-floppy-disk" aria-hidden="true"></i><span>{lang.SUBMIT}</span>
+        </button>
+    </div>
+
+    {H_FORM_KEYS6}
+</form>
+
+</IF>

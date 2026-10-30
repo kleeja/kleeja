@@ -145,18 +145,14 @@ function inst_current_step(): string
 }
 
 /**
- * An icon from style/icons.svg
- * @param  string $name
+ * A solid icon from Font Awesome (includes/static_shared_files/fontawesome)
+ * @param  string $name  the icon name without the fa- prefix
  * @param  string $class
  * @return string
  */
 function inst_icon(string $name, string $class = ''): string
 {
-    return '<svg class="kj-icon' .
-        ($class !== '' ? ' ' . $class : '') .
-        '" aria-hidden="true"><use href="#i-' .
-        $name .
-        '"></use></svg>';
+    return '<i class="kj-icon fa-solid fa-' . $name . ($class !== '' ? ' ' . $class : '') . '" aria-hidden="true"></i>';
 }
 
 /**
@@ -415,18 +411,6 @@ function inst_admin_login(string $name, string $password): bool
     );
 
     return !empty($SQL->fetch_array($result)['acl_can']);
-}
-
-/**
- * Is a failed query of an update about something that is there already, which means it was done before
- * @param  array $error [code, message] of $SQL->get_error()
- * @return bool
- */
-function inst_update_done_before(array $error): bool
-{
-    //MySQL: 1060 duplicate column, 1061 duplicate key, 1062 duplicate entry
-    return in_array((int) ($error[0] ?? 0), [1060, 1061, 1062], true) ||
-        preg_match('/duplicate|already exists|UNIQUE constraint failed/i', (string) ($error[1] ?? '')) === 1;
 }
 
 /**

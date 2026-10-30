@@ -1,0 +1,121 @@
+<div class="kj-page-header">
+    <div>
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="./">{lang.R_CPINDEX}</a></li>
+                <li class="breadcrumb-item active" aria-current="page">{lang.R_REPAIR}</li>
+            </ol>
+        </nav>
+        <h1 class="kj-page-title">{lang.R_REPAIR}</h1>
+        <p class="kj-page-subtitle">{lang.WHY_SYNCING}</p>
+    </div>
+</div>
+
+<div class="row row-cols-1 row-cols-md-2 row-cols-xxl-3 g-3">
+    <div class="col">
+        <section class="card h-100">
+            <div class="card-body d-flex gap-3">
+                <span class="kj-icon-tile"><i class="fa-solid fa-file" aria-hidden="true"></i></span>
+                <div class="flex-grow-1">
+                    <h2 class="h6 fw-semibold mb-1">{lang.ALL_FILES}</h2>
+                    <div class="kj-stat-value fs-4">{all_files}</div>
+                </div>
+            </div>
+            <div class="card-footer">
+                <a href="{resync_files_link}" class="btn btn-sm btn-outline-secondary">
+                    <i class="fa-solid fa-rotate" aria-hidden="true"></i><span>{lang.RESYNC}</span>
+                </a>
+            </div>
+        </section>
+    </div>
+
+    <div class="col">
+        <section class="card h-100">
+            <div class="card-body d-flex gap-3">
+                <span class="kj-icon-tile"><i class="fa-solid fa-image" aria-hidden="true"></i></span>
+                <div class="flex-grow-1">
+                    <h2 class="h6 fw-semibold mb-1">{lang.ALL_IMAGES}</h2>
+                    <div class="kj-stat-value fs-4">{all_images}</div>
+                </div>
+            </div>
+            <div class="card-footer">
+                <a href="{resync_images_link}" class="btn btn-sm btn-outline-secondary">
+                    <i class="fa-solid fa-rotate" aria-hidden="true"></i><span>{lang.RESYNC}</span>
+                </a>
+            </div>
+        </section>
+    </div>
+
+    <div class="col">
+        <section class="card h-100">
+            <div class="card-body d-flex gap-3">
+                <span class="kj-icon-tile is-navy"><i class="fa-solid fa-users" aria-hidden="true"></i></span>
+                <div class="flex-grow-1">
+                    <h2 class="h6 fw-semibold mb-1">{lang.USERS_ST}</h2>
+                    <div class="kj-stat-value fs-4">{all_users}</div>
+                </div>
+            </div>
+            <div class="card-footer">
+                <a href="{resync_users_link}" class="btn btn-sm btn-outline-secondary">
+                    <i class="fa-solid fa-rotate" aria-hidden="true"></i><span>{lang.RESYNC}</span>
+                </a>
+            </div>
+        </section>
+    </div>
+
+    <div class="col">
+        <section class="card h-100">
+            <div class="card-body d-flex gap-3">
+                <span class="kj-icon-tile is-navy"><i class="fa-solid fa-hard-drive" aria-hidden="true"></i></span>
+                <div class="flex-grow-1">
+                    <h2 class="h6 fw-semibold mb-1">{lang.SIZES_ST}</h2>
+                    <div class="kj-stat-value fs-4"><span dir="ltr">{all_sizes}</span></div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <div class="col">
+        <section class="card h-100">
+            <div class="card-body d-flex gap-3">
+                <span class="kj-icon-tile is-secondary"><i class="fa-solid fa-broom" aria-hidden="true"></i></span>
+                <div class="flex-grow-1">
+                    <h2 class="h6 fw-semibold mb-0">{lang.DEL_CACHE}</h2>
+                </div>
+            </div>
+            <div class="card-footer">
+                <a href="{del_cache_link}" class="btn btn-sm btn-outline-secondary">
+                    <i class="fa-solid fa-trash-can" aria-hidden="true"></i><span>{lang.DELETE}</span>
+                </a>
+            </div>
+        </section>
+    </div>
+
+    <div class="col">
+        <section class="card h-100">
+            <div class="card-body d-flex gap-3">
+                <span class="kj-icon-tile is-secondary"><i class="fa-solid fa-database" aria-hidden="true"></i></span>
+                <div class="flex-grow-1">
+                    <h2 class="h6 fw-semibold mb-0">{lang.REPAIR_DB_TABLES}</h2>
+                </div>
+            </div>
+            <div class="card-footer">
+                <a href="{repair_tables_link}" class="btn btn-sm btn-outline-secondary">
+                    <i class="fa-solid fa-screwdriver-wrench" aria-hidden="true"></i><span>{lang.SUBMIT}</span>
+                </a>
+            </div>
+        </section>
+    </div>
+</div>
+
+<section class="card mt-4">
+    <div class="card-body">
+        <label class="form-label" for="kjCronUrl"><i class="fa-solid fa-clock" aria-hidden="true"></i> {lang.ADVICE_CRON_LINK}</label>
+        <div class="input-group">
+            <input class="form-control font-monospace" id="kjCronUrl" value="{queue_cron_job_url}" readonly dir="ltr">
+            <button class="btn btn-outline-secondary" type="button" data-kj-copy="#kjCronUrl" data-kj-copied="{lang.ADM_COPIED}">
+                <i class="fa-solid fa-copy" aria-hidden="true"></i><span data-kj-copy-label>{lang.ADM_COPY}</span>
+            </button>
+        </div>
+    </div>
+</section>

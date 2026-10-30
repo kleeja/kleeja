@@ -137,7 +137,7 @@ function helper_watermark_imagick(string $name, string $ext, string $logo): void
 
     //an exception for gif image
     //generating thumb with 10 frames only, big gif is a devil
-    if ($ext == 'gif') {
+    if ($ext === 'gif') {
         $i = 0;
 
         //$gif_new = new Imagick();

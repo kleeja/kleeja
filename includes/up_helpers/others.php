@@ -141,20 +141,20 @@ function change_filename_decoding(string $filename, int $i_loop, string $ext, st
     $decoding_type = empty($decoding_type) ? $config['decode'] : $decoding_type;
 
     //change it, time..
-    if ($decoding_type == 'time' || $decoding_type == 1) {
+    if ($decoding_type === 'time' || (int) $decoding_type === 1) {
         [$usec, $sec] = explode(' ', microtime());
         $extra = str_replace('.', '', (float) $usec + (float) $sec);
         $return = $extra . $i_loop . '.' . $ext;
     }
     // md5
-    elseif ($decoding_type == 'md5' || $decoding_type == 2) {
+    elseif ($decoding_type === 'md5' || (int) $decoding_type === 2) {
         [$usec, $sec] = explode(' ', microtime());
         $extra = md5((float) $usec + (float) $sec . $filename);
         $extra = substr($extra, 0, 12);
         $return = $extra . $i_loop . '.' . $ext;
     }
     // exists before, change it a little
-    elseif ($decoding_type == 'exists') {
+    elseif ($decoding_type === 'exists') {
         $return =
             substr($filename, 0, -(strlen($ext) + 1)) .
             '_' .
@@ -276,12 +276,12 @@ function user_is_flooding(int $user_id = -1): bool
 
     extract(runHook('user_is_flooding_func', get_defined_vars())); //run
 
-    if ($return != 'empty') {
+    if ($return !== 'empty') {
         return $return;
     }
 
     //if the value is zero (means that the function is disabled) then return false immediately
-    if ($config['usersectoupload'] == 0) {
+    if ((int) $config['usersectoupload'] === 0) {
         return false;
     }
 

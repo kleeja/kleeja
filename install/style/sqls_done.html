@@ -9,7 +9,7 @@
             <ul class="list-group kj-checks kj-scroll">
                 {{foreach($GLOBALS['sqls_done'] as $sql):}}
                 <li class="list-group-item">
-                    <span class="text-success">{{echo inst_icon('check-circle-fill')}}</span>
+                    <span class="text-success">{{echo inst_icon('circle-check')}}</span>
                     <span>{{echo $sql}}</span>
                 </li>
                 {{endforeach;}}
@@ -22,7 +22,7 @@
             </div>
             {{else:}}
             <div class="kj-page-head">
-                <span class="kj-icon-tile is-danger">{{echo inst_icon('exclamation-triangle-fill')}}</span>
+                <span class="kj-icon-tile is-danger">{{echo inst_icon('triangle-exclamation')}}</span>
                 <div>
                     <h1>{{echo $lang['INST_FINISH_ERRSQL']}}</h1>
                 </div>
@@ -31,7 +31,7 @@
             <ul class="list-group kj-checks kj-scroll mb-4">
                 {{foreach($GLOBALS['sql_err'] as $sql):}}
                 <li class="list-group-item">
-                    <span class="text-danger">{{echo inst_icon('x-circle-fill')}}</span>
+                    <span class="text-danger">{{echo inst_icon('circle-xmark')}}</span>
                     <span>{{echo $sql}}</span>
                 </li>
                 {{endforeach;}}

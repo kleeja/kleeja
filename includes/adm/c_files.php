@@ -148,7 +148,7 @@ if (ip('submit')) {
             unserialize(htmlspecialchars_decode($filter['filter_value']), ['allowed_classes' => false]),
         );
 
-        if ($query['WHERE'] == '') {
+        if ($query['WHERE'] === '') {
             kleeja_admin_err($lang['ADMIN_DELETE_FILES_NOF']);
         }
 
@@ -179,7 +179,7 @@ if (ip('submit')) {
 
         $SQL->freeresult($result);
 
-        if ($files_num + $imgs_num == 0) {
+        if ($files_num + $imgs_num === 0) {
             kleeja_admin_err($lang['ADMIN_DELETE_FILES_NOF']);
         } else {
             //update number of stats
@@ -219,7 +219,7 @@ if (ip('submit')) {
     ];
 
     //if user system is default, we use users table
-    if ((int) $config['user_system'] == 1) {
+    if ((int) $config['user_system'] === 1) {
         $query['JOINS'] = [
             [
                 'LEFT JOIN' => "{$dbprefix}users u",
@@ -269,7 +269,7 @@ if (ip('submit')) {
         $do_not_query_total_files = false;
     }
 
-    $query['ORDER BY'] .= isset($_REQUEST['order_way']) && (int) $_REQUEST['order_way'] == 1 ? ' ASC' : ' DESC';
+    $query['ORDER BY'] .= isset($_REQUEST['order_way']) && (int) $_REQUEST['order_way'] === 1 ? ' ASC' : ' DESC';
 
     $nums_rows = 0;
 
@@ -292,7 +292,7 @@ if (ip('submit')) {
     extract(runHook('query_files_admin', get_defined_vars()));
 
     if ($nums_rows > 0) {
-        $query['SELECT'] = 'f.*' . ((int) $config['user_system'] == 1 ? ', u.name AS username' : '');
+        $query['SELECT'] = 'f.*' . ((int) $config['user_system'] === 1 ? ', u.name AS username' : '');
         $query['LIMIT'] = ':start, :perpage';
         $query['BIND']['start'] = $start;
         $query['BIND']['perpage'] = $files_acp_perpage;
@@ -321,7 +321,7 @@ if (ip('submit')) {
             $url = kleeja_get_link($is_image ? 'image' : 'file', $file_info);
 
             //for username in integrated user system
-            if ($row['user'] != '-1' and (int) $config['user_system'] != 1) {
+            if ((int) $row['user'] !== -1 and (int) $config['user_system'] !== 1) {
                 if (!in_array($row['user'], $ids_and_names)) {
                     $row['username'] = $usrcp->usernamebyid($row['user']);
                     $ids_and_names[$row['user']] = $row['username'];
@@ -330,7 +330,7 @@ if (ip('submit')) {
                 }
             }
 
-            $file_name = $row['real_filename'] == '' ? $row['name'] : $row['real_filename'];
+            $file_name = $row['real_filename'] === '' ? $row['name'] : $row['real_filename'];
 
             //make new lovely arrays !!
             $arr[] = [
@@ -341,12 +341,13 @@ if (ip('submit')) {
                     '" href="' .
                     $url .
                     '" target="blank">' .
-                    shorten_text($file_name, 25) .
+                    //decoded before it is cut, so an entity like &quot; is not cut in half
+                    kleeja_html_encode(shorten_text(kleeja_html_decode($file_name), 25)) .
                     '</a>',
                 'fullname' => $file_name,
                 'size' => readable_size($row['size']),
                 'ups' => $row['uploads'],
-                'direct' => $row['id_form'] == 'direct' ? true : false,
+                'direct' => $row['id_form'] === 'direct' ? true : false,
                 'time_human' => kleeja_date($row['time']),
                 'time' => kleeja_date($row['time'], human_time: false),
                 'type' => $row['type'],
@@ -359,9 +360,13 @@ if (ip('submit')) {
                         ? '<span style="color:red;font-weight:bold">' . $row['report'] . '</span>'
                         : $row['report'],
                 'user' =>
-                    $row['user'] == '-1'
+                    (int) $row['user'] === -1
                         ? $lang['GUST']
-                        : '<a href="' . $userfile . '" target="_blank">' . $row['username'] . '</a>',
+                        : '<a href="' .
+                            $userfile .
+                            '" target="_blank">' .
+                            kleeja_html_display($row['username']) .
+                            '</a>',
                 'ip' => '<a href="https://ipinfo.io/' . $row['user_ip'] . '" target="_new">' . $row['user_ip'] . '</a>',
                 'showfilesbyip' => basename(ADMIN_PATH) . '?cp=h_search&amp;s_input=1&amp;s_value=' . $row['user_ip'],
             ];

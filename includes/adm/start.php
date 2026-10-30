@@ -20,7 +20,7 @@ $current_smt = preg_replace('/[^a-z0-9_]/i', '', g('smt', default: 'general'));
 $GET_FORM_KEY = kleeja_add_form_key_get('adm_start_actions');
 
 //data
-$lst_reg = empty($stat_last_user) ? $lang['UNKNOWN'] : $stat_last_user;
+$lst_reg = empty($stat_last_user) ? $lang['UNKNOWN'] : kleeja_html_display($stat_last_user);
 $files_number = $stat_files + $stat_imgs;
 $files_sizes = readable_size($stat_sizes);
 $users_number = $stat_users;
@@ -33,9 +33,9 @@ $upload_max_filesize = function_exists('ini_get')
     : @get_cfg_var('upload_max_filesize');
 $post_max_size = function_exists('ini_get') ? @ini_get('post_max_size') : @get_cfg_var('post_max_size');
 $memory_limit = function_exists('ini_get') ? @ini_get('memory_limit') : @get_cfg_var('memory_limit');
-$s_last_google = $stat_last_google == 0 ? '[ ? ]' : kleeja_date($stat_last_google);
+$s_last_google = (int) $stat_last_google === 0 ? '[ ? ]' : kleeja_date($stat_last_google);
 $s_google_num = $stat_google_num;
-$s_last_bing = $stat_last_bing == 0 ? '[ ? ]' : kleeja_date($stat_last_bing);
+$s_last_bing = (int) $stat_last_bing === 0 ? '[ ? ]' : kleeja_date($stat_last_bing);
 $s_bing_num = $stat_bing_num;
 $usernamelang = sprintf($lang['KLEEJA_CP_W'], $username);
 $current_year = date('Y');
@@ -72,14 +72,8 @@ $kleeja_version =
 //admin messages system
 $ADM_NOTIFICATIONS = [];
 
-//useing IE6 ! and he is admin ?  omg !
-$u_agent = !empty($_SERVER['HTTP_USER_AGENT'])
-    ? htmlspecialchars((string) strtolower($_SERVER['HTTP_USER_AGENT']))
-    : (function_exists('getenv')
-        ? getenv('HTTP_USER_AGENT')
-        : '');
-
-if (is_browser('ie6, ie8, ie7')) {
+//using Internet Explorer ! the control panel doesn't support any version of it
+if (is_browser('ie')) {
     $ADM_NOTIFICATIONS['IE6'] = [
         'id' => 'IE6',
         'msg_type' => 'error',
@@ -99,7 +93,7 @@ if (file_exists(PATH . 'includes/adm/files.php') || file_exists(PATH . 'admin.ph
 }
 
 //if html url is enabled but .htaccess is not available in the root dir !
-if (!file_exists(PATH . '.htaccess') && (int) $config['mod_writer'] == 1) {
+if (!file_exists(PATH . '.htaccess') && (int) $config['mod_writer'] === 1) {
     $ADM_NOTIFICATIONS['htmlurlshtaccess'] = [
         'id' => 'htmlurlshtaccess',
         'msg_type' => 'info',
@@ -110,19 +104,39 @@ if (!file_exists(PATH . '.htaccess') && (int) $config['mod_writer'] == 1) {
 
 //updating
 $v = @unserialize($config['new_version'], ['allowed_classes' => false]);
+//empty before the first check, and the check saves no version when GitHub can't be reached
+$latest_version = (string) ($v['version_number'] ?? '');
 
-if (version_compare(strtolower(KLEEJA_VERSION), strtolower($v['version_number'] || 0), '<')) {
+if ($latest_version !== '' && version_compare(strtolower(KLEEJA_VERSION), strtolower($latest_version), '<')) {
     $ADM_NOTIFICATIONS['up_ver_klj'] = [
         'id' => 'up_ver_klj', //this not so important row
         'msg_type' => 'error',
         'title' => $lang['R_CHECK_UPDATE'],
         'msg' =>
-            sprintf($lang['UPDATE_NOW_S'], KLEEJA_VERSION, $v['version_number']) .
+            sprintf($lang['UPDATE_NOW_S'], KLEEJA_VERSION, $latest_version) .
             '<br />' .
             '<a href="https://kleeja.net/" target="_blank">kleeja.net</a>',
     ];
 
     extract(runHook('admin_update_now', get_defined_vars()));
+}
+
+//the database is older than the files, an update stopped before it, the founders can finish it
+if ((int) ($config['db_version'] ?? 0) < (int) KLEEJA_DB_VERSION && (int) $userinfo['founder'] === 1) {
+    $ADM_NOTIFICATIONS['db_update'] = [
+        'id' => 'db_update',
+        'msg_type' => 'error',
+        'title' => $lang['DB_UPDATE_NEEDED_TITLE'],
+        'msg' =>
+            sprintf($lang['DB_UPDATE_NEEDED'], (int) ($config['db_version'] ?? 0), KLEEJA_DB_VERSION) .
+            '<br /><a class="btn btn-sm btn-primary mt-2" href="' .
+            basename(ADMIN_PATH) .
+            '?cp=p_check_update&amp;smt=db_update&amp;' .
+            kleeja_add_form_key_get('UPDATER_FORM_KEY') .
+            '">' .
+            $lang['DB_UPDATE_NOW'] .
+            '</a>',
+    ];
 }
 
 extract(runHook('default_admin_page', get_defined_vars()));
@@ -243,7 +257,7 @@ if ((int) $config['klj_clean_files_from'] > 0) {
 }
 
 //if there is no thumbs folder
-if (!file_exists(PATH . $config['foldername'] . '/thumbs') && (int) $config['thumbs_imgs'] != 0) {
+if (!file_exists(PATH . $config['foldername'] . '/thumbs') && (int) $config['thumbs_imgs'] !== 0) {
     $ADM_NOTIFICATIONS['no_thumbs'] = [
         'id' => 'no_thumbs',
         'msg_type' => 'info',
@@ -261,19 +275,25 @@ $go_menu = [
         'name' => $lang['GENERAL_STAT'],
         'link' => basename(ADMIN_PATH) . '?cp=start&amp;smt=general',
         'goto' => 'general',
-        'current' => $current_smt == 'general',
+        'current' => $current_smt === 'general',
     ],
     'other' => [
         'name' => $lang['OTHER_INFO'],
         'link' => basename(ADMIN_PATH) . '?cp=start&amp;smt=other',
         'goto' => 'other',
-        'current' => $current_smt == 'other',
+        'current' => $current_smt === 'other',
+    ],
+    'blog' => [
+        'name' => $lang['ADM_KLEEJA_BLOG'],
+        'link' => basename(ADMIN_PATH) . '?cp=start&amp;smt=blog',
+        'goto' => 'blog',
+        'current' => $current_smt === 'blog',
     ],
     'team' => [
         'name' => $lang['KLEEJA_TEAM'],
         'link' => basename(ADMIN_PATH) . '?cp=start&amp;smt=team',
         'goto' => 'team',
-        'current' => $current_smt == 'team',
+        'current' => $current_smt === 'team',
     ],
 ];
 
@@ -291,12 +311,12 @@ $hurry_langs_list = '';
 
 if ($dh = @opendir(PATH . 'lang')) {
     while (($file = @readdir($dh)) !== false) {
-        if (strpos($file, '.') === false && $file != '..' && $file != '.') {
+        if (strpos($file, '.') === false && $file !== '..' && $file !== '.') {
             $hurry_langs_list .=
                 '<option value="' .
                 htmlspecialchars($file) .
                 '"' .
-                ($d_groups[$config['default_group']]['configs']['language'] == $file ? ' selected="selected"' : '') .
+                ($d_groups[$config['default_group']]['configs']['language'] === $file ? ' selected="selected"' : '') .
                 '>' .
                 $file .
                 '</option>';
@@ -350,7 +370,7 @@ if ($cf_num > 3) {
 
     while ($row = $SQL->fetch_array($cf_result)) {
         //jump today
-        if ($prev_date == $row['filter_uid']) {
+        if ($prev_date === $row['filter_uid']) {
             continue;
         }
 
@@ -360,7 +380,7 @@ if ($cf_num > 3) {
         $t_files = $prv_files - $s_files;
         $t_imgs = $prev_imgs - $s_imgs;
 
-        if (date('d-n-Y') == $prev_date) {
+        if (date('d-n-Y') === $prev_date) {
             $day = $lang['TODAY'] . ' ~ ' . $lang['NOW'];
 
             if ($todayIsGone) {
@@ -400,3 +420,6 @@ if ($cf_num > 3) {
         $SQL->build($query_del);
     }
 }
+
+// ECharts draws the uploads chart on the dashboard and the commit charts on the team page
+$start_charts = $current_smt === 'team' || ($current_smt === 'general' && $stats_chart);

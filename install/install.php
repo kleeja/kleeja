@@ -22,6 +22,7 @@ if (file_exists(PATH . 'config.php')) {
 }
 
 include_once PATH . 'includes/plugins.php';
+include_once PATH . 'includes/functions_error.php';
 include_once PATH . 'includes/functions_display.php';
 include_once PATH . 'includes/functions_alternative.php';
 include_once PATH . 'includes/functions.php';

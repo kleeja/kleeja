@@ -1,4 +1,17 @@
+<div class="row justify-content-center">
+    <div class="col-md-9 col-lg-7 col-xl-6">
+        <div class="card shadow-sm text-center">
+            <div class="card-body p-4 p-md-5">
+                <span class="icon-box icon-box-lg rounded-circle bg-primary-subtle text-primary-emphasis mb-4"><i class="fa-solid fa-info"></i></span>
+                <IF NAME="title">
+                <h1 class="h4 fw-bold mb-2">{title}</h1>
+                </IF>
+                <div class="text-body-secondary mb-4" role="status">{text}</div>
 
-<div class="alert alert-info">
-    {text}
+                <a href="{config.siteurl}" class="btn btn-primary px-4">
+                    <i class="fa-solid fa-house me-2"></i>{lang.INDEX}
+                </a>
+            </div>
+        </div>
+    </div>
 </div>

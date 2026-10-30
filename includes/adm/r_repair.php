@@ -176,14 +176,14 @@ switch ($case):
     //toggle admin start boxes
     case 'toggle_start_box':
         if (!kleeja_check_form_key_get('adm_start_actions')) {
-            header('HTTP/1.1 405 Method Not Allowed');
+            http_response_code(405);
             $adminAjaxContent = $lang['INVALID_FORM_KEY'];
         } else {
             $items = explode(':', $config['hidden_start_boxes']);
             $items = array_filter($items);
 
             $name = g('name');
-            $hide = g('toggle', 'int') == 1;
+            $hide = g('toggle', 'int') === 1;
 
             //showing a box that is not hidden changes nothing
             $new_items = $items;
@@ -194,7 +194,7 @@ switch ($case):
                 $new_items[] = $name;
             }
 
-            if ($new_items != $items) {
+            if ($new_items !== $items) {
                 update_config('hidden_start_boxes', implode(':', $new_items));
             }
 

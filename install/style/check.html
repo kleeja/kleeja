@@ -9,9 +9,9 @@
                 {{foreach($GLOBALS['requirements'] as $requirement):}}
                 <li class="list-group-item">
                     {{if($requirement['ok']):}}
-                    <span class="text-success">{{echo inst_icon('check-circle-fill')}}</span>
+                    <span class="text-success">{{echo inst_icon('circle-check')}}</span>
                     {{else:}}
-                    <span class="text-danger">{{echo inst_icon('x-circle-fill')}}</span>
+                    <span class="text-danger">{{echo inst_icon('circle-xmark')}}</span>
                     {{endif;}}
                     <div>
                         <div class="fw-semibold">{{echo $requirement['title']}}</div>
@@ -25,7 +25,7 @@
             <h2 class="h6 fw-bold mt-4 mb-3">{{echo $lang['ADVICES_CHECK']}}</h2>
             {{if($GLOBALS['ziparchive_lib']):}}
             <div class="alert alert-warning d-flex gap-3 mb-0" role="alert">
-                {{echo inst_icon('exclamation-triangle-fill')}}
+                {{echo inst_icon('triangle-exclamation')}}
                 <div>{{echo $lang['ZIPARCHIVE_LIB']}}</div>
             </div>
             {{endif;}}
@@ -41,7 +41,7 @@
                 </a>
                 {{else:}}
                 <a class="btn btn-primary" href="./install.php?step=f&amp;{{echo getlang(1)}}">
-                    {{echo inst_icon('arrow-repeat')}} {{echo $lang['RE_CHECK']}}
+                    {{echo inst_icon('arrows-rotate')}} {{echo $lang['RE_CHECK']}}
                 </a>
                 {{endif;}}
             </div>

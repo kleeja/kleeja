@@ -16,7 +16,7 @@ desc:ar = أحد الستايلات الافتراضية مع النسخة, تط
 copyright = 2017 Kleeja.net
 
 #Version of style
-version = 1.0
+version = 2.0
 
 #Min. required version of kleeja
 kleeja_version = 1.7

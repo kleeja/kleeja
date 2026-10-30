@@ -37,7 +37,7 @@ if (ip('submit')) {
 }
 
 //add delete process to the queue
-if ($current_smt == 'del_d30' || $current_smt == 'del_all') {
+if ($current_smt === 'del_d30' || $current_smt === 'del_all') {
     if (strpos($config['queue'], ':' . $current_smt . 'reports:') !== false) {
         kleeja_admin_err(
             $lang['DELETE_PROCESS_IN_WORK'],
@@ -60,7 +60,7 @@ $query = [
     'ORDER BY' => 'r.id DESC',
 ];
 
-if ($current_smt == 'show_h24') {
+if ($current_smt === 'show_h24') {
     $query['WHERE'] = 'r.time > :time';
     $query['BIND'] = ['time' => time() - 3600 * 24];
 }
@@ -86,14 +86,17 @@ if ($nums_rows > 0) {
         //make new lovely arrays !!
         $arr[] = [
             'id' => $row['id'],
-            'name' => $row['name'],
+            //saved encoded twice by go.php, older reports once
+            'name' => kleeja_html_display($row['name']),
             'mail' => $row['mail'],
-            'url' => $row['url'],
-            'text' => $row['text'],
+            'url' => kleeja_html_display($row['url']),
+            //only http and https are links, a javascript: link of an older report is shown as a text
+            'url_is_link' => (bool) preg_match('#^https?://#i', kleeja_html_decode($row['url'])),
+            'text' => kleeja_html_display($row['text']),
             'human_time' => kleeja_date($row['time']),
             'time' => kleeja_date($row['time'], human_time: false),
             'ip' => $row['ip'],
-            'sent' => $row['id'] == $msg_sent,
+            'sent' => (int) $row['id'] === $msg_sent,
             'ip_finder' => 'https://ipinfo.io/' . htmlspecialchars($row['ip']),
         ];
 
@@ -110,25 +113,17 @@ if ($nums_rows > 0) {
         if (ip('reply_submit')) {
             if ($sen[$row['id']]) {
                 $to = $row['mail'];
-                $subject = $lang['REPLY_REPORT'] . ':' . $config['sitename'];
-                $message =
-                    "\n " .
-                    $lang['WELCOME'] .
-                    ' ' .
-                    $row['name'] .
-                    "\r\n " .
-                    $lang['U_REPORT_ON'] .
-                    ' ' .
-                    $config['sitename'] .
-                    "\r\n " .
-                    $lang['BY_EMAIL'] .
-                    ' : ' .
-                    $row['mail'] .
-                    "\r\n" .
-                    $lang['ADMIN_REPLIED'] .
-                    ": \r\n" .
-                    $sen[$row['id']] .
-                    "\r\n\r\n kleeja.net";
+                $subject = sprintf($lang['MAIL_REPORT_REPLY_SUBJECT'], $config['sitename']);
+                $message = [
+                    ['type' => 'text', 'content' => sprintf($lang['MAIL_HELLO'], $row['name'])],
+                    ['type' => 'text', 'content' => sprintf($lang['MAIL_REPORT_REPLY_INTRO'], $config['sitename'])],
+                    ['type' => 'alert', 'content' => $sen[$row['id']]],
+                    //the quote is a block of its own, so it takes the direction of its own language
+                    ['type' => 'text', 'content' => $lang['MAIL_YOUR_REPORT']],
+                    ['type' => 'text', 'content' => $row['text']],
+                    ['type' => 'text', 'content' => $lang['URL'] . ': ' . $row['url']],
+                    ['type' => 'text', 'content' => sprintf($lang['MAIL_REGARDS'], $config['sitename'])],
+                ];
 
                 $send = send_mail($to, $message, $subject, $config['sitemail'], $config['sitename']);
 
@@ -179,10 +174,7 @@ if (sizeof($del_nums)) {
 }
 
 $total_pages = $Pager->getTotalPages();
-$page_nums = $Pager->print_nums(
-    basename(ADMIN_PATH) . '?cp=' . basename(__FILE__, '.php'),
-    'onclick="javascript:get_kleeja_link($(this).attr(\'href\'), \'#content\'); return false;"',
-);
+$page_nums = $Pager->print_nums(basename(ADMIN_PATH) . '?cp=' . basename(__FILE__, '.php'));
 
 //after submit
 if (ip('submit')) {
@@ -201,27 +193,27 @@ $go_menu = [
         'name' => $lang['R_REPORTS'],
         'link' => basename(ADMIN_PATH) . '?cp=f_reports&amp;smt=general',
         'goto' => 'general',
-        'current' => $current_smt == 'general',
+        'current' => $current_smt === 'general',
     ],
     'show_h24' => [
         'name' => $lang['SHOW_FROM_24H'],
         'link' => basename(ADMIN_PATH) . '?cp=f_reports&amp;smt=show_h24',
         'goto' => 'show_h24',
-        'current' => $current_smt == 'show_h24',
+        'current' => $current_smt === 'show_h24',
     ],
     //TODO : CHECK IF IT'S ALREADY DONE ?
     'del_d30' => [
         'name' => $lang['DELETE_EARLIER_30DAYS'],
         'link' => basename(ADMIN_PATH) . '?cp=f_reports&amp;smt=del_d30',
         'goto' => 'del_d30',
-        'current' => $current_smt == 'del_d30',
+        'current' => $current_smt === 'del_d30',
         'confirm' => true,
     ],
     'del_all' => [
         'name' => $lang['DELETE_ALL'],
         'link' => basename(ADMIN_PATH) . '?cp=f_reports&amp;smt=del_all',
         'goto' => 'del_all',
-        'current' => $current_smt == 'del_all',
+        'current' => $current_smt === 'del_all',
         'confirm' => true,
     ],
 ];

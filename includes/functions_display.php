@@ -25,7 +25,7 @@ function Saaheader(string $title = '', string $extra = ''): void
 
     //is user ? and username
     $user_is = $usrcp->name() ? true : false;
-    $username = $usrcp->name() ? $usrcp->name() : $lang['GUST'];
+    $username = $usrcp->name() ? kleeja_html_display($usrcp->name()) : $lang['GUST'];
 
     //our default charset
     $charset = 'utf-8';
@@ -35,12 +35,14 @@ function Saaheader(string $title = '', string $extra = ''): void
             'name' => 'profile',
             'title' => $lang['PROFILE'],
             'url' => $config['siteurl'] . ($config['mod_writer'] ? 'profile.html' : 'ucp.php?go=profile'),
+            'icon' => 'user-gear',
             'show' => $user_is,
         ],
         2 => [
             'name' => 'fileuser',
             'title' => $lang['YOUR_FILEUSER'],
             'url' => $config['siteurl'] . ($config['mod_writer'] ? 'fileuser.html' : 'ucp.php?go=fileuser'),
+            'icon' => 'folder-open',
             'show' => $config['enable_userfile'] && user_can('access_fileuser'),
         ],
         3 => $user_is
@@ -48,18 +50,21 @@ function Saaheader(string $title = '', string $extra = ''): void
                 'name' => 'logout',
                 'title' => $lang['LOGOUT'],
                 'url' => $config['siteurl'] . ($config['mod_writer'] ? 'logout.html' : 'ucp.php?go=logout'),
+                'icon' => 'right-from-bracket',
                 'show' => true,
             ]
             : [
                 'name' => 'login',
                 'title' => $lang['LOGIN'],
                 'url' => $config['siteurl'] . ($config['mod_writer'] ? 'login.html' : 'ucp.php?go=login'),
+                'icon' => 'right-to-bracket',
                 'show' => true,
             ],
         4 => [
             'name' => 'register',
             'title' => $lang['REGISTER'],
             'url' => $config['siteurl'] . ($config['mod_writer'] ? 'register.html' : 'ucp.php?go=register'),
+            'icon' => 'user-plus',
             'show' => !$user_is && $config['register'],
         ],
     ];
@@ -103,6 +108,14 @@ function Saaheader(string $title = '', string $extra = ''): void
 
     extract(runHook('Saaheader_links_func', get_defined_vars()));
 
+    //the icon of a side menu item is a Font Awesome name without "fa-", like the admin menu,
+    //and the items that plugins add without one get the default icon
+    foreach ($side_menu as $key => $item) {
+        if (empty($item['icon'])) {
+            $side_menu[$key]['icon'] = 'puzzle-piece';
+        }
+    }
+
     //assign some variables
     $tpl->assign('dir', $lang['DIR']);
     $tpl->assign('title', $title);
@@ -134,7 +147,7 @@ function Saaheader(string $title = '', string $extra = ''): void
 
     $header = $tpl->display('header');
 
-    if ($config['siteclose'] == '1' && user_can('enter_acp') && !defined('IN_ADMIN')) {
+    if ((int) $config['siteclose'] === 1 && user_can('enter_acp') && !defined('IN_ADMIN')) {
         //add notification bar
         $header = preg_replace(
             '/<body([^\>]*)>/i',
@@ -169,7 +182,7 @@ function Saafooter(): void
     //show stats ..
     $page_stats = '';
 
-    if ($config['statfooter'] != 0 || defined('DEV_STAGE')) {
+    if ((int) $config['statfooter'] !== 0 || defined('DEV_STAGE')) {
         $hksys = !defined('STOP_PLUGINS') ? 'Enabled' : 'Disabled';
         $endtime = get_microtime();
         $loadtime = number_format($endtime - $starttm, 4);
@@ -663,6 +676,7 @@ function big_error(string $error_title, string $msg_text, bool $error = true): v
         $error_template = preg_replace('/<!-- BEGIN DETAILS -->.*?<!-- END DETAILS -->/s', '', $error_template);
 
         echo strtr($error_template, [
+            '{ROOT}' => htmlspecialchars(kleeja_web_root(), ENT_QUOTES, 'UTF-8'),
             '{TITLE}' => $error_title,
             '{BADGE}' => $error ? 'Kleeja Error' : 'Kleeja Information',
             '{TYPE}' => $error ? 'error' : 'info',
@@ -747,12 +761,18 @@ function kleeja_check_form_key_get(string $request_id): bool
 {
     global $config;
 
-    $token = substr(sha1($config['h_key'] . date('H-d-m') . $request_id), 0, 20);
-
     $return = false;
 
-    if ($token == g('formkey')) {
-        $return = true;
+    //the key changes every hour, the one of the last hour is still good,
+    //so a page opened at 10:59 and used at 11:00 (or a long update between its steps) is not refused
+    foreach ([time(), time() - 3600] as $key_time) {
+        $token = substr(sha1($config['h_key'] . date('H-d-m', $key_time) . $request_id), 0, 20);
+
+        if ($token === g('formkey')) {
+            $return = true;
+
+            break;
+        }
     }
 
     extract(runHook('kleeja_check_form_key_get_func', get_defined_vars()));
@@ -838,8 +858,8 @@ function kleeja_get_link(string $pid, array $extra = []): string
     //to prevent bug with rewrite
     if ($config['mod_writer'] && !empty($extra['::NAME::'])) {
         if (
-            (($pid == 'image' || $pid == 'thumb') && $config['id_form_img'] != 'direct') ||
-            ($pid == 'file' && $config['id_form'] != 'direct')
+            (($pid === 'image' || $pid === 'thumb') && $config['id_form_img'] !== 'direct') ||
+            ($pid === 'file' && $config['id_form'] !== 'direct')
         ) {
             $extra['::NAME::'] = str_replace('.', '-', $extra['::NAME::']);
         }
@@ -900,10 +920,11 @@ function get_up_tpl_box(string $box_name, array $extra = []): string
         if (!file_exists($tpl_path)) {
             $depend_on = false;
 
-            if (trim($config['style_depend_on']) != '') {
+            if (trim($config['style_depend_on']) !== '') {
                 $depend_on = $config['style_depend_on'];
             } else {
-                $depend_on = 'default';
+                //bootstrap is the default style
+                $depend_on = 'bootstrap';
             }
 
             $tpl_path = str_replace('/' . $config['style'] . '/', '/' . trim($depend_on) . '/', $tpl_path);
@@ -972,7 +993,7 @@ function kleeja_style_info(string $style_name): array|false
 
     foreach ($inf_l as $m) {
         //comments
-        if ((isset($m[0]) && $m[0] == '#') || trim($m) == '') {
+        if ((isset($m[0]) && $m[0] === '#') || trim($m) === '') {
             continue;
         }
 
@@ -998,8 +1019,12 @@ function kleeja_style_info(string $style_name): array|false
 /**
  * Browser detection
  * returns whether or not the visiting browser is the one specified [part of kleeja style system]
- * i.e. is_browser('ie6') -> true or false
- * i.e. is_browser('ie, opera') -> true or false
+ * i.e. is_browser('ie11') -> true or false
+ * i.e. is_browser('edge, opera') -> true or false
+ * browsers: ie, edge, opera, firefox, chrome, safari, konqueror
+ * engines: mozilla (Gecko), webkit (Safari and every Chromium browser)
+ * a version can follow the name and matches whole numbers: firefox14 is 14.x, not 143.0
+ * mobile is phones and the tablets that say so, iPadOS sends the macOS agent and can't be told apart
  * @param  string $b browser name, like mozilla
  * @return bool
  */
@@ -1018,104 +1043,36 @@ function is_browser(string $b): bool
         return false;
     }
 
-    //if no agent, let's take the worst case
-    $u_agent = !empty($_SERVER['HTTP_USER_AGENT'])
-        ? htmlspecialchars((string) $_SERVER['HTTP_USER_AGENT'])
-        : (function_exists('getenv')
-            ? getenv('HTTP_USER_AGENT')
-            : '');
+    $u_agent = strtolower((string) ($_SERVER['HTTP_USER_AGENT'] ?? ''));
     $t = trim(preg_replace('/[^a-z]/', '', $b));
     $r = trim(preg_replace('/[a-z]/', '', $b));
 
+    // name => [the agent token and its version, the other browsers that copy that token]
+    $browsers = [
+        'ie' => ['/(?:msie |trident\/.+?rv:)([\d.]+)/', ''],
+        'edge' => ['/\bedg(?:e|a|ios)?\/([\d.]+)/', ''],
+        'opera' => ['/\b(?:opr|opt|opera)[\/ ]([\d.]+)/', ''],
+        'firefox' => ['/\b(?:firefox|fxios)\/([\d.]+)/', ''],
+        'chrome' => ['/\b(?:chrome|crios)\/([\d.]+)/', '/\b(?:edg(?:e|a|ios)?|opr|opt)\//'],
+        'safari' => ['/\bversion\/([\d.]+).*\bsafari\//', '/\b(?:chrome|chromium|crios|fxios|edgios|opt)\/|android/'],
+        'konqueror' => ['/\bkonqueror\/([\d.]+)/', ''],
+        'mozilla' => ['/\bgecko\/([\d.]+)/', ''],
+        'webkit' => ['/\bapplewebkit\/([\d.]+)/', ''],
+    ];
+
     $return = false;
 
-    switch ($t) {
-        case 'ie':
-            $return = strpos(strtolower($u_agent), trim('msie ' . $r)) !== false ? true : false;
-
-            break;
-
-        case 'firefox':
-            $return =
-                strpos(str_replace('/', ' ', strtolower($u_agent)), trim('firefox ' . $r)) !== false ? true : false;
-
-            break;
-
-        case 'safari':
-            $return = strpos(strtolower($u_agent), trim('safari/' . $r)) !== false ? true : false;
-
-            break;
-
-        case 'chrome':
-            $return = strpos(strtolower($u_agent), trim('chrome ' . $r)) !== false ? true : false;
-
-            break;
-
-        case 'flock':
-            $return = strpos(strtolower($u_agent), trim('flock ' . $r)) !== false ? true : false;
-
-            break;
-
-        case 'opera':
-            $return = strpos(strtolower($u_agent), trim('opera ' . $r)) !== false ? true : false;
-
-            break;
-
-        case 'konqueror':
-            $return = strpos(strtolower($u_agent), trim('konqueror/' . $r)) !== false ? true : false;
-
-            break;
-
-        case 'mozilla':
-            $return = strpos(strtolower($u_agent), trim('gecko/' . $r)) !== false ? true : false;
-
-            break;
-
-        case 'webkit':
-            $return = strpos(strtolower($u_agent), trim('applewebkit/' . $r)) !== false ? true : false;
-
-            break;
-        /**
-         * Mobile Phones are so popular those days, so we have to support them ...
-         * This is still in our test lab.
-         * @see http://en.wikipedia.org/wiki/List_of_user_agents_for_mobile_phones
-         **/
-        case 'mobile':
-            $mobile_agents = [
-                'iPhone;',
-                'iPod;',
-                'blackberry',
-                'Android',
-                'HTC',
-                'IEMobile',
-                'LG/',
-                'LG-',
-                'LGE-',
-                'MOT-',
-                'Nokia',
-                'SymbianOS',
-                'nokia_',
-                'PalmSource',
-                'webOS',
-                'SAMSUNG-',
-                'SEC-SGHU',
-                'SonyEricsson',
-                'BOLT/',
-                'Mobile Safari',
-                'Fennec/',
-                'Opera Mini',
-            ];
-            $return = false;
-
-            foreach ($mobile_agents as $agent) {
-                if (strpos($u_agent, $agent) !== false) {
-                    $return = true;
-
-                    break;
-                }
-            }
-
-            break;
+    if ($t === 'mobile') {
+        // Chromium sends this client hint over HTTPS, the rest is for the other browsers
+        $return =
+            ($_SERVER['HTTP_SEC_CH_UA_MOBILE'] ?? '') === '?1' ||
+            preg_match('/mobi|android|iphone|ipod|ipad|blackberry|bb10|opera mini|kaios|symbian/', $u_agent) === 1;
+    } elseif (
+        isset($browsers[$t]) &&
+        preg_match($browsers[$t][0], $u_agent, $m) &&
+        ($browsers[$t][1] === '' || !preg_match($browsers[$t][1], $u_agent))
+    ) {
+        $return = $r === '' || $m[1] === $r || strpos($m[1], $r . '.') === 0;
     }
 
     extract(runHook('is_browser_func', get_defined_vars()));
@@ -1191,10 +1148,10 @@ function kleeja_date(int $time, bool $human_time = true, string $format = ''): s
         $difference /= $lengths[$j];
     }
 
-    $difference = round($difference);
+    $difference = (int) round($difference);
 
-    if ($difference != 1) {
-        if ($difference == 2) {
+    if ($difference !== 1) {
+        if ($difference === 2) {
             $return = $lang['W_PERIODS_DP_' . $j];
         } else {
             $return = $difference . ' ' . ($difference > 10 ? $lang['W_PERIODS_' . $j] : $lang['W_PERIODS_P_' . $j]);
@@ -1250,15 +1207,6 @@ function time_zones(): array
 function configField(string $name, string $type = 'text', array $select_options = []): string
 {
     switch ($type) {
-        default:
-        case 'text':
-            return '<input type="text" id="kj_meta_seo_home_meta_keywords" name="' .
-                $name .
-                '"' .
-                ' value="{con.' .
-                $name .
-                '}" size="50" />';
-
         case 'yesno':
             return '<label>{lang.YES}<input type="radio" id="' .
                 $name .
@@ -1295,6 +1243,15 @@ function configField(string $name, string $type = 'text', array $select_options 
             }
 
             return $return_value . '</select>' . "\n";
+        default:
+            return '<input type="text" id="' .
+                $name .
+                '" name="' .
+                $name .
+                '"' .
+                ' value="{con.' .
+                $name .
+                '}" size="50" />';
     }
 }
 

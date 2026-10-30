@@ -28,15 +28,15 @@ $case = g('case', default: 'local');
 //check _GET Csrf token
 if (!empty($case) && in_array($case, ['select', 'download', 'dfolder'])) {
     if (!kleeja_check_form_key_get('adm_styles_get')) {
-        header('HTTP/1.0 401 Unauthorized');
+        http_response_code(401);
         kleeja_admin_err($lang['INVALID_GET_KEY'], $action);
     }
 }
 
-//check _POST Csrf token
-if (ip('newstyle')) {
+//check _POST Csrf token, the upload form sends newstyle, and ?case=upload without it is checked too
+if (ip('newstyle') || $case === 'upload') {
     if (!kleeja_check_form_key('adm_styles')) {
-        header('HTTP/1.0 401 Unauthorized');
+        http_response_code(401);
         kleeja_admin_err($lang['INVALID_FORM_KEY'], title: $lang['ERROR'], redirect: $action);
     }
 
@@ -61,7 +61,7 @@ switch ($case):
                         'version' => '',
                     ];
 
-                    if (($style_info = kleeja_style_info($folder_name)) != false) {
+                    if (($style_info = kleeja_style_info($folder_name)) !== false) {
                         foreach (['name', 'desc', 'copyright', 'version'] as $InfoKey) {
                             if (array_key_exists($InfoKey, $style_info)) {
                                 if (is_array($style_info[$InfoKey])) {
@@ -77,7 +77,7 @@ switch ($case):
 
                     $available_styles[$folder_name] = [
                         'name' => $folder_name,
-                        'is_default' => $config['style'] == $folder_name ? true : false,
+                        'is_default' => $config['style'] === $folder_name ? true : false,
                         'link_mk_default' =>
                             basename(ADMIN_PATH) .
                             '?cp=' .
@@ -102,12 +102,12 @@ switch ($case):
 
         // plugins avilable in kleeja remote catalog
         if (!($store_catalog = $cache->get('store_catalog'))) {
-            $store_link = 'https://raw.githubusercontent.com/kleeja/store-catalog/master/catalog.json';
+            $store_link = Plugins::STORE_CATALOG_LINK;
 
             $store_catalog = FetchFile::make($store_link)->get();
             $store_catalog = json_decode($store_catalog, true);
 
-            if (json_last_error() == JSON_ERROR_NONE) {
+            if (json_last_error() === JSON_ERROR_NONE) {
                 $cache->save('store_catalog', $store_catalog);
             }
         }
@@ -118,17 +118,17 @@ switch ($case):
         $available_styles_names = array_column($available_styles, 'name');
 
         foreach ($store_catalog as $style_info) {
-            if ($style_info['type'] != 'style') {
+            if ($style_info['type'] !== 'style') {
                 continue;
             }
 
-            if ($case == 'store' && !empty($available_styles[$style_info['name']])) {
+            if ($case === 'store' && !empty($available_styles[$style_info['name']])) {
                 continue;
             }
 
             // is there a new version of this in the store
             elseif (
-                $case == 'check' &&
+                $case === 'check' &&
                 ((!empty($available_styles[$style_info['name']]['info']['version']) &&
                     version_compare(
                         strtolower($available_styles[$style_info['name']]['info']['version']),
@@ -137,6 +137,16 @@ switch ($case):
                     )) ||
                     empty($available_styles[$style_info['name']]['info']['version']))
             ) {
+                continue;
+            }
+
+            $not_compatible = !(
+                version_compare(strtolower($style_info['kleeja_version']['min']), KLEEJA_VERSION, '<=') &&
+                version_compare(strtolower($style_info['kleeja_version']['max']), KLEEJA_VERSION, '>=')
+            );
+
+            // hide styles that are not compatible with this version of kleeja
+            if ($not_compatible && !(defined('IGNORE_STORE_COMPATIBILITY') && IGNORE_STORE_COMPATIBILITY)) {
                 continue;
             }
 
@@ -159,11 +169,7 @@ switch ($case):
                     $style_info['kleeja_version']['max'],
                 ),
                 'icon' => $style_info['icon'],
-                'NotCompatible' =>
-                    version_compare(strtolower($style_info['kleeja_version']['min']), KLEEJA_VERSION, '<=') &&
-                    version_compare(strtolower($style_info['kleeja_version']['max']), KLEEJA_VERSION, '>=')
-                        ? false
-                        : true,
+                'NotCompatible' => $not_compatible,
             ];
         }
 
@@ -183,7 +189,7 @@ switch ($case):
         //check if this style depend on other style and
         //check kleeja version that required by this style
         //
-        if (($style_info = kleeja_style_info($style_name)) != false) {
+        if (($style_info = kleeja_style_info($style_name)) !== false) {
             if (isset($style_info['depend_on']) && !is_dir(PATH . 'styles/' . $style_info['depend_on'])) {
                 kleeja_admin_err(sprintf($lang['DEPEND_ON_NO_STYLE_ERR'], $style_info['depend_on']));
             }
@@ -197,8 +203,10 @@ switch ($case):
 
             //is this style require some plugins to be installed
             if (isset($style_info['plugins_required'])) {
-                $plugins_required = explode(',', $style_info['plugins_required']);
-                $plugins_required = array_map('trim', $plugins_required);
+                //the names are the keys, so an installed plugin is found and removed by its name
+                $plugins_required = array_flip(
+                    array_filter(array_map('trim', explode(',', $style_info['plugins_required'])), 'strlen'),
+                );
 
                 $query = [
                     'SELECT' => 'plg_name, plg_disabled',
@@ -207,21 +215,19 @@ switch ($case):
 
                 $result = $SQL->build($query);
 
-                if ($SQL->num_rows($result) != 0) {
-                    $plugins_required = array_flip($plugins_required);
-                    while ($row = $SQL->fetch_array($result)) {
-                        if (in_array($row['plg_name'], $plugins_required) and $row['plg_disabled'] != 1) {
-                            unset($plugins_required[$row['plg_name']]);
-                        }
+                while ($row = $SQL->fetch_array($result)) {
+                    if (isset($plugins_required[$row['plg_name']]) && (int) $row['plg_disabled'] !== 1) {
+                        unset($plugins_required[$row['plg_name']]);
                     }
                 }
 
                 $SQL->freeresult($result);
 
-                $plugins_required = array_flip($plugins_required);
-
+                //the ones left are not installed, or they are disabled
                 if (sizeof($plugins_required)) {
-                    kleeja_admin_err(sprintf($lang['PLUGINS_REQ_NO_STYLE_ERR'], implode(', ', $plugins_required)));
+                    kleeja_admin_err(
+                        sprintf($lang['PLUGINS_REQ_NO_STYLE_ERR'], implode(', ', array_keys($plugins_required))),
+                    );
                 }
             }
         }
@@ -239,11 +245,11 @@ switch ($case):
         break;
 
     case 'upload':
+        $ERRORS = [];
+
         if (intval($userinfo['founder']) !== 1) {
             $ERRORS[] = $lang['HV_NOT_PRVLG_ACCESS'];
         }
-
-        $ERRORS = [];
 
         //is uploaded?
         if (empty($_FILES['style_file']['tmp_name'])) {
@@ -308,7 +314,7 @@ switch ($case):
 
     case 'download':
         if (intval($userinfo['founder']) !== 1) {
-            header('HTTP/1.0 401 Unauthorized');
+            http_response_code(401);
             kleeja_admin_err($lang['HV_NOT_PRVLG_ACCESS']);
         }
 
@@ -332,7 +338,7 @@ switch ($case):
         }
 
         // plugins avilable in kleeja store
-        $store_link = 'https://raw.githubusercontent.com/kleeja/store-catalog/master/catalog.json';
+        $store_link = Plugins::STORE_CATALOG_LINK;
 
         $catalog_styles = FetchFile::make($store_link)->get();
 
@@ -343,7 +349,7 @@ switch ($case):
 
             // make an arry for all plugins in kleeja store that not included in our server
             foreach ($catalog_styles as $style_info) {
-                if ($style_info['type'] != 'style') {
+                if ($style_info['type'] !== 'style') {
                     continue;
                 }
 

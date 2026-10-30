@@ -31,7 +31,7 @@ $action_all =
 $cp_users_url = basename(ADMIN_PATH) . '?cp=' . basename(__FILE__, '.php');
 
 //if not normal user system
-$user_not_normal = (int) $config['user_system'] != 1;
+$user_not_normal = (int) $config['user_system'] !== 1;
 $is_search = $affected = false;
 $GET_FORM_KEY = kleeja_add_form_key_get('adm_users');
 $H_FORM_KEYS = kleeja_add_form_key('adm_users');
@@ -142,7 +142,7 @@ if (ig('deleteuserfile')) {
 
     $SQL->freeresult($result);
 
-    if ($num == 0) {
+    if ($num === 0) {
         kleeja_admin_err($lang['ADMIN_DELETE_NO_FILE'], redirect: $action_all, rs: 2);
     } else {
         //update number of stats
@@ -201,7 +201,7 @@ if (ig('del_user')) {
 //add new user
 //
 elseif (ip('newuser')) {
-    if (trim(p('lname')) == '' || trim(p('lpass')) == '' || trim(p('lmail')) == '') {
+    if (trim(p('lname')) === '' || trim(p('lpass')) === '' || trim(p('lmail')) === '') {
         $ERRORS[] = $lang['EMPTY_FIELDS'];
     } elseif (
         !preg_match(
@@ -217,7 +217,7 @@ elseif (ip('newuser')) {
             $SQL->query("SELECT * FROM {$dbprefix}users WHERE clean_name = :clean_name", [
                 'clean_name' => trim(kleeja_html_encode($usrcp->cleanusername(p('lname')))),
             ]),
-        ) != 0
+        ) !== 0
     ) {
         $ERRORS[] = $lang['EXIST_NAME'];
     } elseif (
@@ -225,7 +225,7 @@ elseif (ip('newuser')) {
             $SQL->query("SELECT * FROM {$dbprefix}users WHERE mail = :mail", [
                 'mail' => trim(kleeja_html_encode(strtolower(p('lmail')))),
             ]),
-        ) != 0
+        ) !== 0
     ) {
         $ERRORS[] = $lang['EXIST_EMAIL'];
     }
@@ -241,9 +241,9 @@ elseif (ip('newuser')) {
         $group = (int) p('lgroup');
 
         $insert_query = [
-            'INSERT' => 'name ,password, password_salt ,group_id, mail,founder, session_id, clean_name',
+            'INSERT' => 'name ,password, password_salt ,group_id, mail,founder, clean_name',
             'INTO' => "{$dbprefix}users",
-            'VALUES' => ":name, :password, :salt, :group_id, :mail, 0, '', :clean_name",
+            'VALUES' => ':name, :password, :salt, :group_id, :mail, 0, :clean_name',
             'BIND' => [
                 'name' => $name,
                 'password' => $pass,
@@ -312,9 +312,9 @@ if (ip('edituser')) {
     $new_name = $new_mail = false;
     $pass = '';
 
-    if (trim(p('l_name')) == '') {
+    if (trim(p('l_name')) === '') {
         $ERRORS[] = $lang['EMPTY_FIELDS'] . ' (' . $lang['USERNAME'] . ')';
-    } elseif (trim(p('l_mail')) == '') {
+    } elseif (trim(p('l_mail')) === '') {
         $ERRORS[] = $lang['EMPTY_FIELDS'] . ' (' . $lang['EMAIL'] . ')';
     } elseif (
         !preg_match(
@@ -326,7 +326,7 @@ if (ip('edituser')) {
     }
 
     if (empty($ERRORS)) {
-        if ($udata['clean_name'] != $new_clean_name) {
+        if ($udata['clean_name'] !== $new_clean_name) {
             $new_name = true;
 
             if (strlen(trim(p('l_name'))) < 2 || strlen(trim(p('l_name'))) > 100) {
@@ -336,13 +336,13 @@ if (ip('edituser')) {
                     $SQL->query("SELECT * FROM {$dbprefix}users WHERE clean_name = :clean_name", [
                         'clean_name' => $new_clean_name,
                     ]),
-                ) != 0
+                ) !== 0
             ) {
                 $ERRORS[] = $lang['EXIST_NAME'];
             }
         }
 
-        if ($udata['mail'] != trim(p('l_mail'))) {
+        if ($udata['mail'] !== trim(p('l_mail'))) {
             $new_mail = true;
 
             if (
@@ -350,13 +350,13 @@ if (ip('edituser')) {
                     $SQL->query("SELECT * FROM {$dbprefix}users WHERE mail = :mail", [
                         'mail' => trim(kleeja_html_encode(strtolower(p('l_mail')))),
                     ]),
-                ) != 0
+                ) !== 0
             ) {
                 $ERRORS[] = $lang['EXIST_EMAIL'];
             }
         }
 
-        if (trim(p('l_pass')) != '') {
+        if (trim(p('l_pass')) !== '') {
             $user_salt = substr(base64_encode(pack('H*', sha1(mt_rand()))), 0, 7);
             $pass_hash = $usrcp->kleeja_hash_password(trim(p('l_pass')) . $user_salt);
             $pass = 'password = :password, password_salt = :salt,';
@@ -426,7 +426,7 @@ if (ip('edituser')) {
 //add new group
 //
 if (ip('newgroup')) {
-    if (trim(p('gname')) == '') {
+    if (trim(p('gname')) === '') {
         $ERRORS[] = $lang['EMPTY_FIELDS'];
     } elseif (strlen(trim(p('gname'))) < 2 || strlen(trim(p('gname'))) > 100) {
         $ERRORS[] = str_replace('4', '1', $lang['WRONG_NAME']);
@@ -435,7 +435,7 @@ if (ip('newgroup')) {
             $SQL->query("SELECT * FROM {$dbprefix}groups WHERE group_name = :name", [
                 'name' => trim(kleeja_html_encode(p('gname'))),
             ]),
-        ) != 0
+        ) !== 0
     ) {
         $ERRORS[] = $lang['EXIST_NAME'];
     } elseif (in_array(trim(p('gname')), [$lang['ADMINS'], $lang['GUESTS'], $lang['USERS']])) {
@@ -461,7 +461,7 @@ if (ip('newgroup')) {
             kleeja_admin_err('ERROR-NO-ID', redirect: basename(ADMIN_PATH) . '?cp=' . basename(__FILE__, '.php'));
         }
 
-        if ($org_group_id == -1) {
+        if ($org_group_id === -1) {
             $org_group_id = (int) $config['default_group'];
         }
 
@@ -555,17 +555,17 @@ if (ip('delgroup')) {
     }
 
     //We can not move users to the same group we deleting ! that's stupid pro!
-    if ($from_group == $to_group) {
+    if ($from_group === $to_group) {
         kleeja_admin_err($lang['NO_MOVE_SAME_GRP'], redirect: basename(ADMIN_PATH) . '?cp=g_users');
     }
 
     //to_group = '-1' : means default group .. so now we get the real ID.
-    if ($to_group == -1) {
+    if ($to_group === -1) {
         $to_group = (int) $config['default_group'];
     }
 
     //you can not delete default group !
-    if ($from_group == (int) $config['default_group']) {
+    if ($from_group === (int) $config['default_group']) {
         kleeja_admin_err($lang['DEFAULT_GRP_NO_DEL'], redirect: basename(ADMIN_PATH) . '?cp=g_users');
     }
 
@@ -671,7 +671,7 @@ switch ($current_smt):
                     'name' => str_replace(
                         ['{lang.ADMINS}', '{lang.USERS}', '{lang.GUESTS}'],
                         [$lang['ADMINS'], $lang['USERS'], $lang['GUESTS']],
-                        $row['group_name'],
+                        kleeja_html_display($row['group_name']),
                     ),
                     'style' => !empty($groups_background_color[$row['group_id']])
                         ? $groups_background_color[$row['group_id']]
@@ -679,7 +679,7 @@ switch ($current_smt):
                     'is_default' => (int) $row['group_is_default'] ? true : false,
                 ];
 
-                if ((int) $row['group_is_essential'] == 1) {
+                if ((int) $row['group_is_essential'] === 1) {
                     $e_groups[] = $r;
                 } else {
                     $c_groups[] = $r;
@@ -730,7 +730,7 @@ switch ($current_smt):
                 }
             }
 
-            if ($req_group == 2 && in_array($row['acl_name'], ['access_fileuser', 'enter_acp'])) {
+            if ($req_group === 2 && in_array($row['acl_name'], ['access_fileuser', 'enter_acp'])) {
                 continue;
             }
 
@@ -800,7 +800,7 @@ switch ($current_smt):
             $got_lang = preg_replace('/[^a-zA-Z0-9]/', '', g('lang_change'));
 
             // -1 means all
-            if ($req_group == -1) {
+            if ($req_group === -1) {
                 //general
                 update_config('language', $got_lang);
 
@@ -863,7 +863,12 @@ switch ($current_smt):
             if (ip('editdata')) {
                 extract(runHook('after_submit_adm_users_groupdata', get_defined_vars()));
 
-                $new[$row['name']] = p($row['name'], default: $row['value']);
+                //the text as it was typed, it is encoded once when it is saved below,
+                //p() and the saved value are encoded already (see a_configs.php)
+                $new[$row['name']] = htmlspecialchars_decode(
+                    p($row['name'], default: htmlspecialchars_decode($row['value'], ENT_QUOTES)),
+                    ENT_QUOTES,
+                );
 
                 $update_query = [
                     'UPDATE' => "{$dbprefix}groups_data",
@@ -881,16 +886,16 @@ switch ($current_smt):
                 continue;
             }
 
-            if ($row['name'] == 'language') {
+            if ($row['name'] === 'language') {
                 $lngfiles = '';
 
                 //get languages
                 if ($dh = @opendir(PATH . 'lang')) {
                     while (($file = readdir($dh)) !== false) {
-                        if (strpos($file, '.') === false && $file != '..' && $file != '.') {
+                        if (strpos($file, '.') === false && $file !== '..' && $file !== '.') {
                             $lngfiles .=
                                 '<option ' .
-                                ($d_groups[$req_group]['configs']['language'] == $file ? 'selected="selected"' : '') .
+                                ($d_groups[$req_group]['configs']['language'] === $file ? 'selected="selected"' : '') .
                                 ' value="' .
                                 $file .
                                 '">' .
@@ -903,7 +908,7 @@ switch ($current_smt):
                 }
             }
 
-            if ($req_group == 2 && in_array($row['name'], ['enable_userfile'])) {
+            if ($req_group === 2 && in_array($row['name'], ['enable_userfile'])) {
                 continue;
             }
 
@@ -952,7 +957,7 @@ switch ($current_smt):
         //submit
         if (ip('editdata')) {
             //Remove group_is_default from the current one
-            if (p('group_is_default', 'int') == 1) {
+            if (p('group_is_default', 'int') === 1) {
                 $update_query = [
                     'UPDATE' => "{$dbprefix}groups",
                     'SET' => 'group_is_default=0',
@@ -1170,8 +1175,8 @@ switch ($current_smt):
 
         $search = unserialize(htmlspecialchars_decode($filter['filter_value']), ['allowed_classes' => false]);
 
-        $usernamee = $search['username'] != '' ? 'AND (name LIKE :name OR clean_name LIKE :name) ' : '';
-        $usermailee = $search['usermail'] != '' ? 'AND mail LIKE :mail ' : '';
+        $usernamee = $search['username'] !== '' ? 'AND (name LIKE :name OR clean_name LIKE :name) ' : '';
+        $usermailee = $search['usermail'] !== '' ? 'AND mail LIKE :mail ' : '';
         $is_search = true;
 
         $query['WHERE'] = "name <> '' $usernamee $usermailee";
@@ -1182,7 +1187,7 @@ switch ($current_smt):
 
     //show users (for requested group)
     case 'show_group':
-        if ($current_smt != 'show_su') {
+        if ($current_smt !== 'show_su') {
             $is_search = true;
             $req_group = ig('qg') ? g('qg', 'int') : 0;
             $group_name = str_replace(
@@ -1231,10 +1236,10 @@ switch ($current_smt):
 
                 $arr[] = [
                     'id' => $row['id'],
-                    'name' => $row['name'],
+                    'name' => kleeja_html_display($row['name']),
                     'userfile_link' => $userfile,
                     'delusrfile_link' =>
-                        $row['founder'] && (int) $userinfo['founder'] == 0
+                        $row['founder'] && (int) $userinfo['founder'] === 0
                             ? false
                             : basename(ADMIN_PATH) .
                                 '?cp=' .
@@ -1243,7 +1248,8 @@ switch ($current_smt):
                                 $row['id'] .
                                 (ig('page') ? '&amp;page=' . g('page', 'int') : ''),
                     'delusr_link' =>
-                        $userinfo['id'] == $row['id'] || ($row['founder'] && (int) $userinfo['founder'] == 0)
+                        (int) $userinfo['id'] === (int) $row['id'] ||
+                        ($row['founder'] && (int) $userinfo['founder'] === 0)
                             ? false
                             : basename(ADMIN_PATH) .
                                 '?cp=' .
@@ -1336,8 +1342,9 @@ switch ($current_smt):
 
         $errs = isset($errs) ? $errs : false;
         //prepare them for the template
-        $title_name = $udata['name'];
-        $u_name = p('l_name', default: $udata['name']);
+        $title_name = kleeja_html_display($udata['name']);
+        //p() encodes the saved name once more, so it is decoded first, or every save would encode it again
+        $u_name = p('l_name', default: kleeja_html_decode($udata['name']));
         $u_mail = p('l_mail', default: $udata['mail']);
 
         $u_show_filecp = p('l_show_filecp', 'int', $udata['show_my_filecp']);
@@ -1355,8 +1362,8 @@ switch ($current_smt):
                     [$lang['ADMINS'], $lang['USERS'], $lang['GUESTS']],
                     $d_groups[$id]['data']['group_name'],
                 ),
-                'default' => $config['default_group'] == $id ? true : false,
-                'selected' => $id == $u_group,
+                'default' => (int) $config['default_group'] === $id ? true : false,
+                'selected' => $id === (int) $u_group,
             ];
         }
 
@@ -1385,8 +1392,8 @@ switch ($current_smt):
                     [$lang['ADMINS'], $lang['USERS'], $lang['GUESTS']],
                     $d_groups[$id]['data']['group_name'],
                 ),
-                'default' => $config['default_group'] == $id ? true : false,
-                'selected' => ip('lgroup') ? p('lgroup') == $id : $id == $config['default_group'],
+                'default' => (int) $config['default_group'] === $id ? true : false,
+                'selected' => ip('lgroup') ? p('lgroup', 'int') === $id : $id === (int) $config['default_group'],
             ];
         }
 
@@ -1420,14 +1427,14 @@ $go_menu = [
         'name' => $lang['R_GROUPS'],
         'link' => basename(ADMIN_PATH) . '?cp=g_users&amp;smt=general',
         'goto' => 'general',
-        'current' => $current_smt == 'general',
+        'current' => $current_smt === 'general',
     ],
     //'users' => array('name'=>$lang['R_USERS'], 'link'=> basename(ADMIN_PATH) . '?cp=g_users&amp;smt=users', 'goto'=>'users', 'current'=> $current_smt == 'users'),
     'show_su' => [
         'name' => $lang['SEARCH_USERS'],
         'link' => basename(ADMIN_PATH) . '?cp=h_search&amp;smt=users',
         'goto' => 'show_su',
-        'current' => $current_smt == 'show_su',
+        'current' => $current_smt === 'show_su',
     ],
 ];
 
@@ -1437,6 +1444,6 @@ if (!$user_not_normal) {
         'name' => $lang['NEW_USER'],
         'link' => basename(ADMIN_PATH) . '?cp=g_users&amp;smt=new_u',
         'goto' => 'new_u',
-        'current' => $current_smt == 'new_u',
+        'current' => $current_smt === 'new_u',
     ];
 }

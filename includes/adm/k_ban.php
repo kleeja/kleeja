@@ -39,21 +39,22 @@ $result = $SQL->build($query);
 $current_ban_data = $SQL->fetch_array($result);
 $SQL->freeresult($result);
 
-$banned_items = explode('|', $current_ban_data['ban']);
+//an empty ban list must not become one empty entry
+$banned_items = array_values(array_filter(explode('|', (string) $current_ban_data['ban'])));
 
 $show_message = false;
 
-if ($case == 'del' && ig('k')) {
+if ($case === 'del' && ig('k')) {
     if (!kleeja_check_form_key_get('adm_ban_get')) {
-        header('HTTP/1.0 401 Unauthorized');
+        http_response_code(401);
         kleeja_admin_err($lang['INVALID_GET_KEY'], $action);
     }
 
     $to_delete = g('k');
 
     $banned_items = array_filter($banned_items, function (string $item) use ($to_delete, $lang, &$show_message): bool {
-        if (md5($item) == $to_delete) {
-            $show_message = sprintf($lang['ITEM_DELETED'], $item);
+        if (md5($item) === $to_delete) {
+            $show_message = sprintf($lang['ITEM_DELETED'], kleeja_html_display($item));
 
             return false;
         }
@@ -64,7 +65,7 @@ if ($case == 'del' && ig('k')) {
     $update_ban_content = $show_message;
 }
 
-if ($case == 'new') {
+if ($case === 'new') {
     if (!kleeja_check_form_key('adm_ban')) {
         kleeja_admin_err($lang['INVALID_FORM_KEY'], title: $lang['ERROR'], redirect: $action, rs: 1);
     }
@@ -72,19 +73,21 @@ if ($case == 'new') {
     $to_add = p('k', 'str', '');
 
     if (!empty($to_add)) {
-        $banned_items[] = $to_add;
+        //only the new item is encoded, the others are saved encoded already
+        $banned_items[] = kleeja_html_encode($to_add);
         $show_message = $lang['BAN_UPDATED'];
         $update_ban_content = true;
     }
 }
 
 if ($update_ban_content) {
-    $banned_items = array_filter($banned_items);
+    $banned_items = array_values(array_filter($banned_items));
     //update
     $update_query = [
         'UPDATE' => "{$dbprefix}stats",
         'SET' => 'ban = :ban',
-        'BIND' => ['ban' => kleeja_html_encode(implode('|', $banned_items))],
+        //the items are kept as they are saved, encoding them all again would add a layer at every change
+        'BIND' => ['ban' => implode('|', $banned_items)],
     ];
 
     $SQL->build($update_query);
@@ -95,5 +98,6 @@ if ($update_ban_content) {
 }
 
 array_walk($banned_items, function (string &$value, int $key): void {
-    $value = ['content' => $value, 'del_key' => md5($value), 'id' => $key + 1];
+    //del_key is of the saved text, the content is encoded once to be printed
+    $value = ['content' => kleeja_html_display($value), 'del_key' => md5($value), 'id' => $key + 1];
 });

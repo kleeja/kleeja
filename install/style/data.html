@@ -1,7 +1,7 @@
             {{$urlsite = htmlspecialchars($GLOBALS['urlsite'], ENT_QUOTES);}}
             <form method="post" action="./install.php?step=data&amp;{{echo getlang(1)}}" class="needs-validation" novalidate>
                 <section class="kj-section">
-                    <h2 class="kj-section-title">{{echo inst_icon('house-door')}} {{echo $lang['INST_SITE_INFO']}}</h2>
+                    <h2 class="kj-section-title">{{echo inst_icon('house')}} {{echo $lang['INST_SITE_INFO']}}</h2>
                     <div class="row g-3">
                         <div class="col-12">
                             <label class="form-label" for="sitename">{{echo $lang['SITENAME']}}</label>
@@ -22,7 +22,7 @@
                 </section>
 
                 <section class="kj-section">
-                    <h2 class="kj-section-title">{{echo inst_icon('person-gear')}} {{echo $lang['INST_ADMIN_INFO']}}</h2>
+                    <h2 class="kj-section-title">{{echo inst_icon('user-gear')}} {{echo $lang['INST_ADMIN_INFO']}}</h2>
                     <div class="row g-3">
                         <div class="col-md-6">
                             <label class="form-label" for="username">{{echo $lang['USERNAME']}}</label>

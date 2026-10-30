@@ -35,7 +35,7 @@ switch ($current_go_case) {
 
         foreach ($tgroups as $gid) {
             //if this is admin group, dont show it public
-            if ($gid == 1 && (int) $userinfo['group_id'] != 1) {
+            if ($gid === 1 && (int) $userinfo['group_id'] !== 1) {
                 continue;
             }
 
@@ -50,8 +50,8 @@ switch ($current_go_case) {
                         [$lang['ADMINS'], $lang['USERS'], $lang['GUESTS']],
                         $d_groups[$gid]['data']['group_name'],
                     ),
-                    'most_firstrow' => $same_group == 0 ? true : false,
-                    'firstrow' => $same_group == 0 or ($same_group != $gid ? true : false),
+                    'most_firstrow' => $same_group === 0 ? true : false,
+                    'firstrow' => $same_group === 0 or ($same_group !== $gid ? true : false),
                     'rando' => $rando,
                 ];
                 $same_group = $gid;
@@ -77,7 +77,7 @@ switch ($current_go_case) {
         $titlee = $lang['REPORT'];
         $id_d = ig('id') ? g('id', 'int') : (ip('rid') ? p('rid', 'int') : 0);
         $url_id =
-            (int) $config['mod_writer'] == 1
+            (int) $config['mod_writer'] === 1
                 ? $config['siteurl'] . 'download' . $id_d . '.html'
                 : $config['siteurl'] . 'do.php?id=' . $id_d;
         $action = $config['siteurl'] . 'go.php?go=report';
@@ -100,7 +100,7 @@ switch ($current_go_case) {
 
             if ($SQL->num_rows($result)) {
                 $row = $SQL->fetch_array($result);
-                $filename_for_show = $row['real_filename'] == '' ? $row['name'] : $row['real_filename'];
+                $filename_for_show = $row['real_filename'] === '' ? $row['name'] : $row['real_filename'];
             } else {
                 extract(runHook('not_exists_qr_report_go_id', get_defined_vars()));
                 kleeja_err($lang['FILE_NO_FOUNDED']);
@@ -141,7 +141,7 @@ switch ($current_go_case) {
                     (empty(p('rurl')) ? '  [ ' . $lang['URL'] . ' ] ' : '');
             }
 
-            if (ip('surl') && trim(p('surl')) == '') {
+            if (ip('surl') && trim(p('surl')) === '') {
                 $ERRORS['surl'] = $lang['EMPTY_FIELDS'] . ' : [ ' . $lang['URL_F_FILE'] . ' ]';
             }
 
@@ -162,6 +162,16 @@ switch ($current_go_case) {
 
             if (!ip('surl') && !ip('rid')) {
                 $ERRORS['rid'] = $lang['NO_ID'];
+            } elseif (!ip('rid')) {
+                //a link of http or https only, a javascript: link would run in the reports page of the control panel
+                $surl_parts = parse_url(htmlspecialchars_decode(p('surl'), ENT_QUOTES)) ?: [];
+
+                if (
+                    !in_array(strtolower($surl_parts['scheme'] ?? ''), ['http', 'https'], true) ||
+                    empty($surl_parts['host'])
+                ) {
+                    $ERRORS['surl'] = $lang['WRONG_URL'];
+                }
             }
 
             extract(runHook('submit_report_go_page2', get_defined_vars()));
@@ -173,7 +183,7 @@ switch ($current_go_case) {
                 $mail = $NOT_USER ? strtolower(trim(kleeja_html_encode(p('rmail')))) : $usrcp->mail();
                 $url = ip('rid') ? kleeja_html_encode($url_id) : p('surl');
                 $time = (int) time();
-                $rid = ip('rid') ? 0 : p('rid', 'int');
+                $rid = ip('rid') ? p('rid', 'int') : 0;
                 $ip = get_ip();
 
                 $insert_query = [
@@ -207,9 +217,26 @@ switch ($current_go_case) {
                 $SQL->build($update_query);
 
                 $to = $config['sitemail2']; //administrator e-mail
-                $message =
-                    $text . "\n\n\n\n" . 'URL :' . $url . ' - TIME : ' . date('d-m-Y h:i a', $time) . ' - IP:' . $ip;
-                $subject = $lang['REPORT'];
+                $message = [
+                    ['type' => 'text', 'content' => sprintf($lang['MAIL_REPORT_INTRO'], $config['sitename'])],
+                    ['type' => 'alert', 'content' => $text],
+                    [
+                        'type' => 'text',
+                        'content' => implode("\n", [
+                            $lang['NAME'] . ': ' . $name,
+                            $lang['EMAIL'] . ': ' . $mail,
+                            $lang['URL'] . ': ' . $url,
+                            $lang['TIME'] . ': ' . date('d-m-Y h:i a', $time),
+                            $lang['IP'] . ': ' . $ip,
+                        ]),
+                    ],
+                    [
+                        'type' => 'button',
+                        'link' => ADMIN_PATH . '?cp=f_reports',
+                        'label' => $lang['MAIL_REPORT_BUTTON'],
+                    ],
+                ];
+                $subject = sprintf($lang['MAIL_REPORT_SUBJECT'], $config['sitename']);
                 send_mail($to, $message, $subject, $mail, $name);
 
                 kleeja_info($lang['THNX_REPORTED']);
@@ -296,7 +323,7 @@ switch ($current_go_case) {
                 $ERRORS['ctext'] = $lang['NO_ME300TEXT'];
             }
 
-            if ($t_cname == '_kleeja_') {
+            if ($t_cname === '_kleeja_') {
                 update_config('new_version', '');
             }
 
@@ -322,8 +349,25 @@ switch ($current_go_case) {
                 if ($SQL->build($insert_query)) {
                     send_mail(
                         $config['sitemail2'],
-                        $text . "\n\n\n\n" . 'TIME : ' . date('d-m-Y h:i a', $timee) . ' - IP:' . $ip,
-                        $lang['CALL'],
+                        [
+                            ['type' => 'text', 'content' => sprintf($lang['MAIL_CALL_INTRO'], $config['sitename'])],
+                            ['type' => 'alert', 'content' => $text],
+                            [
+                                'type' => 'text',
+                                'content' => implode("\n", [
+                                    $lang['NAME'] . ': ' . $name,
+                                    $lang['EMAIL'] . ': ' . $mail,
+                                    $lang['TIME'] . ': ' . date('d-m-Y h:i a', $timee),
+                                    $lang['IP'] . ': ' . $ip,
+                                ]),
+                            ],
+                            [
+                                'type' => 'button',
+                                'link' => ADMIN_PATH . '?cp=e_calls',
+                                'label' => $lang['MAIL_CALL_BUTTON'],
+                            ],
+                        ],
+                        sprintf($lang['MAIL_CALL_SUBJECT'], $config['sitename']),
                         $mail,
                         $name,
                     );
@@ -357,7 +401,7 @@ switch ($current_go_case) {
             kleeja_err($lang['WRONG_URL']);
         } else {
             //to check
-            if (ig('sure') && g('sure') == 'ok') {
+            if (ig('sure') && g('sure') === 'ok') {
                 $query = [
                     'SELECT' => 'f.id, f.name, f.folder, f.size, f.type',
                     'FROM' => "{$dbprefix}files f",
@@ -370,15 +414,8 @@ switch ($current_go_case) {
 
                 $result = $SQL->build($query);
 
-                if ($SQL->num_rows($result) != 0) {
+                if ($SQL->num_rows($result) !== 0) {
                     while ($row = $SQL->fetch_array($result)) {
-                        @kleeja_unlink($row['folder'] . '/' . $row['name']);
-
-                        //delete thumb
-                        if (file_exists($row['folder'] . '/thumbs/' . $row['name'])) {
-                            @kleeja_unlink($row['folder'] . '/thumbs/' . $row['name']);
-                        }
-
                         $is_img = in_array($row['type'], ['png', 'gif', 'jpg', 'jpeg', 'tif', 'tiff', 'bmp'])
                             ? true
                             : false;
@@ -394,6 +431,13 @@ switch ($current_go_case) {
                         $SQL->build($query_del);
 
                         if ($SQL->affected()) {
+                            @kleeja_unlink($row['folder'] . '/' . $row['name']);
+
+                            //delete thumb
+                            if (file_exists($row['folder'] . '/thumbs/' . $row['name'])) {
+                                @kleeja_unlink($row['folder'] . '/thumbs/' . $row['name']);
+                            }
+
                             //update number of stats
                             $update_query = [
                                 'UPDATE' => "{$dbprefix}stats",
@@ -411,6 +455,8 @@ switch ($current_go_case) {
                     }
 
                     $SQL->freeresult($result);
+                } else {
+                    kleeja_info($lang['NOT_FOUND']);
                 }
             } else {
                 //fix for IE+
@@ -452,7 +498,7 @@ switch ($current_go_case) {
         }
 
         //stats of most online users
-        if (empty($config['most_user_online_ever']) || trim($config['most_user_online_ever']) == '') {
+        if (empty($config['most_user_online_ever']) || trim($config['most_user_online_ever']) === '') {
             $most_online = 1; // 1 == you
             $on_muoe = time();
         } else {
@@ -467,7 +513,7 @@ switch ($current_go_case) {
         $users_st = $stat_users;
         $sizes_st = readable_size($stat_sizes);
         $lst_dl_st = (int) $config['del_f_day'] <= 0 ? false : kleeja_date($stat_last_f_del);
-        $lst_reg = empty($stat_last_user) ? $lang['UNKNOWN'] : $stat_last_user;
+        $lst_reg = empty($stat_last_user) ? $lang['UNKNOWN'] : kleeja_html_display($stat_last_user);
         $on_muoe = kleeja_date($on_muoe);
 
         extract(runHook('stats_go_page', get_defined_vars()));
@@ -482,7 +528,7 @@ switch ($current_go_case) {
         //go.php?go=down&n=$1&f=$2&i=$3
         if (ig('n')) {
             $url_file =
-                (int) $config['mod_writer'] == 1
+                (int) $config['mod_writer'] === 1
                     ? $config['siteurl'] . 'download' . g('i', 'int') . '.html'
                     : $config['siteurl'] . 'do.php?id=' . g('n', 'int');
         } else {

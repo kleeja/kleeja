@@ -29,7 +29,7 @@ if (ig('id') || ig('filename')) {
     ];
 
     //if user system is default, we use users table
-    if ((int) $config['user_system'] == 1) {
+    if ((int) $config['user_system'] === 1) {
         $query['SELECT'] .= ', u.name AS fusername, u.id AS fuserid';
         $query['JOINS'] = [
             [
@@ -52,7 +52,7 @@ if (ig('id') || ig('filename')) {
     extract(runHook('qr_download_id_filename', get_defined_vars()));
     $result = $SQL->build($query);
 
-    if ($SQL->num_rows($result) != 0) {
+    if ($SQL->num_rows($result) !== 0) {
         $file_info = $SQL->fetch_array($result);
 
         $SQL->freeresult($result);
@@ -67,9 +67,14 @@ if (ig('id') || ig('filename')) {
         $uploads = $file_info['uploads'];
 
         $fname2 = str_replace('.', '-', htmlspecialchars($name));
-        $name = $real_filename != '' ? str_replace('.' . $type, '', htmlspecialchars($real_filename)) : $name;
-        $name = strlen($name) > 70 ? substr($name, 0, 70) . '...' : $name;
-        $fusername = $config['user_system'] == 1 && $file_info['fuserid'] > -1 ? $file_info['fusername'] : false;
+        //the name is saved encoded, so it is decoded, then cut to 70 letters, not bytes, then encoded once,
+        //so neither a letter of a name in Arabic nor an entity like &quot; is cut in half
+        $name = kleeja_html_decode($real_filename !== '' ? str_replace('.' . $type, '', $real_filename) : $name);
+        $name = kleeja_html_encode(preg_match('/^.{70}(?=.)/su', $name, $cut) ? $cut[0] . '...' : $name);
+        $fusername =
+            (int) $config['user_system'] === 1 && $file_info['fuserid'] > -1
+                ? kleeja_html_display($file_info['fusername'])
+                : false;
         $userfolder =
             $config['siteurl'] .
             ($config['mod_writer']
@@ -266,11 +271,6 @@ elseif (
                         : null)));
     }
 
-    //is internet explore 8 ?
-    $is_ie8 = is_browser('ie8');
-    //is internet explore 6 ?
-    // $is_ie6 = is_browser('ie6');
-
     $livexts = explode(',', $config['livexts']);
 
     //get info file
@@ -322,7 +322,7 @@ elseif (
 
         //check if the vistor is new in this page before updating kleeja counter
         if (!preg_match('/,' . $ii . ',/i', cookie()->get('oldvistor')) && !isset($_SERVER['HTTP_RANGE'])) {
-            if ($usrcp->group_id() != 1) {
+            if ((int) $usrcp->group_id() !== 1) {
                 //updates number of uploads ..
                 $update_query = [
                     'UPDATE' => "{$dbprefix}files",
@@ -375,7 +375,7 @@ elseif (
     // where you can add 'define("MAKE_DOPHP_301_HEADER", true);' in config.php to stop the load
     // if there is any.ead
     if (defined('MAKE_DOPHP_301_HEADER')) {
-        header('HTTP/1.1 301 Moved Permanently');
+        http_response_code(301);
         header('Location: ' . $path_file);
         $SQL->close();
 
@@ -405,13 +405,13 @@ elseif (
         $name = preg_replace('/\./', '_', $name, $dots_in_name);
     }
 
-    if (is_browser('mozilla')) {
-        $h_name = "filename*=UTF-8''" . rawurlencode(htmlspecialchars_decode($name));
-    } elseif (is_browser('opera, safari, konqueror')) {
-        $h_name = 'filename="' . str_replace('"', '', htmlspecialchars_decode($name)) . '"';
-    } else {
-        $h_name = 'filename="' . rawurlencode(htmlspecialchars_decode($name)) . '"';
-    }
+    // RFC 6266: browsers read the UTF-8 filename*, older clients the ASCII filename
+    $h_name = htmlspecialchars_decode($name);
+    $h_name =
+        'filename="' .
+        preg_replace('/[^\x20-\x7E]+|["\\\\]/', '_', $h_name) .
+        "\"; filename*=UTF-8''" .
+        rawurlencode($h_name);
 
     //Figure out the MIME type (if not specified)
     $ext = explode('.', $path_file);
@@ -444,7 +444,7 @@ elseif (
     //open the file
     if (($fp = @fopen($path_file, 'rb')) === false) {
         //so ... it's failed to open !
-        header('HTTP/1.0 404 Not Found');
+        http_response_code(404);
         @fclose($fp);
         big_error($lang['FILE_NO_FOUNDED'], $lang['NOT_FOUND']);
     }
@@ -456,11 +456,15 @@ elseif (
 
     //send file headers
     header('Pragma: public');
-    header('Accept-Ranges: bytes');
+    if ($resuming_on) {
+        header('Accept-Ranges: bytes');
+    } else {
+        header('Accept-Ranges: none');
+    }
     header('Content-Description: File Transfer');
 
     //dirty fix
-    if ($ext != 'apk') {
+    if ($ext !== 'apk') {
         header("Content-Type: $mime_type");
     }
     header('Date: ' . gmdate('D, d M Y H:i:s', empty($ftime) ? time() : $ftime) . ' GMT');
@@ -470,27 +474,29 @@ elseif (
 
     extract(runHook('do_page_headers_set', get_defined_vars()));
 
-    //if(!$is_image && !$is_live && $is_ie8)
-    //{
-    //    header('X-Download-Options: noopen');
-    //}
-
     //add multipart download and resume support
     if (isset($_SERVER['HTTP_RANGE']) && $resuming_on) {
         [$a, $range] = explode('=', $_SERVER['HTTP_RANGE'], 2);
         [$range] = explode(',', $range, 2);
-        [$range, $range_end] = explode('=', $range);
+        [$range, $range_end] = explode('-', $range);
         $range = round(floatval($range), 0);
-        $range_end = !$range_end ? $size - 1 : round(floatval($range_end), 0);
+        $range_end = !$range_end || floatval($range_end) >= $size ? $size - 1 : round(floatval($range_end), 0);
+
+        if ($range < 0 || $range >= $size || $range > $range_end) {
+            http_response_code(416);
+            header("Content-Range: bytes */$size");
+            fclose($fp);
+            exit();
+        }
 
         $partial_length = $range_end - $range + 1;
-        header('HTTP/1.1 206 Partial Content');
+        http_response_code(206);
         header("Content-Length: $partial_length");
-        header('Content-Range: bytes ' . ($range - $range_end / $size));
+        header("Content-Range: bytes $range-$range_end/$size");
 
         fseek($fp, $range);
     } else {
-        header('HTTP/1.1 200 OK');
+        http_response_code(200);
         $partial_length = $size;
         header("Content-Length: $partial_length");
     }

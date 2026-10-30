@@ -1,0 +1,72 @@
+<div class="kj-page-header">
+    <div>
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="./">{lang.R_CPINDEX}</a></li>
+                <li class="breadcrumb-item active" aria-current="page">{lang.R_CHECK_UPDATE}</li>
+            </ol>
+        </nav>
+        <h1 class="kj-page-title">{lang.R_CHECK_UPDATE}</h1>
+    </div>
+</div>
+
+<section class="card" data-kj-updater data-kj-form-key="{GET_FORM_KEY}" data-kj-check-error="{lang.ERROR_CHECK_VER}"<IF NAME="showMessage"> data-kj-after-check="./?update_done=1"</IF>>
+    <div class="card-body d-flex flex-wrap align-items-center gap-3">
+        <span class="kj-icon-tile" data-kj-update-icon>
+            <span class="spinner-border spinner-border-sm" aria-hidden="true"></span>
+        </span>
+        <div class="flex-grow-1" style="min-width: 12rem" role="status" aria-live="polite">
+            <div class="fw-semibold" data-kj-update-title>{lang.LOADING}…</div>
+        </div>
+        <button type="button" class="btn btn-primary d-none" data-kj-update-start>
+            <i class="fa-solid fa-download" aria-hidden="true"></i><span>{lang.UPDATE_KLJ_NOW}</span>
+        </button>
+    </div>
+    <div class="card-body border-top d-none" data-kj-update-notes-wrap>
+        <h2 class="h6 fw-semibold">{lang.RELEASE_NOTE}</h2>
+        <div class="kj-release-notes" dir="ltr" data-kj-update-notes></div>
+        <div class="small text-body-secondary mt-2" dir="ltr" data-kj-update-date></div>
+    </div>
+</section>
+
+<ol class="list-group kj-steps mt-4 d-none" data-kj-update-steps>
+    <li class="list-group-item is-pending" data-kj-step="1">
+        <span class="kj-step-num">1</span>
+        <div class="flex-grow-1">
+            <div>{lang.UPDATE_PROCESS_STEP1}</div>
+            <div class="d-none" data-kj-step-message></div>
+        </div>
+        <span data-kj-step-state></span>
+    </li>
+    <li class="list-group-item is-pending" data-kj-step="2">
+        <span class="kj-step-num">2</span>
+        <div class="flex-grow-1">
+            <div>{lang.UPDATE_PROCESS_STEP2}</div>
+            <div class="d-none" data-kj-step-message></div>
+        </div>
+        <span data-kj-step-state></span>
+    </li>
+    <li class="list-group-item is-pending" data-kj-step="3">
+        <span class="kj-step-num">3</span>
+        <div class="flex-grow-1">
+            <div>{lang.UPDATE_PROCESS_STEP3}</div>
+            <div class="d-none" data-kj-step-message></div>
+        </div>
+        <span data-kj-step-state></span>
+    </li>
+</ol>
+
+<div class="alert alert-info d-flex align-items-start gap-3 mt-4 d-none" role="status" data-kj-update-next>
+    <i class="fa-solid fa-circle-info kj-alert-icon" aria-hidden="true"></i>
+    <div>
+        <p class="mb-2">{lang.UPDATE_PLUGINS_STYLES_NEXT}</p>
+        <div class="d-flex flex-wrap gap-2">
+            <a class="btn btn-sm btn-primary" href="./?cp=j_plugins&amp;case=check">
+                <i class="fa-solid fa-plug" aria-hidden="true"></i><span>{lang.UPDATE_PLUGINS}</span>
+            </a>
+            <a class="btn btn-sm btn-primary" href="./?cp=m_styles&amp;case=check">
+                <i class="fa-solid fa-paintbrush" aria-hidden="true"></i><span>{lang.UPDATE_STYLES}</span>
+            </a>
+        </div>
+    </div>
+</div>

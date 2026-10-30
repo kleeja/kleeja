@@ -30,11 +30,11 @@ function helper_thumb(string $source_path, string $ext, string $dest_image, int 
     }
 
     //check width, height
-    if (intval($dw) == 0 || intval($dw) < 10) {
+    if (intval($dw) === 0 || intval($dw) < 10) {
         $dw = 100;
     }
 
-    if (intval($dh) == 0 || intval($dh) < 10) {
+    if (intval($dh) === 0 || intval($dh) < 10) {
         $dh = $dw;
     }
 
@@ -201,7 +201,7 @@ function helper_thumb_imagick(string $name, string $ext, string $filename, int $
 
     //an exception for gif image
     //generating thumb with 10 frames only, big gif is a devil
-    if ($ext == 'gif') {
+    if ($ext === 'gif') {
         $i = 0;
 
         //$gif_new = new Imagick();

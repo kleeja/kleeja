@@ -1,0 +1,30 @@
+# Files that are left out of the release archives (git archive, GitHub's "Source code" downloads,
+# and the zipball the control panel's updater downloads). They are for developing Kleeja, not for running it.
+# Paths start with "/" so only the root ones match, LICENSE.md stays in the package.
+
+# Git and GitHub
+/.gitattributes export-ignore
+/.gitignore export-ignore
+/.githooks export-ignore
+/.github export-ignore
+
+# Docker development environment
+/.dockerignore export-ignore
+/Dockerfile export-ignore
+/docker-compose.yml export-ignore
+
+# Node and Prettier toolchain
+/package.json export-ignore
+/package-lock.json export-ignore
+/.prettierignore export-ignore
+/.prettierrc.json export-ignore
+
+# Editors and AI tooling
+/.editorconfig export-ignore
+/.vscode export-ignore
+/CLAUDE.md export-ignore
+
+# Repository documentation
+/README.md export-ignore
+/README.ar.md export-ignore
+/CHANGELOG.md export-ignore

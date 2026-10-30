@@ -1,6 +1,6 @@
             {{if(empty($GLOBALS['problems'])):}}
             <div class="kj-state">
-                <span class="kj-state-icon is-success">{{echo inst_icon('check-circle-fill')}}</span>
+                <span class="kj-state-icon is-success">{{echo inst_icon('circle-check')}}</span>
                 <h1>{{echo $lang['INST_GOOD_GO']}}</h1>
             </div>
 
@@ -14,7 +14,7 @@
             </div>
             {{else:}}
             <div class="kj-page-head">
-                <span class="kj-icon-tile is-danger">{{echo inst_icon('exclamation-triangle-fill')}}</span>
+                <span class="kj-icon-tile is-danger">{{echo inst_icon('triangle-exclamation')}}</span>
                 <div>
                     <h1>{{echo $lang['INST_CHECK_FAILED']}}</h1>
                 </div>
@@ -22,7 +22,7 @@
 
             {{foreach($GLOBALS['problems'] as $problem):}}
             <div class="alert alert-danger d-flex gap-3" role="alert">
-                {{echo inst_icon('x-circle-fill')}}
+                {{echo inst_icon('circle-xmark')}}
                 <div>{{echo $problem}}</div>
             </div>
             {{endforeach;}}
@@ -32,7 +32,7 @@
                     {{echo inst_icon('arrow-left', 'kj-icon-flip')}} {{echo $lang['INST_PREVIOUS']}}
                 </a>
                 <a class="btn btn-primary" href="./install.php?step=check&amp;{{echo getlang(1)}}">
-                    {{echo inst_icon('arrow-repeat')}} {{echo $lang['RE_CHECK']}}
+                    {{echo inst_icon('arrows-rotate')}} {{echo $lang['RE_CHECK']}}
                 </a>
             </div>
             {{endif;}}

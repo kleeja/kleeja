@@ -14,8 +14,7 @@ uploads/thumbs/*
 !uploads/thumbs/php.ini
 !uploads/thumbs/.htaccess
 styles/*
-!styles/bootstrap/*
-!styles/default/*
+!styles/bootstrap/
 !styles/index.html
 .DS_Store
 */.DS_Store
@@ -37,3 +36,6 @@ kleeja.db
 
 # node / prettier toolchain
 node_modules/
+
+# graphify knowledge graph output
+graphify-out/

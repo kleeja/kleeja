@@ -1,6 +1,6 @@
             <form method="post" action="./update.php?{{echo getlang(1)}}" class="needs-validation" novalidate>
                 <div class="kj-page-head">
-                    <span class="kj-icon-tile">{{echo inst_icon('arrow-repeat')}}</span>
+                    <span class="kj-icon-tile">{{echo inst_icon('arrows-rotate')}}</span>
                     <div>
                         <h1>{{echo $lang['INST_UPDATE_P_VER']}}</h1>
                         <p>{{echo sprintf($lang['INST_UPDATE_DESC'], $GLOBALS['current_db_version'], max($GLOBALS['available_db_updates']))}}</p>
@@ -8,18 +8,18 @@
                 </div>
 
                 <div class="alert alert-warning d-flex gap-3" role="alert">
-                    {{echo inst_icon('exclamation-triangle-fill')}}
+                    {{echo inst_icon('triangle-exclamation')}}
                     <div>{{echo $lang['INST_UPDATE_BACKUP']}}</div>
                 </div>
 
                 {{if($GLOBALS['login_failed']):}}
                 <div class="alert alert-danger d-flex gap-3" role="alert">
-                    {{echo inst_icon('x-circle-fill')}}
+                    {{echo inst_icon('circle-xmark')}}
                     <div>{{echo $lang['INST_UPDATE_WRONG_LOGIN']}}</div>
                 </div>
                 {{endif;}}
 
-                <h2 class="kj-section-title mt-4">{{echo inst_icon('person-gear')}} {{echo $lang['INST_UPDATE_LOGIN']}}</h2>
+                <h2 class="kj-section-title mt-4">{{echo inst_icon('user-gear')}} {{echo $lang['INST_UPDATE_LOGIN']}}</h2>
                 <div class="row g-3">
                     <div class="col-md-6">
                         <label class="form-label" for="username">{{echo $lang['USERNAME']}}</label>
@@ -41,7 +41,7 @@
 
                 <div class="kj-actions">
                     <button name="update_now" type="submit" class="btn btn-primary">
-                        {{echo inst_icon('arrow-repeat')}} {{echo $lang['INST_UPDATE_NOW']}}
+                        {{echo inst_icon('arrows-rotate')}} {{echo $lang['INST_UPDATE_NOW']}}
                     </button>
                 </div>
             </form>

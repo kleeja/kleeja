@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="{lang.LANG_SMALL_NAME}" dir="{lang.DIR}" data-bs-theme="light">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="robots" content="noindex, nofollow">
+    <title>{lang.LOGIN} · {lang.KLEEJA_CP} · {config.sitename}</title>
+
+    <script src="{STYLE_PATH_ADMIN}js/color-mode.js"></script>
+
+    <link rel="icon" type="image/svg+xml" href="{config.siteurl}images/logo.svg">
+    <link rel="icon" type="image/png" href="{config.siteurl}images/favicon.png">
+    <link rel="shortcut icon" href="{config.siteurl}images/favicon.ico">
+
+    <IF NAME="lang.DIR==rtl">
+    <link rel="stylesheet" href="{config.siteurl}includes/static_shared_files/bootstrap/css/bootstrap.rtl.min.css">
+    <ELSE>
+    <link rel="stylesheet" href="{config.siteurl}includes/static_shared_files/bootstrap/css/bootstrap.min.css">
+    </IF>
+    <link rel="stylesheet" href="{config.siteurl}includes/static_shared_files/fontawesome/css/all.min.css">
+    <link rel="stylesheet" href="{STYLE_PATH_ADMIN}css/damask.css">
+{extra_header_admin_login}
+</head>
+<body class="kj-auth" id="login_body" data-kj-msg-confirm="{lang.ARE_YOU_SURE_DO_THIS}" data-kj-msg-error="{lang.ERROR_TRY_AGAIN}">
+
+<div class="kj-auth-tools dropdown">
+    <button class="btn kj-icon-btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="{lang.ADM_COLOR_MODE}" title="{lang.ADM_COLOR_MODE}">
+        <i class="fa-solid fa-circle-half-stroke" aria-hidden="true" data-kj-color-icon></i>
+    </button>
+    <ul class="dropdown-menu dropdown-menu-end">
+        <li><h6 class="dropdown-header">{lang.ADM_COLOR_MODE}</h6></li>
+        <li>
+            <button type="button" class="dropdown-item" data-kj-color-mode="light" aria-pressed="false">
+                <i class="fa-solid fa-sun" aria-hidden="true"></i> {lang.ADM_COLOR_LIGHT}
+                <i class="fa-solid fa-check kj-check" aria-hidden="true"></i>
+            </button>
+        </li>
+        <li>
+            <button type="button" class="dropdown-item" data-kj-color-mode="dark" aria-pressed="false">
+                <i class="fa-solid fa-moon" aria-hidden="true"></i> {lang.ADM_COLOR_DARK}
+                <i class="fa-solid fa-check kj-check" aria-hidden="true"></i>
+            </button>
+        </li>
+        <li>
+            <button type="button" class="dropdown-item" data-kj-color-mode="auto" aria-pressed="false">
+                <i class="fa-solid fa-circle-half-stroke" aria-hidden="true"></i> {lang.ADM_COLOR_AUTO}
+                <i class="fa-solid fa-check kj-check" aria-hidden="true"></i>
+            </button>
+        </li>
+    </ul>
+</div>
+
+<main class="card kj-auth-card">
+    <div class="card-body">
+        <div class="text-center mb-4">
+            <span class="kj-auth-logo">
+                <img class="kj-logo-light" src="{config.siteurl}images/logo.svg" alt="Kleeja" width="56" height="56">
+                <img class="kj-logo-dark" src="{config.siteurl}images/logo-light.svg" alt="Kleeja" width="56" height="56">
+            </span>
+            <h1 class="h4 fw-bold mt-1 mb-1">{lang.KLEEJA_CP}</h1>
+            <p class="text-body-secondary mb-0">{lang.WELCOME} · {config.sitename}</p>
+        </div>
+
+        <IF NAME="err">
+        <div class="alert alert-danger d-flex align-items-start gap-2 small" role="alert">
+            <i class="fa-solid fa-circle-exclamation kj-alert-icon" aria-hidden="true"></i>
+            <div>{errs}</div>
+        </div>
+        </IF>
+
+        <form action="{action}" method="post" id="login_form">
+            <div class="mb-3">
+                <label class="form-label" for="kj_login_name">{lang.USERNAME}</label>
+                <div class="input-group">
+                    <span class="input-group-text"><i class="fa-solid fa-user fa-fw" aria-hidden="true"></i></span>
+                    <input type="text" class="form-control" id="kj_login_name" value="{username}" readonly>
+                </div>
+            </div>
+            <input type="hidden" name="lname" id="lname" value="{username}">
+
+            <div class="mb-3">
+                <label class="form-label" for="kj_login_pass">{lang.PASSWORD}</label>
+                <div class="input-group">
+                    <span class="input-group-text"><i class="fa-solid fa-lock fa-fw" aria-hidden="true"></i></span>
+                    <input type="password" class="form-control" id="kj_login_pass" name="lpass_{KEY_FOR_PASS}" autocomplete="current-password" required autofocus>
+                </div>
+            </div>
+
+            <IF NAME="show_captcha">
+            <div class="mb-3">
+                <label class="form-label" for="kleeja_code_answer">{lang.NOTE_CODE}</label>
+                <img class="kj-captcha mb-2" id="kleeja_img_captcha" src="{captcha_file_path}" alt="{lang.REFRESH_CAPTCHA}" title="{lang.REFRESH_CAPTCHA}" onclick="update_kleeja_captcha('{captcha_file_path}', 'kleeja_code_answer');">
+                <input type="text" class="form-control" name="kleeja_code_answer" id="kleeja_code_answer" autocomplete="off" required>
+            </div>
+            </IF>
+
+            <button class="btn btn-primary w-100 py-2" type="submit" name="submit" value="1">
+                <i class="fa-solid fa-right-to-bracket" aria-hidden="true"></i><span>{lang.LOGIN}</span>
+            </button>
+
+            {H_FORM_KEYS}
+            <input type="hidden" name="kid" value="{KEY_FOR_WEE}">
+        </form>
+    </div>
+
+    <div class="card-footer d-flex flex-wrap justify-content-between gap-2 small">
+        <a href="{config.siteurl}"><i class="fa-solid fa-arrow-left kj-flip-rtl" aria-hidden="true"></i> {lang.RETURN_HOME}</a>
+        <span class="text-body-secondary">{not_you}</span>
+    </div>
+</main>
+
+<p class="kj-auth-foot"><a href="https://kleeja.net" target="_blank" rel="noopener">Powered by Kleeja</a></p>
+
+<script src="{config.siteurl}includes/static_shared_files/bootstrap/js/bootstrap.bundle.min.js"></script>
+<script src="{STYLE_PATH_ADMIN}js/damask.js"></script>
+</body>
+</html>

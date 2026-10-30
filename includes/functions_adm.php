@@ -61,7 +61,7 @@ function kleeja_admin_err(
     }
 
     // assign {text} in err template
-    $text = $msg . ($redirect != false ? redirect($redirect, header: false, exit: false, sec: $rs, return: true) : '');
+    $text = $msg . ($redirect ? redirect($redirect, header: false, exit: false, sec: $rs, return: true) : '');
     $SHOW_LIST = $navigation;
 
     //header
@@ -166,7 +166,7 @@ function update_filter(
 ): bool {
     global $SQL, $dbprefix;
 
-    $by_id = strval(intval($id_or_uid)) == strval($id_or_uid);
+    $by_id = strval(intval($id_or_uid)) === strval($id_or_uid);
 
     $update_query = [
         'UPDATE' => "{$dbprefix}filters",
@@ -236,7 +236,7 @@ function get_filter(
             ($filter_type ? ' AND f.filter_type = :type' : '') .
             ($user_id ? ' AND f.filter_user = :user' : ''),
         'BIND' => [
-            'item' => $get_by == 'filter_id' ? intval($item) : kleeja_html_encode($item),
+            'item' => $get_by === 'filter_id' ? intval($item) : kleeja_html_encode($item),
             'type' => kleeja_html_encode($filter_type),
             'user' => $user_id,
         ],
@@ -287,7 +287,7 @@ function filter_exists(
             ($filter_type ? ' AND f.filter_type = :type' : '') .
             ($user_id ? ' AND f.filter_user = :user' : ''),
         'BIND' => [
-            'item' => $get_by == 'filter_id' ? intval($item) : kleeja_html_encode($item),
+            'item' => $get_by === 'filter_id' ? intval($item) : kleeja_html_encode($item),
             'type' => kleeja_html_encode($filter_type),
             'user' => $user_id,
         ],
@@ -329,7 +329,7 @@ function build_search_query(mixed $search): array
     //if searched by a username
     $usernamee = '';
 
-    if (!empty($search['username']) && (int) $config['user_system'] == 1) {
+    if (!empty($search['username']) && (int) $config['user_system'] === 1) {
         $query = [
             'SELECT' => 'u.id',
             'FROM' => "{$dbprefix}users u",
@@ -352,13 +352,13 @@ function build_search_query(mixed $search): array
     }
 
     //build query
-    $file_namee = $search['filename'] != '' ? 'AND (f.real_filename LIKE :filename OR f.name LIKE :filename)' : '';
-    $size_than = ' f.size ' . ($search['than'] != 1 ? '<=' : '>=') . ' :size ';
-    $ups_than = $search['ups'] != '' ? 'AND f.uploads ' . ($search['uthan'] != 1 ? '<' : '>') . ' :ups ' : '';
-    $rep_than = $search['rep'] != '' ? 'AND f.report ' . ($search['rthan'] != 1 ? '<' : '>') . ' :rep ' : '';
-    $lstd_than = $search['lastdown'] != '' ? 'AND f.last_down = :last_down ' : '';
-    $exte = $search['ext'] != '' ? 'AND f.type IN (:exts)' : '';
-    $ipp = $search['user_ip'] != '' ? 'AND f.user_ip LIKE :user_ip ' : '';
+    $file_namee = $search['filename'] !== '' ? 'AND (f.real_filename LIKE :filename OR f.name LIKE :filename)' : '';
+    $size_than = ' f.size ' . ((int) $search['than'] !== 1 ? '<=' : '>=') . ' :size ';
+    $ups_than = $search['ups'] !== '' ? 'AND f.uploads ' . ((int) $search['uthan'] !== 1 ? '<' : '>') . ' :ups ' : '';
+    $rep_than = $search['rep'] !== '' ? 'AND f.report ' . ((int) $search['rthan'] !== 1 ? '<' : '>') . ' :rep ' : '';
+    $lstd_than = $search['lastdown'] !== '' ? 'AND f.last_down = :last_down ' : '';
+    $exte = $search['ext'] !== '' ? 'AND f.type IN (:exts)' : '';
+    $ipp = $search['user_ip'] !== '' ? 'AND f.user_ip LIKE :user_ip ' : '';
 
     //values of placeholders that are not in the query are skipped
     return [
@@ -425,7 +425,7 @@ function sync_total_files(bool $files = true, int $start = 0): int|false
 
     $this_step_count = $v['num_files'];
 
-    if ($this_step_count == 0) {
+    if ((int) $this_step_count === 0) {
         return false;
     }
 
@@ -511,4 +511,153 @@ function split_plugin_name_from_version(string $fileName): ?array
     }
 
     return null;
+}
+
+/**
+ * A text of a help guide in the admin language,
+ * plugins can give a plain text or its translations, like ['en' => 'Hello', 'ar' => 'مرحبا']
+ * @param  mixed  $text
+ * @return string
+ */
+function adm_help_text(mixed $text): string
+{
+    global $config;
+
+    if (!is_array($text)) {
+        return (string) $text;
+    }
+
+    foreach ([$config['language'], 'en'] as $language) {
+        if (isset($text[$language]) && is_scalar($text[$language])) {
+            return (string) $text[$language];
+        }
+    }
+
+    $first = reset($text);
+
+    return is_scalar($first) ? (string) $first : '';
+}
+
+/**
+ * A section of a help guide built from the language of help.php, its items are numbered keys
+ * like HELP_FILES_TIP_1, HELP_FILES_TIP_2 .. and its title, if it has its own, is HELP_FILES_TIP_TITLE
+ * @param  string $guide_key the keys prefix of the guide, like HELP_FILES
+ * @param  string $section   the section type, or type:NAME to read other keys, like features:DAILY
+ * @return array
+ */
+function adm_help_lang_section(string $guide_key, string $section): array
+{
+    global $lang;
+
+    $names = [
+        'features' => 'FEATURE',
+        'steps' => 'STEP',
+        'tips' => 'TIP',
+        'warnings' => 'WARNING',
+        'faq' => 'FAQ',
+        'text' => 'TEXT',
+    ];
+
+    [$type, $name] = array_pad(explode(':', $section, 2), 2, '');
+    $prefix = $guide_key . '_' . ($name !== '' ? $name : $names[$type] ?? strtoupper($type));
+
+    $built = ['type' => $type, 'title' => $lang[$prefix . '_TITLE'] ?? '', 'items' => []];
+
+    if ($type === 'text') {
+        $built['text'] = $lang[$prefix] ?? '';
+
+        return $built;
+    }
+
+    for ($n = 1; isset($lang[$prefix . ($type === 'faq' ? '_Q_' : '_') . $n]); $n++) {
+        $built['items'][] =
+            $type === 'faq'
+                ? ['q' => $lang[$prefix . '_Q_' . $n], 'a' => $lang[$prefix . '_A_' . $n] ?? '']
+                : $lang[$prefix . '_' . $n];
+    }
+
+    return $built;
+}
+
+/**
+ * Make a help guide ready for the template, whether Kleeja or a plugin wrote it
+ * @param  string $id
+ * @param  array  $guide  see the guide of plugin developers on the help page
+ * @param  array  $groups the groups of guides, a guide of an unknown group goes to the plugins
+ * @return array
+ */
+function adm_help_prepare_guide(string $id, array $guide, array $groups): array
+{
+    global $config, $lang;
+
+    $section_icons = [
+        'features' => 'list-check',
+        'steps' => 'list-ol',
+        'tips' => 'lightbulb',
+        'warnings' => 'triangle-exclamation',
+        'faq' => 'circle-question',
+        'code' => 'code',
+        'text' => '',
+    ];
+
+    $sections = [];
+
+    foreach ((array) ($guide['sections'] ?? []) as $section) {
+        if (!is_array($section)) {
+            continue;
+        }
+
+        $type = isset($section_icons[$section['type'] ?? '']) ? $section['type'] : 'features';
+        $items = (array) ($section['items'] ?? []);
+
+        //a list for each language, instead of a list of translated items
+        if (sizeof($items) && array_values($items) !== $items) {
+            $items = (array) ($items[$config['language']] ?? ($items['en'] ?? reset($items)));
+        }
+
+        foreach ($items as $n => $item) {
+            $items[$n] =
+                $type === 'faq'
+                    ? ['q' => adm_help_text($item['q'] ?? ''), 'a' => adm_help_text($item['a'] ?? '')]
+                    : ['text' => adm_help_text($item)];
+        }
+
+        $items = array_values(
+            array_filter($items, fn($item) => ($item['text'] ?? '') !== '' || ($item['q'] ?? '') !== ''),
+        );
+        $text = adm_help_text($section['text'] ?? '');
+        $code = adm_help_text($section['code'] ?? '');
+
+        if (!sizeof($items) && $text === '' && $code === '') {
+            continue;
+        }
+
+        $title = adm_help_text($section['title'] ?? '');
+
+        $sections[] = [
+            'type' => $type,
+            'title' => $title !== '' || $type === 'text' ? $title : $lang['HELP_SECTION_' . strtoupper($type)],
+            'icon' => $section_icons[$type],
+            'items' => $items,
+            'text' => $text,
+            'code' => kleeja_html_encode($code),
+            'aside' => in_array($type, ['tips', 'warnings']),
+        ];
+    }
+
+    $link = (string) ($guide['link'] ?? '');
+
+    return [
+        'id' => preg_replace('/[^a-z0-9_-]/i', '', $id),
+        'group' => isset($groups[$guide['group'] ?? '']) ? $guide['group'] : 'plugins',
+        'icon' => preg_replace('/[^a-z0-9-]/', '', (string) ($guide['icon'] ?? '')) ?: 'puzzle-piece',
+        'image' => (string) ($guide['image'] ?? ''),
+        'title' => adm_help_text($guide['title'] ?? '') ?: $id,
+        'intro' => adm_help_text($guide['intro'] ?? ''),
+        'badge' => adm_help_text($guide['badge'] ?? ''),
+        'page' => (string) ($guide['page'] ?? ''),
+        'link' => $link,
+        'link_title' => adm_help_text($guide['link_title'] ?? '') ?: $lang['HELP_OPEN_PAGE'],
+        'sections' => $sections,
+    ];
 }

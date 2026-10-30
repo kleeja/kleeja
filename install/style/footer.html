@@ -6,7 +6,7 @@
     <a href="https://kleeja.net" target="_blank" rel="noopener">Powered by Kleeja</a>
 </footer>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
+<script src="../includes/static_shared_files/bootstrap/js/bootstrap.bundle.min.js"></script>
 <script>
     (function () {
         var all = function (selector) {
@@ -91,12 +91,14 @@
         // show or hide a password
         all('[data-kj-toggle-password]').forEach(function (button) {
             var input = document.querySelector(button.getAttribute('data-kj-toggle-password'));
+            var icon = button.querySelector('.kj-icon');
 
             button.addEventListener('click', function () {
                 var show = input.type === 'password';
                 input.type = show ? 'text' : 'password';
                 button.setAttribute('aria-pressed', show ? 'true' : 'false');
-                button.querySelector('use').setAttribute('href', show ? '#i-eye-slash' : '#i-eye');
+                icon.classList.toggle('fa-eye', !show);
+                icon.classList.toggle('fa-eye-slash', show);
             });
         });
 

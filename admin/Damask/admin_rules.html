@@ -1,0 +1,27 @@
+<div class="kj-page-header">
+    <div>
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="./">{lang.R_CPINDEX}</a></li>
+                <li class="breadcrumb-item active" aria-current="page">{lang.R_RULES}</li>
+            </ol>
+        </nav>
+        <h1 class="kj-page-title">{lang.R_RULES}</h1>
+        <p class="kj-page-subtitle">{lang.RULES_EXP}</p>
+    </div>
+</div>
+
+<form method="post" action="{action}" id="rules_form" class="card">
+    <div class="card-body">
+        <label class="visually-hidden" for="rules_text">{lang.R_RULES}</label>
+        <textarea class="form-control font-monospace" name="rules_text" id="rules_text" rows="14">{rules}</textarea>
+    </div>
+
+    <div class="card-footer kj-form-actions">
+        <button type="submit" name="submit" value="1" class="btn btn-primary">
+            <i class="fa-solid fa-floppy-disk" aria-hidden="true"></i><span>{lang.UPDATE_RULES}</span>
+        </button>
+    </div>
+
+    {H_FORM_KEYS}
+</form>

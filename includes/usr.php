@@ -14,6 +14,12 @@ if (!defined('IN_COMMON')) {
 
 class usrcp
 {
+    /**
+     * the user of this request: id, group_id, name, mail and last_visit, a guest has only an id and a group.
+     * A guest who logs in is replaced here, the constants USER_ID and the others can not be defined again
+     */
+    private array $current_user = [];
+
     public function data(
         string $name,
         string $pass,
@@ -92,11 +98,11 @@ class usrcp
                 $phppass = $hashed ? $pass : $pass . $row['password_salt'];
 
                 //CHECK IF IT'S MD5 PASSWORD
-                if (strlen($row['password']) == '32' && empty($row['password_salt']) && defined('CONVERTED_SCRIPT')) {
+                if (strlen($row['password']) === 32 && empty($row['password_salt']) && defined('CONVERTED_SCRIPT')) {
                     $passmd5 = md5($pass);
 
                     ////update old md5 hash to phpass hash
-                    if ($row['password'] == $passmd5) {
+                    if ($row['password'] === $passmd5) {
                         ////new salt
                         $new_salt = substr(base64_encode(pack('H*', sha1(mt_rand()))), 0, 7);
                         ////new password hash
@@ -120,59 +126,22 @@ class usrcp
                 }
 
                 if (
-                    ($phppass != $row['password'] && $hashed) ||
-                    ($this->kleeja_hash_password($phppass, $row['password']) != true && $hashed == false)
+                    ($phppass !== $row['password'] && $hashed) ||
+                    ($this->kleeja_hash_password($phppass, $row['password']) !== true && $hashed === false)
                 ) {
                     return false;
                 }
 
-                //Avoid dfining constants again for admin panel login
+                //the admin panel login checks the password only, the user is the same
                 if (!$loginadm) {
-                    define('USER_ID', $row['id']);
-                    define('GROUP_ID', $row['group_id']);
-                    define('USER_NAME', $row['name']);
-                    define('USER_MAIL', $row['mail']);
-                    define('LAST_VISIT', $row['last_visit']);
+                    $this->set_current_user($row);
                 }
 
                 //all user fileds info
                 $userinfo = $row;
 
-                $user_y = base64_encode(
-                    serialize([
-                        'id' => $row['id'],
-                        'name' => $row['name'],
-                        'mail' => $row['mail'],
-                        'last_visit' => $row['last_visit'],
-                    ]),
-                );
-
                 if (!$hashed && !$loginadm) {
-                    //sign the whole payload (incl. group_id and user info) so none of it can be tampered with
-                    $hash_key_expire = $this->ulogu_signature(
-                        (string) $row['id'],
-                        (string) $row['password'],
-                        (string) $expire,
-                        (string) $row['group_id'],
-                        $user_y,
-                    );
-                    cookie()->set(
-                        'ulogu',
-                        $this->en_de_crypt(
-                            $row['id'] .
-                                '|' .
-                                $row['password'] .
-                                '|' .
-                                $expire .
-                                '|' .
-                                $hash_key_expire .
-                                '|' .
-                                $row['group_id'] .
-                                '|' .
-                                $user_y,
-                        ),
-                        $expire,
-                    );
+                    $this->set_login_cookie($row, $expire);
                 }
 
                 //if last visit > 1 minute then update it
@@ -197,6 +166,44 @@ class usrcp
         } else {
             return false;
         }
+    }
+
+    public function set_login_cookie(array $row, int $expire): void
+    {
+        $user_y = base64_encode(
+            serialize([
+                'id' => $row['id'],
+                'name' => $row['name'],
+                'mail' => $row['mail'],
+                'last_visit' => $row['last_visit'],
+            ]),
+        );
+
+        $hash_key_expire = $this->ulogu_signature(
+            (string) $row['id'],
+            (string) $row['password'],
+            (string) $expire,
+            (string) $row['group_id'],
+            $user_y,
+        );
+
+        cookie()->set(
+            'ulogu',
+            $this->en_de_crypt(
+                $row['id'] .
+                    '|' .
+                    $row['password'] .
+                    '|' .
+                    $expire .
+                    '|' .
+                    $hash_key_expire .
+                    '|' .
+                    $row['group_id'] .
+                    '|' .
+                    $user_y,
+            ),
+            $expire,
+        );
     }
 
     /*
@@ -233,7 +240,7 @@ class usrcp
     {
         extract(runHook('id_func_usr_class', get_defined_vars()));
 
-        return defined('USER_ID') ? USER_ID : false;
+        return $this->current_user['id'] ?? (defined('USER_ID') ? USER_ID : false);
     }
 
     // group ids, kept as the database gave it, same as id()
@@ -241,7 +248,7 @@ class usrcp
     {
         extract(runHook('group_id_func_usr_class', get_defined_vars()));
 
-        return defined('GROUP_ID') ? GROUP_ID : false;
+        return $this->current_user['group_id'] ?? (defined('GROUP_ID') ? GROUP_ID : false);
     }
 
     // user name
@@ -249,7 +256,7 @@ class usrcp
     {
         extract(runHook('name_func_usr_class', get_defined_vars()));
 
-        return defined('USER_NAME') ? USER_NAME : false;
+        return $this->current_user['name'] ?? (defined('USER_NAME') ? USER_NAME : false);
     }
 
     // user mail
@@ -257,7 +264,7 @@ class usrcp
     {
         extract(runHook('mail_func_usr_class', get_defined_vars()));
 
-        return defined('USER_MAIL') ? USER_MAIL : false;
+        return $this->current_user['mail'] ?? (defined('USER_MAIL') ? USER_MAIL : false);
     }
 
     // logout func
@@ -430,7 +437,7 @@ class usrcp
         $return = $hasher->HashPassword($password);
 
         //return check or hash
-        return $check_pass != false ? $hasher->CheckPassword($password, $check_pass) : $return;
+        return $check_pass !== '' ? $hasher->CheckPassword($password, $check_pass) : $return;
     }
 
     //kleeja cookie
@@ -553,27 +560,46 @@ class usrcp
                         $userinfo['group_id'] = $group_id;
                         $userinfo['password'] = $hashed_password;
 
-                        define('USER_ID', $userinfo['id']);
-                        define('GROUP_ID', $userinfo['group_id']);
-                        define('USER_NAME', $userinfo['name']);
-                        define('USER_MAIL', $userinfo['mail']);
-                        define('LAST_VISIT', $userinfo['last_visit']);
+                        $this->set_current_user($userinfo);
                         $user_data = true;
                     }
                 }
             }
 
-            if ($user_data == false) {
+            if ($user_data === false) {
                 $this->logout();
             } else {
                 return $user_data;
             }
         } else {
             //guest
-            define('USER_ID', $userinfo['id']);
-            define('GROUP_ID', $userinfo['group_id']);
+            $this->set_current_user($userinfo);
         }
 
         return false; //nothing
+    }
+
+    /**
+     * keep the user of this request, and define the constants that are not defined yet,
+     * they stay for the plugins that read them
+     * @param array $user a row of the users table, or the id and the group of a guest
+     */
+    private function set_current_user(array $user): void
+    {
+        $constants = [
+            'id' => 'USER_ID',
+            'group_id' => 'GROUP_ID',
+            'name' => 'USER_NAME',
+            'mail' => 'USER_MAIL',
+            'last_visit' => 'LAST_VISIT',
+        ];
+
+        $this->current_user = array_intersect_key($user, $constants);
+
+        foreach ($this->current_user as $key => $value) {
+            if (!defined($constants[$key])) {
+                define($constants[$key], $value);
+            }
+        }
     }
 }

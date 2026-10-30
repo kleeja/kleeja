@@ -1,0 +1,133 @@
+<div class="kj-page-header">
+    <div>
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="./">{lang.R_CPINDEX}</a></li>
+                <IF NAME="current_smt == 'show_h24'">
+                <li class="breadcrumb-item"><a href="./?cp=e_calls">{lang.R_CALLS}</a></li>
+                <li class="breadcrumb-item active" aria-current="page">{lang.SHOW_FROM_24H}</li>
+                <ELSE>
+                <li class="breadcrumb-item active" aria-current="page">{lang.R_CALLS}</li>
+                </IF>
+            </ol>
+        </nav>
+        <h1 class="kj-page-title">{lang.R_CALLS}</h1>
+    </div>
+    <div class="kj-page-actions">
+        <div class="btn-group btn-group-sm" role="group" aria-label="{lang.R_CALLS}">
+            <a class="btn btn-outline-secondary<IF NAME="current_smt == 'show_h24'"><ELSE> active</IF>" href="./?cp=e_calls">{lang.ALL}</a>
+            <a class="btn btn-outline-secondary<IF NAME="current_smt == 'show_h24'"> active</IF>" href="./?cp=e_calls&amp;smt=show_h24">{lang.SHOW_FROM_24H}</a>
+        </div>
+        <div class="dropdown">
+            <button class="btn btn-outline-danger btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                <i class="fa-solid fa-trash-can" aria-hidden="true"></i><span>{lang.DELETE}</span>
+            </button>
+            <ul class="dropdown-menu dropdown-menu-end">
+                <li><a class="dropdown-item" href="./?cp=e_calls&amp;smt=del_d30" data-kj-confirm><i class="fa-solid fa-calendar-xmark" aria-hidden="true"></i> {lang.DELETE_EARLIER_30DAYS}</a></li>
+                <li><a class="dropdown-item text-danger" href="./?cp=e_calls&amp;smt=del_all" data-kj-confirm><i class="fa-solid fa-trash-can" aria-hidden="true"></i> {lang.DELETE_ALL}</a></li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+<IF NAME="there_queue">
+<div class="alert alert-info d-flex align-items-start gap-2" role="status">
+    <i class="fa-solid fa-hourglass-half kj-alert-icon" aria-hidden="true"></i>
+    <div>{lang.DELETE_PROCESS_IN_WORK}</div>
+</div>
+</IF>
+
+<IF NAME="no_results">
+
+<div class="card">
+    <div class="card-body text-center py-5">
+        <span class="kj-icon-tile is-lg mb-3"><i class="fa-solid fa-envelope-open" aria-hidden="true"></i></span>
+        <p class="text-body-secondary mb-0">{lang.MESSAGE_NONE}</p>
+    </div>
+</div>
+
+<ELSE>
+
+<form method="post" name="callform" action="{action}" id="calls_form" class="card">
+    <div class="list-group list-group-flush">
+        <LOOP NAME="arr">
+        <div class="list-group-item kj-message" id="su[{{id}}]" data-kj-row>
+            <div class="d-flex align-items-start gap-3">
+                <input class="form-check-input flex-shrink-0 mt-1" type="checkbox" name="del_{{id}}" value="{{id}}" rel="_del" data-kj-check="del" aria-label="{lang.DELETE}: {{name}}">
+                <div class="flex-grow-1" style="min-width: 0">
+                    <button type="button" class="kj-message-toggle collapsed" data-bs-toggle="collapse" data-bs-target="#collapse{{id}}" aria-expanded="false" aria-controls="collapse{{id}}">
+                        <span class="fw-semibold text-truncate">{{name}}</span>
+                        <IF LOOP="sent"><span class="kj-badge is-success"><i class="fa-solid fa-reply" aria-hidden="true"></i> {lang.IS_SEND_MAIL}</span></IF>
+                        <span class="ms-auto small text-body-secondary text-nowrap">{{human_time}}</span>
+                        <i class="fa-solid fa-chevron-down kj-chevron" aria-hidden="true"></i>
+                    </button>
+
+                    <div id="collapse{{id}}" class="collapse">
+                        <div class="kj-message-body">{{text}}</div>
+                        <dl class="kj-meta mb-3">
+                            <IF LOOP="mail">
+                            <dt>{lang.EMAIL}</dt>
+                            <dd dir="ltr" style="text-align: start">{{mail}}</dd>
+                            </IF>
+                            <dt>{lang.IP}</dt>
+                            <dd><a href="{{ip_finder}}" target="_blank" rel="noopener" dir="ltr">{{ip}}</a></dd>
+                            <dt>{lang.TIME}</dt>
+                            <dd>{{time}}</dd>
+                        </dl>
+                        <IF LOOP="mail">
+                        <button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#contactForm{{id}}">
+                            <i class="fa-solid fa-reply" aria-hidden="true"></i><span>{lang.REPLY_CALL}</span>
+                        </button>
+                        </IF>
+                    </div>
+                </div>
+            </div>
+        </div>
+        </LOOP>
+    </div>
+
+    <div class="card-footer kj-bulkbar">
+        <div class="form-check">
+            <input class="form-check-input" type="checkbox" id="kjCheckAll" data-kj-check-all="del">
+            <label class="form-check-label" for="kjCheckAll">{lang.CHECK_ALL}</label>
+        </div>
+        <button type="submit" class="btn btn-sm btn-outline-danger" name="submit" value="1" data-kj-bulk="del" data-kj-confirm disabled>
+            <i class="fa-solid fa-trash-can" aria-hidden="true"></i><span>{lang.DEL_SELECTED} <span data-kj-count></span></span>
+        </button>
+    </div>
+
+    {H_FORM_KEYS}
+</form>
+
+<div class="kj-pager mt-3">{page_nums}</div>
+
+<!-- reply forms -->
+<LOOP NAME="arr">
+<IF LOOP="mail">
+<div class="modal fade" id="contactForm{{id}}" tabindex="-1" aria-labelledby="contactFormLabel{{id}}" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <form method="post" action="{action}" class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title" id="contactFormLabel{{id}}">{lang.REPLY_CALL}</h2>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="{lang.CLOSE}"></button>
+            </div>
+            <div class="modal-body">
+                <div class="small text-body-secondary mb-2">{{name}} · <span dir="ltr">{{mail}}</span></div>
+                <div class="kj-quote">{{text}}</div>
+                <label class="form-label" for="reply{{id}}">{lang.REPLY}</label>
+                <textarea id="reply{{id}}" name="v_{{id}}" class="form-control" rows="5" required></textarea>
+                <input type="hidden" name="reply_submit" value="1">
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">{lang.CLOSE}</button>
+                <button type="submit" class="btn btn-primary">
+                    <i class="fa-solid fa-paper-plane" aria-hidden="true"></i><span>{lang.REPLY}</span>
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+</IF>
+</LOOP>
+
+</IF>
