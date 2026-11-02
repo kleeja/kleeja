@@ -260,23 +260,33 @@ switch ($case):
                 $zip = new ZipArchive();
 
                 if ($zip->open($_FILES['plugin_file']['tmp_name']) === true) {
+                    // determine root folder name inside zip before closing
+                    $first_entry = (string) $zip->getNameIndex(0);
+                    $extracted_folder = explode('/', trim($first_entry, '/'))[0];
+
                     if (!$zip->extractTo(PATH . KLEEJA_PLUGINS_FOLDER)) {
                         $ERRORS[] = sprintf($lang['EXTRACT_ZIP_FAILED'], KLEEJA_PLUGINS_FOLDER);
                     }
 
-                    $plugin_name = trim($zip->getNameIndex(0));
-                    $plugin_name_and_version = split_plugin_name_from_version($plugin_name);
-
-                    if (is_array($plugin_name_and_version)) {
-                        $plugin_name = $plugin_name_and_version['name'];
-                    }
-
-                    rename(
-                        PATH . KLEEJA_PLUGINS_FOLDER . '/' . trim($zip->getNameIndex(0), '/'),
-                        PATH . KLEEJA_PLUGINS_FOLDER . '/' . $plugin_name,
-                    );
-
                     $zip->close();
+
+                    if (!sizeof($ERRORS)) {
+                        $plugin_name = $extracted_folder;
+                        $plugin_name_and_version = split_plugin_name_from_version($plugin_name);
+
+                        if (is_array($plugin_name_and_version)) {
+                            $plugin_name = $plugin_name_and_version['name'];
+                        }
+
+                        // uploaded plugin's archive has different name, so we change it if needed
+                        if ($extracted_folder !== '' && $extracted_folder !== $plugin_name) {
+                            $old_path = PATH . KLEEJA_PLUGINS_FOLDER . '/' . $extracted_folder;
+                            $new_path = PATH . KLEEJA_PLUGINS_FOLDER . '/' . $plugin_name;
+                            if (file_exists($old_path) && $old_path !== $new_path) {
+                                rename($old_path, $new_path);
+                            }
+                        }
+                    }
                 } else {
                     $ERRORS[] = sprintf($lang['EXTRACT_ZIP_FAILED'], KLEEJA_PLUGINS_FOLDER);
                 }
@@ -649,17 +659,25 @@ switch ($case):
                             $zip = new ZipArchive();
 
                             if ($zip->open(PATH . 'cache/' . $plugin_name . '.zip') === true) {
-                                if ($zip->extractTo(PATH . KLEEJA_PLUGINS_FOLDER)) {
+                                // determine root folder name inside zip before closing
+                                $first_entry = (string) $zip->getNameIndex(0);
+                                $extracted_folder = explode('/', trim($first_entry, '/'))[0];
+
+                                $extracted = $zip->extractTo(PATH . KLEEJA_PLUGINS_FOLDER);
+                                $zip->close();
+
+                                if ($extracted) {
                                     // we dont need the zip file anymore
                                     kleeja_unlink(PATH . 'cache/' . $plugin_name . '.zip');
 
-                                    // uploaded plugin's archive has different name, so we change it
-                                    rename(
-                                        PATH . KLEEJA_PLUGINS_FOLDER . '/' . trim($zip->getNameIndex(0), '/'),
-                                        PATH . KLEEJA_PLUGINS_FOLDER . '/' . $plugin_name,
-                                    );
-
-                                    $zip->close();
+                                    // uploaded plugin's archive has different name, so we change it if needed
+                                    if ($extracted_folder !== '' && $extracted_folder !== $plugin_name) {
+                                        $old_path = PATH . KLEEJA_PLUGINS_FOLDER . '/' . $extracted_folder;
+                                        $new_path = PATH . KLEEJA_PLUGINS_FOLDER . '/' . $plugin_name;
+                                        if (file_exists($old_path) && $old_path !== $new_path) {
+                                            rename($old_path, $new_path);
+                                        }
+                                    }
 
                                     // download or update msg
                                     $adminAjaxContent =

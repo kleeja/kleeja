@@ -381,17 +381,25 @@ switch ($case):
                             $zip = new ZipArchive();
 
                             if ($zip->open(PATH . 'cache/' . $style_name . '.zip') === true) {
-                                if ($zip->extractTo(PATH . 'styles')) {
+                                // determine root folder name inside zip before closing
+                                $first_entry = (string) $zip->getNameIndex(0);
+                                $extracted_folder = explode('/', trim($first_entry, '/'))[0];
+
+                                $extracted = $zip->extractTo(PATH . 'styles');
+                                $zip->close();
+
+                                if ($extracted) {
                                     // we dont need the zip file anymore
                                     kleeja_unlink(PATH . 'cache/' . $style_name . '.zip');
 
-                                    // uploaded style's archive has different name, so we change it
-                                    rename(
-                                        PATH . 'styles/' . trim($zip->getNameIndex(0), '/'),
-                                        PATH . 'styles/' . $style_name,
-                                    );
-
-                                    $zip->close();
+                                    // uploaded style's archive has different name, so we change it if needed
+                                    if ($extracted_folder !== '' && $extracted_folder !== $style_name) {
+                                        $old_path = PATH . 'styles/' . $extracted_folder;
+                                        $new_path = PATH . 'styles/' . $style_name;
+                                        if (file_exists($old_path) && $old_path !== $new_path) {
+                                            rename($old_path, $new_path);
+                                        }
+                                    }
 
                                     // download or update msg
                                     $adminAjaxContent =

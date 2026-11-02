@@ -223,13 +223,18 @@ $update_schema[10]['functions'] = [
                 $zip->open($archive) === true
             ) {
                 //github puts the files in one folder, og_default-3.0/
-                $zip_folder = explode('/', (string) $zip->getNameIndex(0))[0];
+                $first_entry = (string) $zip->getNameIndex(0);
+                $zip_folder = explode('/', trim($first_entry, '/'))[0];
 
-                if ($zip->extractTo($styles_folder) && $zip_folder !== 'og_default') {
-                    rename("{$styles_folder}/{$zip_folder}", $og_default_folder);
-                }
-
+                $extracted = $zip->extractTo($styles_folder);
                 $zip->close();
+
+                if ($extracted && $zip_folder !== '' && $zip_folder !== 'og_default') {
+                    $old_path = "{$styles_folder}/{$zip_folder}";
+                    if (file_exists($old_path) && $old_path !== $og_default_folder) {
+                        rename($old_path, $og_default_folder);
+                    }
+                }
             }
 
             if (file_exists($archive)) {
