@@ -137,6 +137,19 @@ class usrcp
                     return false;
                 }
 
+                // If user logged in with password, transparently upgrade legacy or outdated hash
+                if (!$hashed && password_needs_rehash($row['password'], PASSWORD_DEFAULT)) {
+                    $new_password = (string) $this->kleeja_hash_password($phppass);
+                    $update_pass = [
+                        'UPDATE' => "{$dbprefix}users",
+                        'SET' => 'password = :password',
+                        'WHERE' => 'id = :id',
+                        'BIND' => ['password' => $new_password, 'id' => (int) $row['id']],
+                    ];
+                    $SQL->build($update_pass);
+                    $row['password'] = $new_password;
+                }
+
                 //a login waits for the link of the verification mail, it empties verification_hash, see ucp.php?verify_email=
                 //the cookie of a user who is logged in, and the password of the admin panel, are not a new login,
                 //so a user who changed the email stays logged in until the next login
@@ -450,19 +463,30 @@ class usrcp
         return strtolower($uname);
     }
 
-    //depand on phpass class
     //return the hash of $password, or when $check_pass is given, whether $password matches it
     public function kleeja_hash_password(string $password, string $check_pass = ''): string|bool
     {
-        include_once 'phpass.php';
+        $return_now = false;
 
         extract(runHook('kleeja_hash_password_func_usr_class', get_defined_vars()));
 
-        $hasher = new PasswordHash(8, true);
-        $return = $hasher->HashPassword($password);
+        if ($return_now && isset($return)) {
+            return $return;
+        }
 
-        //return check or hash
-        return $check_pass !== '' ? $hasher->CheckPassword($password, $check_pass) : $return;
+        if ($check_pass !== '') {
+            // Legacy phpass portable hashes ($P$)
+            if (str_starts_with($check_pass, '$P$')) {
+                include_once 'phpass.php';
+                $hasher = new PasswordHash(8, true);
+
+                return $hasher->CheckPassword($password, $check_pass);
+            }
+
+            return password_verify($password, $check_pass);
+        }
+
+        return password_hash($password, PASSWORD_DEFAULT);
     }
 
     //kleeja cookie
