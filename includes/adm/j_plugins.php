@@ -649,17 +649,24 @@ switch ($case):
                             $zip = new ZipArchive();
 
                             if ($zip->open(PATH . 'cache/' . $plugin_name . '.zip') === true) {
+                                // determine root folder name inside zip before closing
+                                $first_entry = $zip->getNameIndex(0);
+                                $extracted_folder = explode('/', trim($first_entry, '/'))[0];
+
                                 if ($zip->extractTo(PATH . KLEEJA_PLUGINS_FOLDER)) {
+                                    $zip->close();
+
                                     // we dont need the zip file anymore
                                     kleeja_unlink(PATH . 'cache/' . $plugin_name . '.zip');
 
-                                    // uploaded plugin's archive has different name, so we change it
-                                    rename(
-                                        PATH . KLEEJA_PLUGINS_FOLDER . '/' . trim($zip->getNameIndex(0), '/'),
-                                        PATH . KLEEJA_PLUGINS_FOLDER . '/' . $plugin_name,
-                                    );
-
-                                    $zip->close();
+                                    // uploaded plugin's archive has different name, so we change it if needed
+                                    if ($extracted_folder !== '' && $extracted_folder !== $plugin_name) {
+                                        $old_path = PATH . KLEEJA_PLUGINS_FOLDER . '/' . $extracted_folder;
+                                        $new_path = PATH . KLEEJA_PLUGINS_FOLDER . '/' . $plugin_name;
+                                        if (file_exists($old_path) && $old_path !== $new_path) {
+                                            rename($old_path, $new_path);
+                                        }
+                                    }
 
                                     // download or update msg
                                     $adminAjaxContent =
@@ -671,6 +678,7 @@ switch ($case):
                                         kleeja_unlink(PATH . KLEEJA_PLUGINS_FOLDER . '/' . $plugin_name . '_backup');
                                     }
                                 } else {
+                                    $zip->close();
                                     $adminAjaxContent =
                                         '1003:::' . sprintf($lang['EXTRACT_ZIP_FAILED'], KLEEJA_PLUGINS_FOLDER);
                                 }
