@@ -548,7 +548,7 @@ class Plugins
      * @param  string $plugin_name
      * @return array
      */
-    private static function definition(string $plugin_name): array
+    public static function definition(string $plugin_name): array
     {
         //the enabled plugins were included when the instance was made
         self::getInstance();
