@@ -187,6 +187,24 @@ $config_values[] = [
     0,
     0,
 ];
+$config_values[] = [
+    'trustedproxyips',
+    '',
+    "<textarea id=\"trustedproxyips\" name=\"trustedproxyips\" rows=\"5\" class=\"form-control\" style=\"direction:ltr\" placeholder=\"173.245.48.0/20 # Cloudflare\">{con.trustedproxyips}</textarea>\r\n <div class=\"d-flex align-items-center flex-wrap gap-2 mt-2\"><button type=\"button\" class=\"btn btn-sm btn-outline-secondary\" data-kj-cloudflare=\"{cloudflare_ips_link}\" data-kj-cloudflare-list=\"#trustedproxyips\" data-kj-cloudflare-header=\"#proxyheader\" data-kj-cloudflare-done=\"{lang.CLOUDFLARE_IPS_ADDED}\"><i class=\"fa-solid fa-cloud\" aria-hidden=\"true\"></i> <span>{lang.ADD_CLOUDFLARE_IPS}</span></button><span data-kj-cloudflare-status></span></div>\r\n <small class=\"form-text d-block\">{lang.TRUSTEDPROXY_INFO}</small>",
+    '17',
+    'advanced',
+    0,
+    0,
+];
+$config_values[] = [
+    'proxyheader',
+    '',
+    "<input type=\"text\" id=\"proxyheader\" name=\"proxyheader\" value=\"{con.proxyheader}\" size=\"30\" placeholder=\"X-Forwarded-For\" style=\"direction:ltr\" />\r\n <small class=\"form-text d-block\">{lang.PROXYHEADER_INFO}</small>",
+    '18',
+    'advanced',
+    0,
+    0,
+];
 
 // Upload settings
 $config_values[] = [

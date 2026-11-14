@@ -1488,31 +1488,45 @@ function klj_clean_old(string $table, string $for = 'all'): void
 }
 
 /**
- * get_ip() for the user
+ * the IP of the visitor.
+ * the header of a proxy (X-Forwarded-For, CF-Connecting-IP ...) is believed only when the request comes
+ * from one of the trusted proxies of the settings, anyone else can send that header with any IP in it
  */
 function get_ip(): string
 {
-    $ip = '';
+    global $config;
 
-    if (!empty($_SERVER['HTTP_CF_CONNECTING_IP'])) {
-        $ip = $_SERVER['HTTP_CF_CONNECTING_IP'];
-    } elseif (!empty($_SERVER['REMOTE_ADDR'])) {
-        $ip = $_SERVER['REMOTE_ADDR'];
-    }
+    //an IPv4 in the IPv6 style, ::ffff:192.0.2.1
+    $plain = function (string $ip): string {
+        $ip = trim($ip);
 
-    //if IP chain
-    if (strpos($ip, ',') !== false) {
-        $ip = explode(',', $ip);
-        $ip = trim($ip[0]);
-    }
+        return stripos($ip, '::ffff:') === 0 && filter_var(substr($ip, 7), FILTER_VALIDATE_IP, FILTER_FLAG_IPV4)
+            ? substr($ip, 7)
+            : $ip;
+    };
 
-    //is it IPv6?
-    $ip_v6 = preg_match('/^[0-9a-f]{1,4}:([0-9a-f]{0,4}:){1,6}[0-9a-f]{1,4}$/', $ip);
+    $ip = $plain($_SERVER['REMOTE_ADDR'] ?? '');
+    $proxies = kleeja_ip_ranges(kleeja_html_decode($config['trustedproxyips'] ?? ''));
 
-    if ($ip_v6) {
-        //does it IPv4 hide in a IPv6 style
-        if (stripos($ip, '::ffff:') === 0) {
-            $ip = substr($ip, 7);
+    if (sizeof($proxies) && kleeja_ip_in_ranges($ip, $proxies)) {
+        //X-Forwarded-For, x_forwarded_for and HTTP_X_FORWARDED_FOR are the same header
+        $header = strtoupper(str_replace('-', '_', trim($config['proxyheader'] ?? '')));
+        $header = 'HTTP_' . preg_replace('/^HTTP_/', '', $header !== '' ? $header : 'X_FORWARDED_FOR');
+
+        //every proxy adds the IP it got the request from to the end of the list, so it is read from the end,
+        //the first IP that is not a trusted proxy is the visitor
+        foreach (array_reverse(explode(',', $_SERVER[$header] ?? '')) as $hop) {
+            $hop = $plain($hop);
+
+            if (filter_var($hop, FILTER_VALIDATE_IP) === false) {
+                break;
+            }
+
+            $ip = $hop;
+
+            if (!kleeja_ip_in_ranges($hop, $proxies)) {
+                break;
+            }
         }
     }
 
@@ -1520,6 +1534,97 @@ function get_ip(): string
     extract(runHook('kleeja_get_ip_func', get_defined_vars()));
 
     return $return;
+}
+
+/**
+ * the IPs and CIDR ranges of a list, one a line, a note can follow a #
+ * @param  string $text like "173.245.48.0/20 # Cloudflare"
+ * @return array
+ */
+function kleeja_ip_ranges(string $text): array
+{
+    $ranges = [];
+
+    foreach (explode("\n", str_replace("\r", '', $text)) as $line) {
+        $range = trim(explode('#', $line, 2)[0]);
+
+        if ($range !== '') {
+            $ranges[] = $range;
+        }
+    }
+
+    return $ranges;
+}
+
+/**
+ * an IP or a CIDR range (IPv4 or IPv6) as its binary address and the number of its bits
+ * @param  string     $range like 192.0.2.1, 173.245.48.0/20 or 2400:cb00::/32
+ * @return array|null [binary address, bits], null if it is not a valid IP or range
+ */
+function kleeja_parse_ip_range(string $range): ?array
+{
+    [$address, $bits] = array_pad(explode('/', trim($range), 2), 2, null);
+
+    if (filter_var($address, FILTER_VALIDATE_IP) === false) {
+        return null;
+    }
+
+    $binary = inet_pton($address);
+    $max_bits = strlen($binary) * 8;
+
+    if ($bits === null) {
+        return [$binary, $max_bits];
+    }
+
+    if (!ctype_digit($bits) || (int) $bits > $max_bits) {
+        return null;
+    }
+
+    return [$binary, (int) $bits];
+}
+
+/**
+ * is the IP one of the IPs or in one of the CIDR ranges of the list
+ * @param  string $ip
+ * @param  array  $ranges
+ * @return bool
+ */
+function kleeja_ip_in_ranges(string $ip, array $ranges): bool
+{
+    if (filter_var($ip, FILTER_VALIDATE_IP) === false) {
+        return false;
+    }
+
+    $ip_binary = inet_pton($ip);
+
+    foreach ($ranges as $range) {
+        $parsed = kleeja_parse_ip_range((string) $range);
+
+        //an IPv4 is never in an IPv6 range, and the other way around
+        if ($parsed === null || strlen($parsed[0]) !== strlen($ip_binary)) {
+            continue;
+        }
+
+        [$range_binary, $bits] = $parsed;
+        $bytes = intdiv($bits, 8);
+        $rest_bits = $bits % 8;
+
+        if (substr($ip_binary, 0, $bytes) !== substr($range_binary, 0, $bytes)) {
+            continue;
+        }
+
+        if ($rest_bits === 0) {
+            return true;
+        }
+
+        $mask = chr((0xff << (8 - $rest_bits)) & 0xff);
+
+        if (($ip_binary[$bytes] & $mask) === ($range_binary[$bytes] & $mask)) {
+            return true;
+        }
+    }
+
+    return false;
 }
 
 /**

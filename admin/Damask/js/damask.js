@@ -2098,6 +2098,72 @@
         }
     }
 
+    /* --- Trusted proxies: add the IP ranges of Cloudflare to the list ------------------------ */
+
+    function initCloudflareIps() {
+        $$("[data-kj-cloudflare]").forEach(function (button) {
+            var list = $(button.dataset.kjCloudflareList);
+            var header = $(button.dataset.kjCloudflareHeader);
+            var status = $("[data-kj-cloudflare-status]", button.parentNode);
+
+            if (!list || !status) {
+                return;
+            }
+
+            button.addEventListener("click", function () {
+                button.disabled = true;
+                status.className = "kj-status text-body-secondary d-inline-flex align-items-center gap-2";
+                status.innerHTML = "";
+                status.appendChild(spinner());
+
+                fetchJSON(button.dataset.kjCloudflare)
+                    .then(function (data) {
+                        var parts = splitOnce(data.content, ":::");
+
+                        if (parts[0] !== "1") {
+                            var error = new Error("Request failed");
+                            error.data = { content: parts[1] };
+                            throw error;
+                        }
+
+                        // the ranges that are in the list already are not added again, with or without a note
+                        var have = list.value.split("\n").map(function (line) {
+                            return line.split("#")[0].trim();
+                        });
+                        var added = parts[1].split("\n").filter(function (range) {
+                            return range && have.indexOf(range) === -1;
+                        });
+
+                        if (added.length) {
+                            var current = list.value.replace(/\s+$/, "");
+                            list.value =
+                                (current ? current + "\n" : "") +
+                                added
+                                    .map(function (range) {
+                                        return range + " # Cloudflare";
+                                    })
+                                    .join("\n");
+                        }
+
+                        // the IP of the visitor is in this header behind Cloudflare
+                        if (header) {
+                            header.value = "CF-Connecting-IP";
+                        }
+
+                        status.className = "kj-status kj-badge is-success";
+                        status.textContent = button.dataset.kjCloudflareDone || "";
+                    })
+                    .catch(function (error) {
+                        status.className = "kj-status kj-badge is-danger";
+                        status.textContent = errorText(error);
+                    })
+                    .then(function () {
+                        button.disabled = false;
+                    });
+            });
+        });
+    }
+
     /* --- Boot --------------------------------------------------------------------------------- */
 
     upgradeLegacyDataApi();
@@ -2118,4 +2184,5 @@
     initUpdater();
     initStore();
     initHelp();
+    initCloudflareIps();
 })();

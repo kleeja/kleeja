@@ -274,4 +274,48 @@ $update_schema[11]['sql'] = [
         "\r\n" .
         ' <label>{lang.NO}<input type="radio" id="verify_email" name="verify_email" value="0"  <IF NAME="con.verify_email==0"> checked="checked"</IF> /></label>' .
         "', 11, 'general', 0, 0);",
+    //the trusted proxies, the header of a proxy is believed only when the request comes from one of them.
+    //get_ip() believed CF-Connecting-IP from anyone before, so the sites behind Cloudflare keep the IPs of
+    //their visitors with the ranges of Cloudflare, and the header can't be faked by anyone else now
+    'trustedproxyips' =>
+        "INSERT INTO `{$dbprefix}config` (`name`, `value`, `option`, `display_order`, `type`, `plg_id`, `dynamic`) VALUES ('trustedproxyips', '" .
+        implode(
+            "\n",
+            array_map(
+                function (string $range): string {
+                    return $range . ' # Cloudflare';
+                },
+                [
+                    '173.245.48.0/20',
+                    '103.21.244.0/22',
+                    '103.22.200.0/22',
+                    '103.31.4.0/22',
+                    '141.101.64.0/18',
+                    '108.162.192.0/18',
+                    '190.93.240.0/20',
+                    '188.114.96.0/20',
+                    '197.234.240.0/22',
+                    '198.41.128.0/17',
+                    '162.158.0.0/15',
+                    '104.16.0.0/13',
+                    '104.24.0.0/14',
+                    '172.64.0.0/13',
+                    '131.0.72.0/22',
+                    '2400:cb00::/32',
+                    '2606:4700::/32',
+                    '2803:f800::/32',
+                    '2405:b500::/32',
+                    '2405:8100::/32',
+                    '2a06:98c0::/29',
+                    '2c0f:f248::/32',
+                ],
+            ),
+        ) .
+        "', '" .
+        "<textarea id=\"trustedproxyips\" name=\"trustedproxyips\" rows=\"5\" class=\"form-control\" style=\"direction:ltr\" placeholder=\"173.245.48.0/20 # Cloudflare\">{con.trustedproxyips}</textarea>\r\n <div class=\"d-flex align-items-center flex-wrap gap-2 mt-2\"><button type=\"button\" class=\"btn btn-sm btn-outline-secondary\" data-kj-cloudflare=\"{cloudflare_ips_link}\" data-kj-cloudflare-list=\"#trustedproxyips\" data-kj-cloudflare-header=\"#proxyheader\" data-kj-cloudflare-done=\"{lang.CLOUDFLARE_IPS_ADDED}\"><i class=\"fa-solid fa-cloud\" aria-hidden=\"true\"></i> <span>{lang.ADD_CLOUDFLARE_IPS}</span></button><span data-kj-cloudflare-status></span></div>\r\n <small class=\"form-text d-block\">{lang.TRUSTEDPROXY_INFO}</small>" .
+        "', 17, 'advanced', 0, 0);",
+    'proxyheader' =>
+        "INSERT INTO `{$dbprefix}config` (`name`, `value`, `option`, `display_order`, `type`, `plg_id`, `dynamic`) VALUES ('proxyheader', 'CF-Connecting-IP', '" .
+        "<input type=\"text\" id=\"proxyheader\" name=\"proxyheader\" value=\"{con.proxyheader}\" size=\"30\" placeholder=\"X-Forwarded-For\" style=\"direction:ltr\" />\r\n <small class=\"form-text d-block\">{lang.PROXYHEADER_INFO}</small>" .
+        "', 18, 'advanced', 0, 0);",
 ];

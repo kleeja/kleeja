@@ -156,6 +156,16 @@ return [
     'COOKIE_NAME' => 'Cookie prefix',
     'COOKIE_PATH' => 'Cookie path',
     'COOKIE_SECURE' => 'Cookie secure',
+    'TRUSTEDPROXYIPS' => 'Trusted proxies',
+    'TRUSTEDPROXY_INFO' =>
+        'The IPs or CIDR ranges of the proxies in front of the site (Cloudflare, a load balancer, a reverse proxy), one on each line, a note can follow a #. The IP of the visitor is taken from the header of a proxy only when the request comes from one of them. Leave it empty if the site has no proxy.',
+    'PROXYHEADER' => 'Visitor IP header',
+    'PROXYHEADER_INFO' =>
+        'The header your proxy puts the IP of the visitor in, like X-Forwarded-For or CF-Connecting-IP. X-Forwarded-For is used when it is empty.',
+    'ADD_CLOUDFLARE_IPS' => 'Add the IPs of Cloudflare',
+    'CLOUDFLARE_IPS_ADDED' => 'The IPs of Cloudflare were added, save the settings to keep them.',
+    'CLOUDFLARE_IPS_FAILED' => 'The IPs of Cloudflare could not be fetched, try again later.',
+    'INVALID_TRUSTED_PROXIES' => 'These trusted proxies are not a valid IP or CIDR range: %s',
     'SHOWFILESBYIP' => 'Show files by IP',
     'DELETEALLRES' => 'Delete all results',
     'ADMIN_DELETE_FILES_OK' => '%s file(s) deleted successfully',
