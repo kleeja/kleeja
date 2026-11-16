@@ -155,6 +155,16 @@ return [
     'COOKIE_NAME' => 'بادئة الكوكيز',
     'COOKIE_PATH' => 'مسار الكوكيز',
     'COOKIE_SECURE' => 'تفعيل الكوكيز الآمنة',
+    'TRUSTEDPROXYIPS' => 'البروكسيات الموثوقة',
+    'TRUSTEDPROXY_INFO' =>
+        'عناوين IP أو نطاقات CIDR للبروكسيات التي أمام الموقع (Cloudflare، موزع الأحمال، البروكسي العكسي)، كل واحد في سطر، ويمكن كتابة ملاحظة بعد #. يؤخذ IP الزائر من ترويسة البروكسي فقط إن جاء الطلب من أحدها. اتركه فارغاً إن لم يكن أمام الموقع بروكسي.',
+    'PROXYHEADER' => 'ترويسة IP الزائر',
+    'PROXYHEADER_INFO' =>
+        'الترويسة التي يضع فيها البروكسي IP الزائر، مثل X-Forwarded-For أو CF-Connecting-IP. تُستخدم X-Forwarded-For إن تُركت فارغة.',
+    'ADD_CLOUDFLARE_IPS' => 'إضافة عناوين Cloudflare',
+    'CLOUDFLARE_IPS_ADDED' => 'أضيفت عناوين Cloudflare، احفظ الإعدادات للإبقاء عليها.',
+    'CLOUDFLARE_IPS_FAILED' => 'تعذر جلب عناوين Cloudflare، حاول لاحقاً.',
+    'INVALID_TRUSTED_PROXIES' => 'هذه البروكسيات الموثوقة ليست عنوان IP أو نطاق CIDR صحيح: %s',
     'SHOWFILESBYIP' => 'عرض ملفات الـ IP',
     'DELETEALLRES' => 'حذف كل ملفات البحث هذا',
     'ADMIN_DELETE_FILES_OK' => 'تم حذف %s ملف بنجاح',

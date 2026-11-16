@@ -22,6 +22,31 @@ $n_submit = $lang['UPDATE_CONFIG'];
 $options = '';
 $CONFIGEXTEND = false;
 $H_FORM_KEYS = kleeja_add_form_key('adm_configs');
+$cloudflare_ips_link =
+    $base_action . '&amp;cloudflare_ips=1&amp;' . kleeja_add_form_key_get('adm_configs_get') . '&amp;_ajax_=1';
+
+//the IP ranges of Cloudflare, for the button of the trusted proxies, they are saved with the other settings
+if (ig('cloudflare_ips') && ig('_ajax_')) {
+    if (!kleeja_check_form_key_get('adm_configs_get')) {
+        echo_ajax(1, '0:::' . $lang['INVALID_FORM_KEY']);
+    }
+
+    $cloudflare = FetchFile::make('https://api.cloudflare.com/client/v4/ips')->setTimeOut(10)->get();
+    $cloudflare = is_string($cloudflare) ? json_decode($cloudflare, true) : null;
+    $cloudflare_ranges = array_filter(
+        array_merge($cloudflare['result']['ipv4_cidrs'] ?? [], $cloudflare['result']['ipv6_cidrs'] ?? []),
+        function ($range): bool {
+            return is_string($range) && kleeja_parse_ip_range($range) !== null;
+        },
+    );
+
+    echo_ajax(
+        1,
+        sizeof($cloudflare_ranges)
+            ? '1:::' . implode("\n", $cloudflare_ranges)
+            : '0:::' . $lang['CLOUDFLARE_IPS_FAILED'],
+    );
+}
 
 //secondary menu
 $query = [
@@ -74,6 +99,25 @@ $go_menu['all'] = [
 if (ip('submit')) {
     if (!kleeja_check_form_key('adm_configs')) {
         kleeja_admin_err($lang['INVALID_FORM_KEY'], title: $lang['ERROR'], redirect: $action, rs: 1);
+    }
+
+    //checked before any setting is saved, so a wrong line doesn't leave half of the settings saved
+    if (ip('trustedproxyips')) {
+        $invalid_proxies = array_filter(
+            kleeja_ip_ranges(htmlspecialchars_decode(p('trustedproxyips'), ENT_QUOTES)),
+            function (string $range): bool {
+                return kleeja_parse_ip_range($range) === null;
+            },
+        );
+
+        if (sizeof($invalid_proxies)) {
+            kleeja_admin_err(
+                sprintf($lang['INVALID_TRUSTED_PROXIES'], kleeja_html_encode(implode(', ', $invalid_proxies))),
+                title: $lang['ERROR'],
+                redirect: $action,
+                rs: 5,
+            );
+        }
     }
 }
 
@@ -245,6 +289,14 @@ while ($row = $SQL->fetch_array($result)) {
             }
 
             delete_cache('data_lang' . $got_lang);
+        } elseif ($row['name'] === 'trustedproxyips') {
+            //one range a line, without the empty lines
+            $new['trustedproxyips'] = implode(
+                "\n",
+                array_filter(array_map('trim', explode("\n", $new['trustedproxyips'])), 'strlen'),
+            );
+        } elseif ($row['name'] === 'proxyheader') {
+            $new['proxyheader'] = preg_replace('/[^a-z0-9_\-]/i', '', $new['proxyheader']);
         }
 
         extract(runHook('after_submit_adm_config', get_defined_vars()));
