@@ -274,4 +274,59 @@ $update_schema[11]['sql'] = [
         "\r\n" .
         ' <label>{lang.NO}<input type="radio" id="verify_email" name="verify_email" value="0"  <IF NAME="con.verify_email==0"> checked="checked"</IF> /></label>' .
         "', 11, 'general', 0, 0);",
+    //Asia/Buraydah is not a time zone of PHP, its time is the one of Asia/Riyadh
+    'time_zone_buraydah' => "UPDATE `{$dbprefix}config` SET value = 'Asia/Riyadh' WHERE name = 'time_zone' AND value = 'Asia/Buraydah';",
+];
+
+$update_schema[11]['functions'] = [
+    //the old versions kept the time zone as a number of hours, it is a time zone identifier now
+    function () {
+        global $SQL, $dbprefix;
+
+        if (!($result = $SQL->query("SELECT value FROM `{$dbprefix}config` WHERE name = 'time_zone'"))) {
+            return;
+        }
+
+        $row = $SQL->fetch($result);
+        $SQL->freeresult($result);
+
+        if (!$row || !is_numeric($row['value'])) {
+            return;
+        }
+
+        //a time zone of the admin panel with the same offset, the regions of time_zones(), it isn't loaded here.
+        //one without daylight saving time first, the number of hours was the same the whole year
+        $offset = (int) round((float) $row['value'] * 3600);
+        $time_zone = null;
+        $regions =
+            DateTimeZone::AFRICA |
+            DateTimeZone::AMERICA |
+            DateTimeZone::ASIA |
+            DateTimeZone::ATLANTIC |
+            DateTimeZone::AUSTRALIA |
+            DateTimeZone::EUROPE |
+            DateTimeZone::INDIAN |
+            DateTimeZone::PACIFIC;
+
+        foreach (timezone_identifiers_list($regions) as $identifier) {
+            $zone = new DateTimeZone($identifier);
+
+            if ($zone->getOffset(new DateTime()) !== $offset) {
+                continue;
+            }
+
+            if ($zone->getOffset(new DateTime('+6 months')) === $offset) {
+                $time_zone = $identifier;
+
+                break;
+            }
+
+            $time_zone ??= $identifier;
+        }
+
+        //no time zone has this offset, the old versions used 0 for a value they didn't know
+        $time_zone ??= 'Africa/Abidjan';
+
+        $SQL->query("UPDATE `{$dbprefix}config` SET value = '{$time_zone}' WHERE name = 'time_zone'");
+    },
 ];
