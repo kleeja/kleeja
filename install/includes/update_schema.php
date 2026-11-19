@@ -275,3 +275,18 @@ $update_schema[11]['sql'] = [
         ' <label>{lang.NO}<input type="radio" id="verify_email" name="verify_email" value="0"  <IF NAME="con.verify_email==0"> checked="checked"</IF> /></label>' .
         "', 11, 'general', 0, 0);",
 ];
+
+//expand password columns to VARCHAR(255) to accommodate future PASSWORD_DEFAULT algorithm changes
+$update_schema[12]['functions'] = [
+    function () {
+        global $SQL, $dbprefix;
+        if ($SQL->driver === 'mysql') {
+            $SQL->query(
+                "ALTER TABLE `{$dbprefix}users` CHANGE `password` `password` VARCHAR(255) COLLATE utf8_bin NOT NULL",
+            );
+            $SQL->query(
+                "ALTER TABLE `{$dbprefix}users` CHANGE `new_password` `new_password` VARCHAR(255) COLLATE utf8_bin NOT NULL DEFAULT ''",
+            );
+        }
+    },
+];
